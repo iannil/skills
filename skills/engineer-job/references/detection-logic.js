@@ -60,4 +60,35 @@ function detectComplexity(req) {
   }
 }
 
-module.exports = { detectComplexity }
+function topoSort(milestones) {
+  const ids = milestones.map((m) => m.id)
+  const idSet = new Set(ids)
+  for (const m of milestones) {
+    for (const d of m.deps || []) {
+      if (!idSet.has(d)) throw new Error(`milestone ${m.id} depends on unknown ${d}`)
+    }
+  }
+  const indeg = {}
+  const adj = {}
+  ids.forEach((id) => { indeg[id] = 0; adj[id] = [] })
+  for (const m of milestones) {
+    for (const d of m.deps || []) {
+      adj[d].push(m.id)
+      indeg[m.id]++
+    }
+  }
+  const queue = ids.filter((id) => indeg[id] === 0)
+  const order = []
+  while (queue.length) {
+    const id = queue.shift()
+    order.push(id)
+    for (const next of adj[id]) {
+      indeg[next]--
+      if (indeg[next] === 0) queue.push(next)
+    }
+  }
+  if (order.length !== ids.length) throw new Error('cycle detected in milestone dependency graph')
+  return order
+}
+
+module.exports = { detectComplexity, topoSort }
