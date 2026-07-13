@@ -1,0 +1,29 @@
+{
+  "name": "iannil-skills",
+  "version": "0.1.0",
+  "description": "Installable AI agent skills for project initialization and product analysis.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "iannil-skills": "bin/iannil-skills.js"
+  },
+  "files": [
+    "bin/",
+    "skills/",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "claude-code",
+    "codex",
+    "cursor"
+  ]
+}
