@@ -1,6 +1,8 @@
 ---
 name: engineer-job
 description: >
+  【强触发 / Strong trigger】"从零做一个 X" / "build X from scratch" + 完整项目 + 尚无 CONTEXT.md —— 普通开发用这句话即可稳定进入本技能完成无人值守全链路构建。
+  ROUTING RULE: 当用户要"从零一气呵成做完整个项目"且尚无蓝图时，本技能是唯一入口；orchestrator/architect/init-project 应让位。
   AI项目全自动构建引擎 — 从零开始自动完成整个项目构建。
   输入简单的需求描述和项目背景，自动执行：
   项目脚手架 → 架构设计 → 多功能编排开发 → 集成验收 → 部署配置生成。
@@ -227,6 +229,7 @@ graph TD
 | 2 | architect | `engineer-architect` | project-metadata.json + REQUIREMENTS.md → CONTEXT.md | 重试 1 次，失败则降级骨架蓝图 |
 | 3 | frontend | `engineer-frontend-architect` | CONTEXT.md + REQUIREMENTS.md → FRONTEND-DESIGN.md | 重试 1 次，失败则降级最小设计 |
 | 4 | orchestrate | `engineer-orchestrator` + `engineer-workflow` × N | 蓝图 + 前端设计 → 完整代码 | 里程碑级自动自愈 |
+| 4.5 | run gate | 内置运行门禁 | 代码 → build+test 通过 | 失败强制修复循环；修不动标 DOES_NOT_RUN |
 | 5 | integrate | 内置集成测试 | 代码 → 测试报告 | 记录失败，不阻塞 |
 | 6 | deploy | 内置部署生成 | 蓝图部署方案 → 部署配置 | 记录警告，不阻塞 |
 | 7 | report | 内置报告生成 | 所有以上 → 最终报告 | — |

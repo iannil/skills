@@ -5,6 +5,7 @@ description: >
   从需求描述出发，主动调研、分析、提议技术方案，自动生成可执行的架构蓝图，
   包含系统全景、技术栈决策、数据模型、API契约、里程碑依赖树。
   比 engineer-coach 更进一步：coach 在已有蓝图下引导开发，architect 在蓝图不存在时创建它。
+  ROUTING RULE: 若用户要"从零做一个完整项目"（不只是设计），请改触发 engineer-job。本技能聚焦"画蓝图"，不负责脚手架与开发。
   TRIGGERS: 用户描述了一个项目或功能但没有提供 CONTEXT.md 蓝图时触发。
   "我想做一个...""帮我设计一个系统""有个想法""帮我规划这个项目""从零开始做"
   "new project""design a system""I want to build""plan this project""帮我架构"

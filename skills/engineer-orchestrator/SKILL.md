@@ -5,6 +5,7 @@ description: >
   自动分解为功能级任务，按依赖顺序逐一调用 engineer-workflow 执行，
   管理跨功能集成验收、上下文重置和进度持久化。
   比 engineer-workflow 更进一步：workflow 管一个功能，orchestrator 管整个项目。
+  ROUTING RULE: 若用户要"从零做一个完整项目"且尚无 CONTEXT.md 蓝图，请改触发 engineer-job（它负责脚手架+架构+全链路）。本技能仅在蓝图已就绪时接管多功能编排。
   TRIGGERS: 用户说"开始做这个项目""完整实现""启动项目""全功能开发"
   "build the whole project""全部实现""把所有功能做完""项目整体开发"
   "start the project""implement everything" — 当蓝图（CONTEXT.md）已就绪，

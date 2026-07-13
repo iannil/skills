@@ -8,6 +8,7 @@ description: >
   "init project", "new project", "scaffold", "project init", "create project",
   "initialize repo", "项目初始化", "新项目", "创建项目", "脚手架", or any similar
   phrase about starting a new project — even if the request sounds informal or incomplete.
+  ROUTING RULE: 若用户要"从零做一个完整项目做完"，请改触发 engineer-job；本技能仅做脚手架，不负责架构与开发。
   The skill handles both the universal project conventions (docs, memory, release structure)
   and project-type-specific scaffolding (Python, Rust, Node.js, Go, web apps, CLI tools, etc.).
   It asks 5-8 clarifying questions before generating the full file tree.

@@ -40,6 +40,10 @@ Phase 4: Deploy       ──► Dockerfile / CI config (non-blocking)
 Phase 5: Report       ──► Final completion report
 ```
 
+### 自动复杂度检测（Component 2）
+
+Phase 0 读取 `args.requirements` 后，`run.wf.js` 用 `detectComplexity()` 启发式判定 `has_frontend` / `skip_requirements` / `skip_frontend`（显式 `args.skip_*` 永远优先）。检测结果写入 `project-metadata.json`，并据 `skip_requirements` / `skip_frontend` 分别门禁 Phase 1 与 Phase 3。纯函数单一真源在 `references/detection-logic.js`，由 `tests/test-detection.mjs` 守护，并内联进 `run.wf.js`（沙箱禁止 require）。
+
 ---
 
 ## 使用方式 / Usage
@@ -120,6 +124,15 @@ Workflow({
 - 更新后的 `CONTEXT.md`（里程碑状态标记为完成）
 
 **失败处理**: 里程碑级自愈（重建 ≤ 2 次 → 降级 → 跳过）
+
+### Phase 2.5: Run Gate (hard gate)
+
+**新增（Component 4）** — build + test 必须通过。
+
+- agent 读 `project-metadata.json` 的 language/framework，优先用项目原生配置（Makefile / package.json / pyproject.toml / Cargo.toml / go.mod），回退查 `references/build-commands.json`。
+- 真跑 build + test（通过 agent 的 Bash 工具）。
+- 失败 → 强制修复循环（normal=2 / auto=1 / silent=1 次）。
+- 修不动 → 标 `DOES_NOT_RUN`，最终报告头条如实标注，**不宣称完成**。
 
 ### Phase 3: Integrate
 
