@@ -123,8 +123,10 @@ compatibility: "bash, write, read, edit"
 | 需求收敛 | 需求理解摘要确认 | 跳过，直接进入技术选型 |
 | 蓝图设计 | 技术选型确认 | 使用 AI 推荐的默认技术栈 |
 | 蓝图设计 | 领域词汇表确认 | 直接使用 AI 生成的定义 |
+| 蓝图设计 | 架构模式决策确认 | 使用 AI 推荐的默认架构模式 |
 | 蓝图设计 | 数据模型确认 | 直接使用 AI 生成的设计 |
 | 蓝图设计 | API 契约确认 | 直接使用 AI 生成的设计 |
+| 蓝图设计 | 部署架构确认 | 直接使用 AI 生成的部署架构 |
 | 蓝图设计 | 里程碑确认 | 直接使用 AI 生成的规划 |
 | 固化 | 完整蓝图审核 | 自动批准，记录决策日志 |
 | 固化 | ADR 创建 | 条件满足时自动创建 |
@@ -154,25 +156,27 @@ graph TD
     
     subgraph "阶段二：蓝图设计 / Phase 2: Blueprint Design"
         D["③ 技术选型提议<br/>Tech stack proposal"] --> E["④ 领域词汇表设计<br/>Domain glossary design"]
-        E --> F["⑤ 数据模型设计<br/>Data model design"]
-        F --> G["⑥ API契约设计<br/>API contract design"]
-        G --> H{"需要前端界面？<br/>Has frontend?"}
-        H -->|"✅ 是"| I["⑦ 前端设计方向<br/>Frontend design direction"]
-        I --> J["⑧ 里程碑拆解<br/>Milestone decomposition"]
-        H -->|"❌ 纯后端/CLI"| J
+        E --> F["⑤ 架构模式决策<br/>Architecture Pattern Decision"]
+        F --> G["⑥ 数据模型设计<br/>Data model design"]
+        G --> H["⑦ API契约设计<br/>API contract design"]
+        H --> I{"需要前端界面？<br/>Has frontend?"}
+        I -->|"✅ 是"| J["⑧ 前端设计方向<br/>Frontend design direction"]
+        J --> K["⑨ 部署架构设计<br/>Deployment Architecture"]
+        K --> L["⑩ 里程碑拆解<br/>Milestone decomposition"]
+        I -->|"❌ 纯后端/CLI"| L
     end
     
     subgraph "阶段三：固化 / Phase 3: Solidify"
-        J --> K["⑨ 生成 CONTEXT.md<br/>Generate blueprint"]
-        K --> L["⑩ 用户审核蓝图<br/>User reviews blueprint"]
-        L -->|"需要修改"| M["修订 Revision"]
-        M --> L
-        L -->|"批准 Approved"| N["⑪ 提交蓝图<br/>Commit blueprint"]
+        L --> M["⑪ 生成 CONTEXT.md<br/>Generate blueprint"]
+        M --> N["⑫ 用户审核蓝图<br/>User reviews blueprint"]
+        N -->|"需要修改"| O["修订 Revision"]
+        O --> N
+        N -->|"批准 Approved"| P["⑭ 提交蓝图<br/>Commit blueprint"]
     end
     
-    N --> O{"下一步？<br/>Next?"}
-    O -->|"立即开始开发"| P["→ 转 engineer-workflow<br/>Handoff to workflow"]
-    O -->|"先不做"| Q["结束，蓝图已就绪<br/>Blueprint ready"]
+    P --> Q{"下一步？<br/>Next?"}
+    Q -->|"立即开始开发"| R["→ 转 engineer-workflow<br/>Handoff to workflow"]
+    Q -->|"先不做"| S["结束，蓝图已就绪<br/>Blueprint ready"]
 ```
 
 ---
@@ -366,7 +370,45 @@ graph LR
 
 **术语即源头**：一旦词汇表确定，后续的数据模型实体名、API 资源名、代码中的类名都应遵循此词汇表。术语改变了，对应的所有设计都要同步更新。
 
-### 第五步：数据模型设计 / Data Model Design
+### 第五步：架构模式决策 / Architecture Pattern Decision
+
+> 在技术选型确认后、数据模型设计前，为多端/多模块系统选择架构模式。
+> 对于单端单体系统（如单个 API 服务），此步骤可选。
+
+当系统包含多个前端端或多个模块时，架构模式的选择会显著影响后续的数据模型和 API 设计。
+因此架构模式决策在数据模型设计之前执行。
+
+**模式选择指南**：
+
+| 项目特征 | 推荐模式 | 适用场景 |
+|---------|:--------|:---------|
+| 多个前端端 | BFF + API Gateway | 用户端(Web)+管理端(Web)+学员端(小程序)+考试员端(移动) |
+| 异步长流程 | 事件驱动 + Saga | 审批链、考试申请→审核→成绩同步→证书生成 |
+| 大量报表/统计 | CQRS（轻量级） | 财务报表、证书统计、数据看板 |
+| 多机构管理 | 多租户（行级隔离） | 一个管理端管理多个机构 |
+| 业务逻辑复杂 | DDD 分层 | 财务规则、证书状态机、考试流程 |
+
+**输出格式**：
+
+```markdown
+### 架构模式 / Architecture Patterns
+
+| 模式 | 是否采用 | 说明 |
+|:----|:-------:|:-----|
+| BFF | ✅ | 每个前端端一个专属 BFF |
+| 事件驱动 | ✅ | 考试申请→审核→成绩→证书 异步流程 |
+| CQRS | ❌ | 当前阶段不需要，后续迭代可选 |
+| 多租户 | ✅ | 行级 tenant_id 隔离 |
+| DDD 分层 | ✅ | 应用层/领域层/基础设施层分离 |
+
+### 架构图
+
+[Deployment architecture Mermaid diagram]
+```
+
+**参考**：详细模式定义见 `references/enterprise-architecture-patterns.md`。
+
+### 第六步：数据模型设计 / Data Model Design
 
 **衔接说明**：数据模型实体名应与词汇表保持一致。如果词汇表中定义的是 `Customer`，数据库表名就应该是 `customers`，而不是 `users`。
 
@@ -416,7 +458,7 @@ erDiagram
 - 如果数据模型超过了 5 个实体，考虑是否需要分阶段细化（在第一版只设计 MVP 所需的实体）
 - 标记哪些是 MVP 必需的，哪些可以后续迭代
 
-### 第六步：API 契约设计 / API Contract Design
+### 第七步：API 契约设计 / API Contract Design
 
 定义核心 API 接口。只定义 MVP 必需的接口。
 
@@ -465,7 +507,7 @@ erDiagram
 | 500 | 服务器内部错误 |
 ```
 
-### 第七步：前端设计方向 / Frontend Design Direction
+### 第八步：前端设计方向 / Frontend Design Direction
 
 > **仅当系统包含前端界面时执行此步骤。** 如果系统是纯后端 API 或 CLI 工具，跳过此步骤，直接进入里程碑拆解。
 
@@ -524,13 +566,52 @@ erDiagram
 
 **注意**：不要在这里做完整 UI 设计。目标是让后续的开发者（或 AI）在看到代码之前，先了解设计的意图和方向。完整的视觉设计是 `frontend-design` 技能的职责，在具体的前端开发阶段执行。
 
-### 第八步：里程碑拆解 / Milestone Decomposition
+### 第九步：部署架构设计 / Deployment Architecture
+
+> 对应多端系统的部署拓扑。此处的架构图会直接影响后续部署配置生成（Phase 6）。
+
+**输出格式**：
+
+```mermaid
+graph TD
+    subgraph "前端层"
+        Portal1["[端A] (Next.js SSR)"]
+        Portal2["[端B] (Next.js SSR)"]
+        Portal3["[端C] (微信小程序)"]
+    end
+    
+    subgraph "BFF/API Gateway"
+        GW["API Gateway"]
+        BFF1["[端A] BFF"]
+        BFF2["[端B] BFF"]
+    end
+    
+    subgraph "领域服务"
+        SVC1["[服务1]"]
+        SVC2["[服务2]"]
+    end
+    
+    subgraph "基础设施"
+        DB[(数据库)]
+        MQ[("消息队列")]
+        S3[("对象存储")]
+    end
+    
+    Portal1 & Portal2 & Portal3 --> GW
+    GW --> BFF1 & BFF2
+    BFF1 & BFF2 --> SVC1 & SVC2
+    SVC1 & SVC2 --> DB & MQ & S3
+```
+
+### 第十步：里程碑拆解 / Milestone Decomposition
 
 将整个项目拆解为**严格依赖顺序的结构里程碑**。遵循方法论的核心原则：
 - 数据模型必须先于业务逻辑
 - 核心功能必须先于横切面（鉴权/缓存/日志）
 - 后端 API 必须先于前端 UI
 - 每个里程碑必须可独立运行/测试
+- **后端里程碑和前端里程碑可并行**（如 M1 数据模型 与 P1 设计系统同时开发）
+- 里程碑仅在有直接 API/数据依赖时才需要等待另一端
 
 **每个里程碑对应一个 engineer-workflow 的执行单元。**
 
@@ -573,7 +654,7 @@ graph LR
 
 ## 阶段三：固化 / Phase 3: Solidify
 
-### 第九步：生成 CONTEXT.md / Generate Blueprint
+### 第十一步：生成 CONTEXT.md / Generate Blueprint
 
 将以上所有设计集成到标准的 CONTEXT.md 蓝图中。这是最终产物。
 
@@ -605,6 +686,16 @@ graph LR
 
 ### [实体2]
 ...
+
+## 架构模式 / Architecture Patterns
+
+| 模式 | 状态 | 说明 |
+|:----|:----:|:------|
+| [BFF] | [✅/❌] | [说明] |
+
+## 部署架构 / Deployment Architecture
+
+[Mermaid 部署架构图]
 
 ## API 契约 / API Contracts
 
@@ -701,7 +792,7 @@ graph LR
 - **下一步**: 启动里程碑 1 的开发
 ```
 
-### 第十步：用户审核蓝图 / User Reviews Blueprint
+### 第十二步：用户审核蓝图 / User Reviews Blueprint
 
 将完整的 CONTEXT.md 展示给用户。不要直接问"行不行"，而是引导性确认：
 
@@ -718,15 +809,17 @@ graph LR
 CONTEXT.md 蓝图已生成。这是一个完整的架构设计，包含：
 
 1. ✅ **系统全景** — 技术栈和架构红线
-2. ✅ **领域词汇表** — [N] 个核心术语定义
-3. ✅ **数据模型** — [N] 个核心实体定义
-4. ✅ **API 契约** — [N] 个核心接口定义
-5. ✅ **前端设计方向** — [如适用，设计基调/色彩/排版已确定]
-6. ✅ **里程碑规划** — [N] 个依赖排序的里程碑，MVP 范围已标记
-7. ✅ **测试策略** — 测试框架/类型/覆盖率目标已定义
-8. ✅ **文档规范** — README/CHANGELOG/API 文档规范已定义
-9. ✅ **部署方案** — 运行方式/容器化/CI/CD 已规划
-10. ✅ **架构决策（ADR）** — [N] 个关键决策记录
+2. ✅ **架构模式** — [N] 个架构模式已决策
+3. ✅ **领域词汇表** — [N] 个核心术语定义
+4. ✅ **数据模型** — [N] 个核心实体定义
+5. ✅ **API 契约** — [N] 个核心接口定义
+6. ✅ **前端设计方向** — [如适用，设计基调/色彩/排版已确定]
+7. ✅ **部署架构** — 多端部署拓扑已设计
+8. ✅ **里程碑规划** — [N] 个依赖排序的里程碑，MVP 范围已标记
+9. ✅ **测试策略** — 测试框架/类型/覆盖率目标已定义
+10. ✅ **文档规范** — README/CHANGELOG/API 文档规范已定义
+11. ✅ **部署方案** — 运行方式/容器化/CI/CD 已规划
+12. ✅ **架构决策（ADR）** — [N] 个关键决策记录
 
 ### 需要你确认的关键决策
 
@@ -743,7 +836,7 @@ CONTEXT.md 蓝图已生成。这是一个完整的架构设计，包含：
 - **直接批准** — 没问题的话告诉我"可以"，我就提交蓝图
 ```
 
-### 第十一步：生成 ADR / Generate ADRs
+### 第十三步：生成 ADR / Generate ADRs
 
 对于设计过程中满足以下三点**全部成立**的决策，创建 ADR 文件：
 1. **难以逆转**——将来改变主意的成本显著
@@ -788,7 +881,7 @@ ADR 文件放在 `docs/adr/` 目录下，按数字序号命名。
 
 **不满足条件时跳过 ADR**。不是每个技术选型都需要 ADR。例如"前端用 React"不需要 ADR——除非团队中有人强烈反对 React 并且该决策影响深远。
 
-### 第十二步：提交蓝图 / Commit Blueprint
+### 第十四步：提交蓝图 / Commit Blueprint
 
 用户批准后执行：
 
