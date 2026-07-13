@@ -578,6 +578,27 @@ engineer-workflow 完成单个功能后，orchestrator 不能只是"哦好，下
 请选择处理方式。
 ```
 
+### 级联取消逻辑 / Cascade Cancel Logic
+
+当一个里程碑被标记为 `BLOCKED` 或 `SKIPPED` 后，自动执行以下级联处理（参考 `engineer-orchestrator/references/cascade-failure.md`）：
+
+1. **识别受影响的下游** — 扫描依赖图，找出所有直接或间接依赖本里程碑的任务
+2. **按依赖类型处理**：
+   - **hard 依赖**（默认）→ 自动标记为 `BLOCKED (cascade)`，记录根因里程碑 ID
+   - **soft 依赖** → 保留 `TODO` 状态，标注"上游 [里程碑ID] 已阻塞"
+3. **更新依赖树状态** — 在 progress.json / job.state.json 中标记所有级联阻塞的任务
+4. **生成级联摘要**（追加到当前错误报告末尾）：
+
+```markdown
+### 级联影响 / Cascade Impact
+
+[BLOCKED/SKIPPED 里程碑] ─[hard/soft]──→ [受影响里程碑] → [受影响里程碑状态]
+
+**总计**: N 个里程碑受级联影响
+```
+
+**用户可覆盖**：在 `normal` 模式下，用户可选择将 hard 依赖临时降级为 soft，继续执行下游。
+
 ### 第九步：标记完成 & 更新进度 / Mark Done & Update Progress
 
 功能通过集成验收后，**立即更新进度文件**——这是跨会话恢复的关键：
