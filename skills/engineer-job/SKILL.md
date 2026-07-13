@@ -158,9 +158,15 @@ graph TD
 | 0 | init | `init-project` | 用户需求 → 文件树 + 技术栈 | 重试 1 次，失败则终止 |
 | 1 | architect | `engineer-architect` | 项目文件树 → CONTEXT.md 蓝图 | 重试 1 次，失败则降级骨架蓝图 |
 | 2 | orchestrate | `engineer-orchestrator` + `engineer-workflow` × N | 蓝图 → 完整代码 | 里程碑级自动自愈 |
-| 3 | integrate | 内置集成测试 | 代码 → 测试报告 | 记录失败，不阻塞 |
+| 3 | integrate | 内置集成测试 + [可选]生产就绪检查 | 代码 → 测试报告 + 生产就绪报告 | 记录失败，不阻塞；生产检查只记录不阻塞 |
 | 4 | deploy | 内置部署生成 | 蓝图部署方案 → 部署配置 | 记录警告，不阻塞 |
 | 5 | report | 内置报告生成 | 所有以上 → 最终报告 | — |
+
+**可选增强 — Phase 3 生产就绪检查**：
+在 `--auto` 或 `--silent` 模式下，如果项目是服务端/Web 应用，Phase 3 会额外执行生产就绪检查。
+读取 `init-project/references/production-readiness.md` 按项目类型运行检查清单，
+未通过项记录到最终报告的"建议改进"部分，不阻塞流程。
+纯 CLI/库项目自动跳过此步骤。
 
 ---
 
