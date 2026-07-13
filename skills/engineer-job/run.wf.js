@@ -14,6 +14,73 @@ export const meta = {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  Pure helpers — mirrored from references/detection-logic.js — keep in sync
+//  (Workflow 沙箱禁止 require/import；此处内联。单测守护单一真源。)
+// ═══════════════════════════════════════════════════════════
+
+const FRONTEND_SIGNALS = [
+  '前端', '界面', '页面', 'ui', 'web app', 'web-app', '小程序', '移动端',
+  'dashboard', '仪表盘', '后台管理', '管理后台', 'react', 'vue', 'next.js',
+  'nextjs', 'frontend', '网页', '网站',
+]
+const NO_FRONTEND_SIGNALS = [
+  'cli', '命令行', 'library', '库', 'sdk', '脚本', '纯后端', 'api only',
+  '纯 api', 'backend only', 'fastapi', 'flask', 'django', 'express', 'spring',
+  'gin', 'echo', 'actix', 'rest api', 'api 服务', 'api-server', 'api server',
+  '后端接口',
+]
+const COMPLEX_SIGNALS = [
+  '多端', '多模块', '多个角色', '审批', '工作流', 'saas', '多租户',
+  '事件驱动', 'bff', '微服务', '跨模块', '多机构', '分销', '权限体系',
+]
+const SIMPLE_SIGNALS = [
+  'crud', '简单', '单个', '工具', '计算器', 'todo', '待办', '脚本',
+  '小工具', '单功能', 'single', 'simple',
+]
+
+function detectComplexity(req) {
+  const text = String(req || '').toLowerCase()
+  const hit = (arr) => arr.some((k) => text.includes(k))
+  let has_frontend, fe_reason
+  if (hit(NO_FRONTEND_SIGNALS)) { has_frontend = false; fe_reason = '命中无前端信号词' }
+  else if (hit(FRONTEND_SIGNALS)) { has_frontend = true; fe_reason = '命中前端信号词' }
+  else { has_frontend = true; fe_reason = '无明确信号，保守按含前端处理' }
+  let skip_requirements, req_reason
+  if (hit(COMPLEX_SIGNALS)) { skip_requirements = false; req_reason = '命中复杂信号词，保留需求分析' }
+  else if (hit(SIMPLE_SIGNALS)) { skip_requirements = true; req_reason = '命中简单信号词，跳过需求分析' }
+  else { skip_requirements = false; req_reason = '无明确信号，保留需求分析（安全默认）' }
+  const skip_frontend = !has_frontend
+  let detected_complexity
+  if (hit(COMPLEX_SIGNALS)) detected_complexity = 'complex'
+  else if (hit(SIMPLE_SIGNALS)) detected_complexity = 'simple'
+  else detected_complexity = 'moderate'
+  return { detected_complexity, has_frontend, skip_requirements, skip_frontend, complexity_reasoning: `${fe_reason}; ${req_reason}` }
+}
+
+function topoSort(milestones) {
+  const ids = milestones.map((m) => m.id)
+  const idSet = new Set(ids)
+  for (const m of milestones) {
+    for (const d of m.deps || []) {
+      if (!idSet.has(d)) throw new Error(`milestone ${m.id} depends on unknown ${d}`)
+    }
+  }
+  const indeg = {}; const adj = {}
+  ids.forEach((id) => { indeg[id] = 0; adj[id] = [] })
+  for (const m of milestones) {
+    for (const d of m.deps || []) { adj[d].push(m.id); indeg[m.id]++ }
+  }
+  const queue = ids.filter((id) => indeg[id] === 0)
+  const order = []
+  while (queue.length) {
+    const id = queue.shift(); order.push(id)
+    for (const next of adj[id]) { indeg[next]--; if (indeg[next] === 0) queue.push(next) }
+  }
+  if (order.length !== ids.length) throw new Error('cycle detected in milestone dependency graph')
+  return order
+}
+
+// ═══════════════════════════════════════════════════════════
 //  Skill Protocol: Standard Inter-Skill Communication
 // ═══════════════════════════════════════════════════════════
 //
@@ -44,26 +111,15 @@ export const meta = {
 //
 // ═══════════════════════════════════════════════════════════
 
-// ── Constants ─────────────────────────────────────────────
+// ── Complexity Detection (Component 2) ───────────────────
+// 启发式检测；显式 args.skip_* 永远优先。
 
-const MODE = args.mode || 'normal'
-const REQUIREMENTS = args.requirements || ''
-const PROJECT_NAME = args.projectName || 'unnamed-project'
+const detected = detectComplexity(REQUIREMENTS)
+const skip_requirements = args.skip_requirements != null ? !!args.skip_requirements : detected.skip_requirements
+const skip_frontend = args.skip_frontend != null ? !!args.skip_frontend : detected.skip_frontend
+const isSimpleProject = skip_requirements || skip_frontend
 
-// ── Simple Project Detection ──────────────────────────────
-// If the project is simple (no frontend, few modules), skip
-// requirements analysis and frontend design phases.
-
-const isSimpleProject = (() => {
-  // Explicit skip from args
-  if (args.skip_requirements || args.skip_frontend) return true
-  // No explicit indication — assume complex (safe default, normal flow)
-  return false
-})()
-
-if (isSimpleProject) {
-  log('Simple project detected — skipping Phase 1 (requirements) and Phase 3 (frontend design)')
-}
+log(`Complexity: ${detected.detected_complexity} | has_frontend=${detected.has_frontend} | skip_requirements=${skip_requirements} | skip_frontend=${skip_frontend} (${detected.complexity_reasoning})`)
 
 // ── Phase Result Schema ──────────────────────────────────
 
@@ -178,6 +234,11 @@ Write this file to disk BEFORE generating any project files:
     "deployment": { "type": "<local | docker | serverless | cloud-vm>", "ci_cd": "<github-actions | gitlab-ci | manual | none>", "docker": <true | false> },
     "testing": { "framework": "<inferred>", "types": ["unit", "integration"] },
     "license": "MIT",
+    "detected_complexity": "${detected.detected_complexity}",
+    "has_frontend": ${detected.has_frontend},
+    "skip_requirements": ${skip_requirements},
+    "skip_frontend": ${skip_frontend},
+    "complexity_reasoning": "${detected.complexity_reasoning}",
     "features": ["<feature 1>", "<feature 2>"]
   },
   "progress_file": ".agents/job.state.json",
@@ -244,7 +305,7 @@ Write them to disk as actual files.`),
 // ═══════════════════════════════════════════════════════════
 
 phase('Requirements')
-if (!isDone('requirements') && !isSimpleProject) {
+if (!isDone('requirements') && !skip_requirements) {
   log('Phase 1: engineer-requirements — deep requirement decomposition')
 
   let result = await agent(
@@ -289,7 +350,7 @@ Return structured result with summary.`),
   }
 
   phasesDone.add('requirements')
-} else if (isSimpleProject) {
+} else if (skip_requirements) {
   log('Phase 1 skipped (simple project)')
 }
 
@@ -365,7 +426,7 @@ phase('Frontend')
 // If no frontend, it generates a minimal FRONTEND-DESIGN.md noting no frontend needed.
 // Skip via isSimpleProject (passed through args) or explicit args.skip_frontend.
 
-if (!isDone('frontend') && !isSimpleProject && !args.skip_frontend) {
+if (!isDone('frontend') && !skip_frontend) {
   log('Phase 3: engineer-frontend-architect — frontend design')
 
   let result = await agent(

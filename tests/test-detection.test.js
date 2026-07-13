@@ -42,3 +42,10 @@ test('topoSort: unknown dep throws', () => {
   const ms = [{ id: 'M1', deps: ['M9'] }]
   assert.throws(() => topoSort(ms))
 })
+
+test('run.wf.js inlines pure functions (sync guard)', () => {
+  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'run.wf.js'), 'utf8')
+  assert.ok(wf.includes('function detectComplexity'), 'run.wf.js 必须内联 detectComplexity')
+  assert.ok(wf.includes('function topoSort'), 'run.wf.js 必须内联 topoSort')
+  assert.ok(wf.includes('mirrored from references/detection-logic.js'), 'run.wf.js 必须标注镜像来源')
+})
