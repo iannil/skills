@@ -35,7 +35,7 @@ const COMPLEX_SIGNALS = [
 ]
 const SIMPLE_SIGNALS = [
   'crud', '简单', '单个', '工具', '计算器', 'todo', '待办', '脚本',
-  '小工具', '单功能', 'single', 'simple',
+  '小工具', '单功能', 'single', 'simple', 'library', '库',
 ]
 
 function detectComplexity(req) {

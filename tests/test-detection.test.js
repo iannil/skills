@@ -49,3 +49,20 @@ test('run.wf.js inlines pure functions (sync guard)', () => {
   assert.ok(wf.includes('function topoSort'), 'run.wf.js 必须内联 topoSort')
   assert.ok(wf.includes('mirrored from references/detection-logic.js'), 'run.wf.js 必须标注镜像来源')
 })
+
+function extractSignalArray(src, name) {
+  const m = src.match(new RegExp('const ' + name + ' = (\\[[\\s\\S]*?\\])'))
+  if (!m) return null
+  try { return eval(m[1]) } catch { return null }
+}
+
+test('run.wf.js keyword tables match detection-logic.js (sync guard)', () => {
+  const dl = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'references', 'detection-logic.js'), 'utf8')
+  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'run.wf.js'), 'utf8')
+  for (const k of ['FRONTEND_SIGNALS', 'NO_FRONTEND_SIGNALS', 'COMPLEX_SIGNALS', 'SIMPLE_SIGNALS']) {
+    const a = extractSignalArray(dl, k)
+    const b = extractSignalArray(wf, k)
+    assert.ok(Array.isArray(a) && Array.isArray(b), `${k}: could not extract array from both files`)
+    assert.deepEqual(b, a, `${k}: run.wf.js table must match detection-logic.js`)
+  }
+})
