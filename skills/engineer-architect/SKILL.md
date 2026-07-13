@@ -519,6 +519,7 @@ erDiagram
 ### 后续工作
 
 完整的 UI 设计可以调用 `frontend-design` 技能在前端开发阶段细化。此处只记录方向性决策。
+前端组件的目录规范、框架选择、设计方向到代码的映射参考 `init-project/references/frontend-guide.md`。
 ```
 
 **注意**：不要在这里做完整 UI 设计。目标是让后续的开发者（或 AI）在看到代码之前，先了解设计的意图和方向。完整的视觉设计是 `frontend-design` 技能的职责，在具体的前端开发阶段执行。
