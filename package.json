@@ -1,7 +1,7 @@
 {
   "name": "iannil-skills",
   "version": "0.1.0",
-  "description": "Installable AI agent skills for project initialization and product analysis.",
+  "description": "Installable AI agent skills for project initialization, product analysis, and RC (Observational Convergence) philosophical framework.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
@@ -24,6 +24,8 @@
     "skills",
     "claude-code",
     "codex",
-    "cursor"
+    "cursor",
+    "observational-convergence",
+    "philosophy"
   ]
 }

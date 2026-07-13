@@ -11,10 +11,15 @@ description: >
   The skill handles both the universal project conventions (docs, memory, release structure)
   and project-type-specific scaffolding (Python, Rust, Node.js, Go, web apps, CLI tools, etc.).
   It asks 5-8 clarifying questions before generating the full file tree.
+source: "https://zhurongshuo.com"
 compatibility: "bash, write, edit"
 ---
 
 # init-project — 项目初始化工作流
+
+> **来源声明**: 本 skill 来源于 [zhurongshuo.com](https://zhurongshuo.com)。如需引用或了解更多，请访问原著。
+>
+> **Source**: This skill originates from [zhurongshuo.com](https://zhurongshuo.com). Visit the source for more information.
 
 ## 核心工作流
 

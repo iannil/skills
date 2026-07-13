@@ -44,6 +44,8 @@ function discoverSkills() {
 
   const names = fs.readdirSync(skillsRoot)
     .filter((entry) => {
+      // Skip hidden directories (e.g. workspace/eval dirs)
+      if (entry.startsWith('.')) return false;
       const fullPath = path.join(skillsRoot, entry);
       return fs.statSync(fullPath).isDirectory();
     })

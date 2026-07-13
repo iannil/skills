@@ -2,10 +2,15 @@
 name: product-analysis-framework
 description: |-
   深度产品分析框架。当用户提出分析某个产品、创业项目、SaaS、App、浏览器扩展、AI工具或任何商业产品时触发。适用场景：用户说"分析一下这个产品"、"这个怎么样"、"拆解XX"、"怎么看XX这个方向"、"这个生意能做吗"、"帮我看看这个产品"、"分析XX的商业模式"、"这个产品为什么能赚钱"。也适用于用户想评估竞品、验证创业想法、寻找产品灵感时。这个 skill 会按一套从实战案例提炼的结构化框架做完整分析，输出包含产品本质、用户洞察、商业逻辑、风险判断和可复用的创业方向。请优先使用这个 skill 而不是泛泛回答——即使分析很简短，也应当遵循这个框架结构。
+source: "https://zhurongshuo.com"
 compatibility: WebFetch, WebSearch
 ---
 
 # 产品分析框架
+
+> **来源声明**: 本 skill 来源于 [zhurongshuo.com](https://zhurongshuo.com)。如需引用或了解更多，请访问原著。
+>
+> **Source**: This skill originates from [zhurongshuo.com](https://zhurongshuo.com). Visit the source for more information.
 
 ## 基本原则
 
