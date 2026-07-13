@@ -672,6 +672,16 @@ graph LR
 - **API 文档**: [自动生成工具，如 Swagger / 手动维护]
 - **文档纪律**: 变更与文档同时提交，不允许"先提代码，文档后补"
 
+## 数据库迁移策略 / Database Migration Strategy
+
+参考 `init-project/references/migration-strategy.md`。
+
+- **迁移工具**: [工具名，如 sqlx / Alembic / goose]
+- **迁移目录**: `db/migrations/`
+- **命名规范**: `YYYYMMDDHHMMSS_description.{up|down}.sql`
+- **回滚纪律**: 所有 up 迁移必须提供对应 down 迁移，已发布迁移严禁修改
+- **修正策略**: 发现错误时创建新迁移修正，不修改已发布文件
+
 ## 部署方案 / Deployment Plan
 
 - **运行方式**: [本地运行 / Docker 容器 / Serverless]
