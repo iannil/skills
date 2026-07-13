@@ -169,6 +169,28 @@ const PHASE_RESULT = {
   additionalProperties: true,
 }
 
+const MILESTONE_SCHEMA = {
+  type: 'object',
+  properties: {
+    milestones: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+          deps: { type: 'array', items: { type: 'string' } },
+          description: { type: 'string' },
+          acceptance: { type: 'string' },
+          frontend: { type: 'boolean' },
+        },
+        required: ['id', 'name', 'deps', 'description'],
+      },
+    },
+  },
+  required: ['milestones'],
+}
+
 // ── Helpers ──────────────────────────────────────────────
 
 // Build a Phase context string shared with every agent prompt
@@ -186,6 +208,10 @@ function ctx(phase, extra = '') {
 // ── Phase Tracking (in-memory only — agents persist to disk) ──
 
 const phasesDone = new Set()
+
+let developmentSummary = ''
+let developmentMilestoneState = {}
+let runGateResult = null
 
 function isDone(phase) {
   return phasesDone.has(phase)
@@ -483,41 +509,122 @@ Return structured result.`),
 
 phase('Develop')
 if (!isDone('development')) {
-  log('Phase 4: engineer-orchestrator — multi-feature development')
+  log('Phase 4: extracting milestone DAG from CONTEXT.md')
 
-  const result = await agent(
-    ctx('engineer-orchestrator', `=== ORCHESTRATE AND EXECUTE MULTI-FEATURE DEVELOPMENT ===
-
-Read CONTEXT.md for the milestone DAG and technical specifications.
-Read project-metadata.json for the milestone list, glossary, and frontend direction.
-Read frontend-spec.json if it exists (may contain design tokens).
-Read FRONTEND-DESIGN.md if it exists (for frontend milestone definitions, components, state machines).
-
-Execute the orchestrator skill:
-1. Parse milestone dependency DAG from CONTEXT.md
-2. Create progress tracker at .agents/progress.json
-3. Execute milestones IN DEPENDENCY ORDER:
-   - For each milestone, call engineer-workflow (sub-agent via Agent tool)
-   - Run code generation, test generation, and acceptance
-   - After each milestone, run cross-feature integration check
-   - For frontend milestones: check design token compliance
-   - Auto-recover: retry 1x then degrade scope then skip (mode-dependent)
-4. Update CONTEXT.md after each milestone
-5. Update project-metadata.json milestones status
-6. Write .agents/job.state.json development section after each milestone
-7. Append to .agents/job.progress.md after each milestone
-8. Commit after each milestone
-
-Return consolidated results with status per milestone.`),
-    { schema: PHASE_RESULT, label: 'engineer-orchestrator', phase: 'Develop' }
+  const extracted = await agent(
+    ctx('milestone-extract', `=== EXTRACT MILESTONE DAG ===
+Read "CONTEXT.md" from disk. Extract the milestone/feature list as structured data.
+- id: as written in CONTEXT.md (M1, M2, ...)
+- name: milestone name
+- deps: ids this milestone depends on (empty array if none)
+- description: copy the milestone scope from CONTEXT.md
+- acceptance: key acceptance points if present (empty string otherwise)
+- frontend: true if this milestone is primarily frontend work
+If CONTEXT.md has no milestone section, return a single milestone:
+  [{id:"M1", name:"implement-all", deps:[], description:"implement the whole project per CONTEXT.md", acceptance:"build and tests pass", frontend:false}]
+Return ONLY the structured milestones.`),
+    { schema: MILESTONE_SCHEMA, label: 'milestone-extract', phase: 'Develop' }
   )
 
-  if (!result || result.status === 'BLOCKED') {
-    log('Phase 4 partially completed — recording what was done')
-  } else {
-    log('Phase 4 complete: development finished')
+  let milestones = extracted && extracted.milestones && extracted.milestones.length
+    ? extracted.milestones
+    : [{ id: 'M1', name: 'implement-all', deps: [], description: 'implement the whole project per CONTEXT.md', acceptance: 'build and tests pass', frontend: false }]
+  if (!extracted || !extracted.milestones || !extracted.milestones.length) {
+    log('Phase 4: milestone extraction empty — degraded to single implement-all milestone')
   }
 
+  let order
+  try {
+    order = topoSort(milestones)
+  } catch (e) {
+    log(`Phase 4: topo sort failed (${e.message}) — fallback to listed order`)
+    order = milestones.map((m) => m.id)
+  }
+  const byId = {}
+  milestones.forEach((m) => { byId[m.id] = m })
+
+  const milestoneState = {}
+  order.forEach((id) => { milestoneState[id] = { status: 'TODO', rebuild_count: 0, degraded: false, skipped: false } })
+  const MAX_RETRY = 1
+
+  function cascadeSkip(blockedId) {
+    for (const m of milestones) {
+      if ((m.deps || []).includes(blockedId) && milestoneState[m.id].status === 'TODO') {
+        milestoneState[m.id].status = 'SKIPPED'
+        milestoneState[m.id].skipped = true
+        milestoneState[m.id].skip_reason = `upstream ${blockedId} blocked/skipped`
+        log(`Phase 4: cascade-skip ${m.id} (depends on ${blockedId})`)
+        cascadeSkip(m.id)
+      }
+    }
+  }
+
+  for (const id of order) {
+    const ms = milestoneState[id]
+    if (ms.status === 'SKIPPED') continue
+    const m = byId[id]
+    ms.status = 'IN_PROGRESS'
+    log(`Phase 4: milestone ${id} (${m.name}) — start`)
+
+    let res = await agent(
+      ctx('engineer-workflow', `=== EXECUTE MILESTONE ${id}: ${m.name} ===
+Read "CONTEXT.md" from disk for the blueprint.
+Implement milestone ${id} "${m.name}":
+Description: ${m.description}
+Acceptance: ${m.acceptance || '(per CONTEXT.md)'}
+${ms.degraded ? 'DEGRADED SCOPE: only the happy path; skip edge/exception branches and optional enhancements; keep core acceptance points.' : ''}
+Follow engineer-workflow: generate code + tests, run tests, commit.
+Update .agents/job.state.json development.features.${id} and append to .agents/job.progress.md.
+Return structured result.`),
+      { schema: PHASE_RESULT, label: `workflow-${id}`, phase: 'Develop' }
+    )
+
+    if ((!res || res.status === 'BLOCKED') && ms.rebuild_count < MAX_RETRY) {
+      ms.rebuild_count++
+      ms.degraded = true
+      log(`Phase 4: milestone ${id} BLOCKED — retry once with degraded (happy-path only) scope`)
+      res = await agent(
+        ctx('engineer-workflow', `=== RETRY MILESTONE ${id}: ${m.name} (DEGRADED) ===
+Previous attempt blocked. Implement ONLY the happy path of milestone ${id} "${m.name}".
+Skip edge cases, exception branches, optional enhancements. Keep core acceptance points.
+Description: ${m.description}
+Update .agents/job.state.json and job.progress.md. Return structured result.`),
+        { schema: PHASE_RESULT, label: `workflow-${id}-retry`, phase: 'Develop' }
+      )
+    }
+
+    if (!res || res.status === 'BLOCKED') {
+      ms.status = 'SKIPPED'
+      ms.skipped = true
+      ms.skip_reason = 'workflow blocked after retry'
+      log(`Phase 4: milestone ${id} SKIPPED (blocked) — cascading`)
+      cascadeSkip(id)
+    } else {
+      const insp = await agent(
+        ctx('engineer-inspector', `=== VERIFY MILESTONE ${id}: ${m.name} ===
+Read "CONTEXT.md" and inspect code changes for milestone ${id} "${m.name}".
+Check the three architecture-drift signals: foundation tampering, over-engineering, size bloat.
+Acceptance target: ${m.acceptance || '(per CONTEXT.md)'}
+Return DONE if acceptable, DONE_WITH_CONCERNS if minor issues, BLOCKED if serious drift.`),
+        { schema: PHASE_RESULT, label: `inspector-${id}`, phase: 'Develop' }
+      )
+      if (insp && insp.status === 'BLOCKED' && ms.rebuild_count < MAX_RETRY) {
+        ms.rebuild_count++
+        log(`Phase 4: milestone ${id} inspector BLOCKED — one fix attempt`)
+        await agent(
+          ctx('engineer-workflow', `=== FIX MILESTONE ${id} per inspector ===
+Inspector flagged serious drift. Re-read CONTEXT.md and fix milestone ${id} "${m.name}". Return structured result.`),
+          { schema: PHASE_RESULT, label: `workflow-${id}-fix`, phase: 'Develop' }
+        )
+      }
+      ms.status = insp && insp.status === 'BLOCKED' ? 'DEGRADED' : 'DONE'
+      log(`Phase 4: milestone ${id} ${ms.status}`)
+    }
+  }
+
+  developmentSummary = milestones.map((m) => `${m.id}:${milestoneState[m.id].status}`).join(', ')
+  developmentMilestoneState = milestoneState
+  log(`Phase 4 complete: ${developmentSummary}`)
   phasesDone.add('development')
 }
 
