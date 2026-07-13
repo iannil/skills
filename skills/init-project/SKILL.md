@@ -50,11 +50,12 @@ compatibility: "bash, write, edit"
 
 ```
 {project-name}/
-├── .claude/                    # Claude Code 配置
+├── .agents/                    # Agents 配置
 │   └── settings.json
 ├── docs/                       # 项目文档
 │   ├── standards/              # 规范文档
 │   ├── templates/              # 文档模板
+│   ├── adr/                    # 架构决策记录（Architecture Decision Records）
 │   ├── progress/               # 未完成的修改进度
 │   │   └── {YYYY-MM-DD}.md
 │   └── reports/                # 已完成修改和验收报告
@@ -79,7 +80,7 @@ compatibility: "bash, write, edit"
 - 贡献指南
 - 许可证信息
 
-请确保 `.claude/settings.json` 的内容包含基本的权限配置（如允许 Bash、Read、Write、Edit、Glob、Grep）。
+请确保 `.agents/settings.json` 的内容包含基本的权限配置（如允许 Bash、Read、Write、Edit、Glob、Grep）。
 
 ### Step 3: 生成类型特定文件树
 
