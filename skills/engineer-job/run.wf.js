@@ -1,9 +1,11 @@
 export const meta = {
   name: 'engineer-job-run',
-  description: 'AI Project Auto-Build Engine — 6-phase orchestration. Scaffolds, architects, develops, integrates, deploys, and reports.',
+  description: 'AI Project Auto-Build Engine — 8-phase orchestration. Scaffolds, analyzes requirements, architects, designs frontend, develops, integrates, deploys, and reports.',
   phases: [
     { title: 'Scaffold', detail: 'init-project scaffolding + project-metadata.json' },
-    { title: 'Architect', detail: 'engineer-architect blueprint design via metadata' },
+    { title: 'Requirements', detail: 'engineer-requirements deep requirement decomposition' },
+    { title: 'Architect', detail: 'engineer-architect blueprint design with architecture patterns' },
+    { title: 'Frontend', detail: 'engineer-frontend-architect frontend design' },
     { title: 'Develop', detail: 'engineer-orchestrator multi-feature development' },
     { title: 'Integrate', detail: 'integration testing & production readiness' },
     { title: 'Deploy', detail: 'deployment configuration generation' },
@@ -28,12 +30,16 @@ export const meta = {
 //   .agents/job.progress.md          — human-readable append-only log
 //   project-metadata.json            — structured metadata bridging init→architect→orchestrator
 //   CONTEXT.md                       — project blueprint (architect output)
+//   REQUIREMENTS.md                  — requirements analysis (requirements phase)
+//   FRONTEND-DESIGN.md               — frontend architecture design (frontend phase)
 //   frontend-spec.json               — frontend design tokens (if has_frontend)
 //   .agents/progress.json            — orchestrator progress tracker
 //
 // Protocol flow:
-//   init-project  ──►  project-metadata.json  ──►  engineer-architect
-//   engineer-architect  ──►  CONTEXT.md  ──►  engineer-orchestrator
+//   init-project  ──►  project-metadata.json  ──►  engineer-requirements
+//   engineer-requirements  ──►  REQUIREMENTS.md  ──►  engineer-architect
+//   engineer-architect  ──►  CONTEXT.md  ──►  engineer-frontend-architect
+//   engineer-frontend-architect  ──►  FRONTEND-DESIGN.md  ──►  engineer-orchestrator
 //   engineer-orchestrator  ──►  .agents/progress.json  ──►  engineer-workflow × N
 //
 // ═══════════════════════════════════════════════════════════
@@ -43,6 +49,21 @@ export const meta = {
 const MODE = args.mode || 'normal'
 const REQUIREMENTS = args.requirements || ''
 const PROJECT_NAME = args.projectName || 'unnamed-project'
+
+// ── Simple Project Detection ──────────────────────────────
+// If the project is simple (no frontend, few modules), skip
+// requirements analysis and frontend design phases.
+
+const isSimpleProject = (() => {
+  // Explicit skip from args
+  if (args.skip_requirements || args.skip_frontend) return true
+  // No explicit indication — assume complex (safe default, normal flow)
+  return false
+})()
+
+if (isSimpleProject) {
+  log('Simple project detected — skipping Phase 1 (requirements) and Phase 3 (frontend design)')
+}
 
 // ── Phase Result Schema ──────────────────────────────────
 
@@ -85,7 +106,7 @@ const PHASE_RESULT = {
         session_summary: { type: 'string' },
       },
     },
-    // report field — returned by Phase 5 with final report text
+    // report field — returned by Phase 7 with final report text
     report: { type: 'string' },
   },
   required: ['status', 'summary'],
@@ -177,8 +198,8 @@ Create the .agents/ directory and write job.state.json:
   "project": "${PROJECT_NAME}",
   "job_version": "2.0",
   "mode": "${MODE}",
-  "phases": { "init": { "status": "DONE" }, "architect": { "status": "TODO" }, "development": { "status": "TODO" }, "finalize": { "status": "TODO" }, "deploy": { "status": "TODO" }, "report": { "status": "TODO" } },
-  "checkpoint": { "last_phase": "init", "next_action": "start architect phase", "session_summary": "Project scaffolded" }
+  "phases": { "init": { "status": "DONE" }, "requirements": { "status": "TODO" }, "architect": { "status": "TODO" }, "frontend": { "status": "TODO" }, "development": { "status": "TODO" }, "finalize": { "status": "TODO" }, "deploy": { "status": "TODO" }, "report": { "status": "TODO" } },
+  "checkpoint": { "last_phase": "init", "next_action": "start requirements phase", "session_summary": "Project scaffolded" }
 }
 
 Step 4 — Write .agents/job.progress.md
@@ -217,51 +238,101 @@ Write them to disk as actual files.`),
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Phase 1 — engineer-architect: 架构蓝图
-// ═══════════════════════════════════════════════════════════
+//  Phase 1 — engineer-requirements: 需求深度拆解
 //  Input:  project-metadata.json (on disk, from Phase 0)
-//  Output: CONTEXT.md (blueprint) + updated project-metadata.json + [frontend-spec.json]
+//  Output: REQUIREMENTS.md (需求分析文档)
+// ═══════════════════════════════════════════════════════════
+
+phase('Requirements')
+if (!isDone('requirements') && !isSimpleProject) {
+  log('Phase 1: engineer-requirements — deep requirement decomposition')
+
+  let result = await agent(
+    ctx('engineer-requirements', `=== DEEP REQUIREMENT DECOMPOSITION ===
+
+Read "project-metadata.json" from disk for project context.
+
+Execute the engineer-requirements process:
+1. Identify all user roles and their core journeys
+2. Run event storming — identify key business events
+3. Decompose into bounded contexts / modules
+4. Build full feature inventory with CRUD matrix
+5. Create feature dependency DAG
+6. Define state machines for key business objects
+7. Write acceptance criteria for each feature
+
+Output: Write REQUIREMENTS.md to project root with ALL sections filled.
+Update .agents/job.state.json requirements phase to DONE.
+Append to .agents/job.progress.md.
+
+Return structured result with summary.`),
+    { schema: PHASE_RESULT, label: 'engineer-requirements', phase: 'Requirements' }
+  )
+
+  if (result?.status === 'BLOCKED') {
+    log('Phase 1 failed, retrying once...')
+    result = await agent(
+      `Retry: requirements decomposition. Requirements: "${REQUIREMENTS}". Generate a minimal REQUIREMENTS.md with at least role definitions and feature list.`,
+      { schema: PHASE_RESULT, label: 'requirements-retry', phase: 'Requirements' }
+    )
+  }
+
+  if (!result || result.status === 'BLOCKED') {
+    // Degrade: generate minimal requirements
+    await agent(
+      `Generate a minimal REQUIREMENTS.md with role definitions and basic feature list extracted from: "${REQUIREMENTS}". Update job.state.json requirements as DONE_WITH_CONCERNS.`,
+      { schema: PHASE_RESULT, label: 'requirements-degrade', phase: 'Requirements' }
+    )
+    log('Phase 1 degraded: minimal requirements generated')
+  } else {
+    log('Phase 1 complete: REQUIREMENTS.md generated')
+  }
+
+  phasesDone.add('requirements')
+} else if (isSimpleProject) {
+  log('Phase 1 skipped (simple project)')
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Phase 2 — engineer-architect: 架构蓝图（改进版）
+//  Input:  project-metadata.json + REQUIREMENTS.md (on disk)
+//  Output: CONTEXT.md (含架构模式 + 部署架构)
+// ═══════════════════════════════════════════════════════════
 
 phase('Architect')
 if (!isDone('architect')) {
-  log('Phase 1: engineer-architect — generating blueprint')
+  log('Phase 2: engineer-architect — generating blueprint')
 
   let result = await agent(
     ctx('engineer-architect', `=== GENERATE PROJECT BLUEPRINT ===
 
 Read "project-metadata.json" from disk for technical context.
+Read "REQUIREMENTS.md" from disk if it exists (for feature definitions, state machines, role journeys).
 Read the existing project file tree.
 
 Generate a complete CONTEXT.md blueprint:
 1. System overview, tech stack, architectural red lines
-2. Domain glossary (core terms with English names)
-3. Core data models (entities, fields, indexes)
-4. API contracts (routes, requests, responses, errors)
-5. Milestone plan (dependency-ordered, each with acceptance criteria)
-6. Testing strategy (framework, types, coverage targets)
-7. Deployment plan
+2. Architecture pattern decisions (BFF / Event-Driven / CQRS / Multi-Tenancy / DDD)
+   — Reference enterprise-architecture-patterns.md for pattern details
+3. Deployment architecture topology diagram
+4. Domain glossary (core terms with English names)
+5. Core data models (entities, fields, indexes)
+6. API contracts (routes, requests, responses, errors)
+7. Milestone plan (dependency-ordered, backend and frontend milestones CAN be parallel)
+8. Testing strategy, docs convention, deployment plan
 
-Read the project-metadata.json has_frontend field. If true, also generate:
-- Frontend Design System section in CONTEXT.md
-- frontend-spec.json with design tokens
+Read project-metadata.json has_frontend field. If true, also generate:
+- Frontend Design Direction section in CONTEXT.md
+- frontend-spec.json with basic design tokens
 
-AFTER generating CONTEXT.md, UPDATE project-metadata.json:
-- Add "architect" section with milestones list, glossary terms, and frontend direction
-- Set blueprint_commit to the git hash of the CONTEXT.md commit
-
-UPDATE .agents/job.state.json:
-- Set architect phase status to "DONE"
-- Update checkpoint.last_phase to "architect"
-- Update checkpoint.next_action to "start development phase"
-
-APPEND to .agents/job.progress.md with the architect completion summary.
-
-Return structured result with progress details.`),
+AFTER generating CONTEXT.md, UPDATE project-metadata.json with architect results.
+UPDATE .agents/job.state.json architect phase to "DONE".
+APPEND to .agents/job.progress.md.`),
     { schema: PHASE_RESULT, label: 'engineer-architect', phase: 'Architect' }
   )
 
   if (result?.status === 'BLOCKED') {
-    log('Phase 1 failed, retrying once...')
+    log('Phase 2 failed, retrying once...')
     result = await agent(
       `Retry: architect blueprint. Requirements: "${REQUIREMENTS}". If still blocked, generate a skeleton CONTEXT.md with minimal structure and mark degraded.`,
       { schema: PHASE_RESULT, label: 'architect-retry', phase: 'Architect' }
@@ -274,22 +345,84 @@ Return structured result with progress details.`),
       `Generate a minimal skeleton CONTEXT.md and update job.state.json with architect as DONE_WITH_CONCERNS. This is a degraded fallback.`,
       { schema: PHASE_RESULT, label: 'architect-degrade', phase: 'Architect' }
     )
-    log('Phase 1 degraded: skeleton blueprint generated')
+    log('Phase 2 degraded: skeleton blueprint generated')
   } else {
-    log('Phase 1 complete: blueprint generated')
+    log('Phase 2 complete: blueprint generated')
   }
 
   phasesDone.add('architect')
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Phase 2 — engineer-orchestrator: 多功能编排开发
-//  Input:  CONTEXT.md + project-metadata.json (on disk)
+//  Phase 3 — engineer-frontend-architect: 前端详细设计
+//  Input:  CONTEXT.md (on disk, from Phase 2)
+//  Output: FRONTEND-DESIGN.md (前端设计文档)
+// ═══════════════════════════════════════════════════════════
+
+phase('Frontend')
+// Phase 3 runs by default for non-simple projects.
+// The sub-agent reads CONTEXT.md and detects has_frontend on its own.
+// If no frontend, it generates a minimal FRONTEND-DESIGN.md noting no frontend needed.
+// Skip via isSimpleProject (passed through args) or explicit args.skip_frontend.
+
+if (!isDone('frontend') && !isSimpleProject && !args.skip_frontend) {
+  log('Phase 3: engineer-frontend-architect — frontend design')
+
+  let result = await agent(
+    ctx('engineer-frontend-architect', `=== FRONTEND ARCHITECTURE DESIGN ===
+
+Read "CONTEXT.md" from disk for system architecture, tech stack, and frontend direction.
+Read "REQUIREMENTS.md" from disk if it exists (for user roles and journeys).
+
+Execute the engineer-frontend-architect process:
+1. Portal scope analysis — identify all frontend portals, their tech stacks, devices, users
+2. Design token system — shared tokens + portal-specific tokens (colors, fonts, spacing)
+3. Page tree & routes — complete page tree per portal with route paths
+4. Component hierarchy — UI components → feature components → page components
+5. State architecture — global vs local vs server state boundaries
+6. UI state machines — loading, empty, error, edge cases for every core page
+7. API interaction patterns — data fetching strategy per page
+8. Page-level design summary — one-liner per core page
+
+Output: Write FRONTEND-DESIGN.md to project root with ALL sections filled.
+Update .agents/job.state.json frontend phase to DONE.
+Append to .agents/job.progress.md.
+
+Return structured result.`),
+    { schema: PHASE_RESULT, label: 'engineer-frontend-architect', phase: 'Frontend' }
+  )
+
+  if (result?.status === 'BLOCKED') {
+    log('Phase 3 failed, retrying once...')
+    result = await agent(
+      `Retry: frontend design. Generate at minimum a FRONTEND-DESIGN.md with portal scope, page tree, and design token system.`,
+      { schema: PHASE_RESULT, label: 'frontend-retry', phase: 'Frontend' }
+    )
+  }
+
+  if (!result || result.status === 'BLOCKED') {
+    await agent(
+      `Generate minimal FRONTEND-DESIGN.md with portal definitions and page tree. Mark as degraded.`,
+      { schema: PHASE_RESULT, label: 'frontend-degrade', phase: 'Frontend' }
+    )
+    log('Phase 3 degraded: minimal frontend design generated')
+  } else {
+    log('Phase 3 complete: FRONTEND-DESIGN.md generated')
+  }
+
+  phasesDone.add('frontend')
+} else {
+  log('Phase 3 skipped (no frontend or simple project)')
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Phase 4 — engineer-orchestrator: 多功能编排开发（增强版）
+//  Input:  CONTEXT.md + FRONTEND-DESIGN.md + project-metadata.json (on disk)
 //  Output: .agents/progress.json + completed code
 
 phase('Develop')
 if (!isDone('development')) {
-  log('Phase 2: engineer-orchestrator — multi-feature development')
+  log('Phase 4: engineer-orchestrator — multi-feature development')
 
   const result = await agent(
     ctx('engineer-orchestrator', `=== ORCHESTRATE AND EXECUTE MULTI-FEATURE DEVELOPMENT ===
@@ -297,6 +430,7 @@ if (!isDone('development')) {
 Read CONTEXT.md for the milestone DAG and technical specifications.
 Read project-metadata.json for the milestone list, glossary, and frontend direction.
 Read frontend-spec.json if it exists (may contain design tokens).
+Read FRONTEND-DESIGN.md if it exists (for frontend milestone definitions, components, state machines).
 
 Execute the orchestrator skill:
 1. Parse milestone dependency DAG from CONTEXT.md
@@ -318,20 +452,20 @@ Return consolidated results with status per milestone.`),
   )
 
   if (!result || result.status === 'BLOCKED') {
-    log('Phase 2 partially completed — recording what was done')
+    log('Phase 4 partially completed — recording what was done')
   } else {
-    log('Phase 2 complete: development finished')
+    log('Phase 4 complete: development finished')
   }
 
   phasesDone.add('development')
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Phase 3 — Integration: 集成测试 (non-blocking)
+//  Phase 5 — Integration: 集成测试 (non-blocking)
 
 phase('Integrate')
 if (!isDone('finalize')) {
-  log('Phase 3: integration testing')
+  log('Phase 5: integration testing')
 
   const result = await agent(
     ctx('integration', `=== RUN INTEGRATION TESTS ===
@@ -356,11 +490,11 @@ Return structured results with pass/fail per check, and any issues.`),
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Phase 4 — Deploy: 部署配置 (non-blocking)
+//  Phase 6 — Deploy: 部署配置 (non-blocking)
 
 phase('Deploy')
 if (!isDone('deploy')) {
-  log('Phase 4: deployment configuration')
+  log('Phase 6: deployment configuration')
 
   const result = await agent(
     ctx('deploy', `=== GENERATE DEPLOYMENT CONFIG ===
@@ -385,11 +519,11 @@ APPEND to job.progress.md.`),
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Phase 5 — Report: 最终报告
+//  Phase 7 — Report: 最终报告
 
 phase('Report')
 if (!isDone('report')) {
-  log('Phase 5: generating final report')
+  log('Phase 7: generating final report')
 
   const result = await agent(
     ctx('report', `=== GENERATE FINAL REPORT ===
@@ -426,6 +560,6 @@ Return the report text in the "report" field of the result.`),
 // ═══════════════════════════════════════════════════════════
 //  Completion
 
-log('All 6 phases completed. Project build finished.')
+log(`All ${isSimpleProject ? '6' : '8'} phases completed. Project build finished.`)
 log(`Mode: ${MODE}`)
 log(`Phases completed: ${[...phasesDone].filter(Boolean).join(', ')}`)
