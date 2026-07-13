@@ -38,7 +38,11 @@
           }
         },
         "license": { "type": "string" },
-        "features": { "type": "array", "items": { "type": "string" }, "description": "核心功能列表" }
+        "features": { "type": "array", "items": { "type": "string" }, "description": "核心功能列表" },
+        "detected_complexity": { "type": "string", "enum": ["simple", "moderate", "complex"], "description": "Phase 0 启发式检测的项目复杂度" },
+        "skip_requirements": { "type": "boolean", "description": "是否跳过 Phase 1 需求分析" },
+        "skip_frontend": { "type": "boolean", "description": "是否跳过 Phase 3 前端设计" },
+        "complexity_reasoning": { "type": "string", "description": "检测理由（一句话）" }
       }
     },
     "architect": {
@@ -90,6 +94,17 @@
           }
         },
         "adr_count": { "type": "number" }
+      }
+    },
+    "run_gate": {
+      "type": "object",
+      "description": "Phase 4.5 运行门禁结果",
+      "properties": {
+        "status": { "type": "string", "enum": ["PASS", "DOES_NOT_RUN", "SKIPPED"] },
+        "attempts": { "type": "number" },
+        "build_command": { "type": "string" },
+        "test_command": { "type": "string" },
+        "last_error": { "type": ["string", "null"] }
       }
     },
     "progress_file": { "type": "string", "description": "job.state.json 路径", "default": ".agents/job.state.json" },
