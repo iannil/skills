@@ -1,4 +1,4 @@
-# iannil-skills
+# iannil/skills
 
 Installable AI agent skills for project initialization, product analysis, and RC (Observational Convergence) philosophical framework.
 
@@ -6,16 +6,17 @@ This package keeps each skill in the standard `skills/<name>/SKILL.md` layout us
 
 ## Available Skills
 
-### Engineering Workflow Skills（工程开发系列）
+### Engineering Skills
 
-基于《基于实现规划的 AI 辅助编程实战》方法论的完整工程开发技能链：
+Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice" methodology, the complete engineering development skill chain:
 
-- `engineer-architect` — **AI 架构师**（P0）。将用户模糊需求转化为结构化 CONTEXT.md 蓝图。自动调研、分析、提议技术方案，生成含系统全景、数据模型、API契约、里程碑依赖树的可执行蓝图。
-- `engineer-orchestrator` — **AI 项目编排引擎**（P0）。接收项目蓝图，自动分解为功能级任务队列，按依赖顺序逐一调用 engineer-workflow 执行，管理跨功能集成验收、上下文重置和跨会话进度持久化。
-- `engineer-workflow` — **AI 编码全自动工作流引擎**。输入单个功能需求，自动执行：里程碑拆解→下发指令→编码→验收→分支判断→提交固化→更新蓝图。
-- `engineer-coach` — **AI 编码流程教练**。六步 SOP 引导用户完成 AI 辅助编程：拆解→下发指令→编码→验收→分支判断→固化。
-- `engineer-inspector` — **AI 代码架构监理**。检测架构偏移三大信号（篡改地基/过度设计/体积失控），输出结构化验收报告。
-- `engineer-advisor` — **AI 编码知识顾问**。诊断对话健康度，评估是否需要重置上下文、升维指令或彻底重建。
+- `engineer-job` — **AI Project Auto-Build Engine** (P0). Meta-orchestrator that automatically executes the full project lifecycle: scaffolding → architecture design → multi-feature development → integration testing → deployment config generation. Supports `--auto` (auto-confirm) and `--silent` (silent) modes for unattended project building.
+- `engineer-architect` — **AI Architect** (P0). Translates vague user requirements into a structured CONTEXT.md blueprint. Automatically researches, analyzes, and proposes technical solutions, generating an executable blueprint that includes system overview, data models, API contracts, and milestone dependency tree.
+- `engineer-orchestrator` — **AI Project Orchestration Engine** (P0). Receives the project blueprint, automatically decomposes it into a feature-level task queue, invokes engineer-workflow one by one in dependency order, and manages cross-feature integration acceptance, context reset, and cross-session progress persistence.
+- `engineer-workflow` — **AI Coding Fully Automated Workflow Engine**. Takes a single feature requirement as input and automatically executes: milestone breakdown → dispatch instructions → coding → acceptance → branch decision → commit consolidation → update blueprint.
+- `engineer-coach` — **AI Coding Process Coach**. A six-step SOP guides users through AI-assisted programming: breakdown → dispatch instructions → coding → acceptance → branch decision → consolidation.
+- `engineer-inspector` — **AI Code Architecture Inspector**. Detects three major signals of architecture drift (foundation tampering / over-engineering / size runaway) and outputs a structured acceptance report.
+- `engineer-advisor` — **AI Coding Knowledge Advisor**. Diagnoses conversation health, evaluates whether context reset, instruction elevation, or complete rebuild is needed.
 
 ### Project & Product Skills
 
@@ -88,6 +89,8 @@ npm test
 
 ```text
 skills/
+├── engineer-job/
+│   └── SKILL.md                    # P0 — 元编排引擎 / 全自动项目构建
 ├── engineer-architect/
 │   └── SKILL.md                    # P0 — 需求→蓝图自动生成
 ├── engineer-orchestrator/
