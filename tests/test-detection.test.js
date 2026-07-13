@@ -66,3 +66,14 @@ test('run.wf.js keyword tables match detection-logic.js (sync guard)', () => {
     assert.deepEqual(b, a, `${k}: run.wf.js table must match detection-logic.js`)
   }
 })
+
+test('run.wf.js defines its args-derived Constants (sync guard)', () => {
+  // Catches accidental deletion of the Constants block (MODE/REQUIREMENTS/PROJECT_NAME),
+  // which node --check (syntax-only) and the detection-logic tests cannot detect —
+  // a missing const only surfaces as a runtime ReferenceError when the workflow executes.
+  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'run.wf.js'), 'utf8')
+  assert.ok(/^const MODE = /m.test(wf), 'run.wf.js must define const MODE')
+  assert.ok(/^const REQUIREMENTS = /m.test(wf), 'run.wf.js must define const REQUIREMENTS')
+  assert.ok(/^const PROJECT_NAME = /m.test(wf), 'run.wf.js must define const PROJECT_NAME')
+})
+

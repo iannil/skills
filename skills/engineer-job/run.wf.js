@@ -112,6 +112,12 @@ function topoSort(milestones) {
 //
 // ═══════════════════════════════════════════════════════════
 
+// ── Constants ─────────────────────────────────────────────
+
+const MODE = args.mode || 'normal'
+const REQUIREMENTS = args.requirements || ''
+const PROJECT_NAME = args.projectName || 'unnamed-project'
+
 // ── Complexity Detection (Component 2) ───────────────────
 // 启发式检测；显式 args.skip_* 永远优先。
 
