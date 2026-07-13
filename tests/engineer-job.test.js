@@ -31,7 +31,7 @@ function readFrontmatter(filePath) {
   return { frontmatter, content };
 }
 
-describe('iannil-skills', () => {
+describe('skills', () => {
   const skills = findSkillFiles();
 
   describe('all skills', () => {

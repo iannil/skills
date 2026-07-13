@@ -11,14 +11,14 @@ const skillsRoot = path.join(packageRoot, 'skills');
 function usage() {
   return [
     'Usage:',
-    '  iannil-skills list',
-    '  iannil-skills install [all|skill-name] [--dry-run]',
+    '  skills list',
+    '  skills install [all|skill-name] [--dry-run]',
     '',
     'Examples:',
-    '  iannil-skills install',
-    '  iannil-skills install all',
-    '  iannil-skills install init-project',
-    '  iannil-skills install product-analysis-framework --dry-run'
+    '  skills install',
+    '  skills install all',
+    '  skills install init-project',
+    '  skills install product-analysis-framework --dry-run'
   ].join('\n');
 }
 

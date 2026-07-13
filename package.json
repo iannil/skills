@@ -1,11 +1,11 @@
 {
-  "name": "iannil-skills",
+  "name": "skills",
   "version": "0.1.0",
   "description": "Installable AI agent skills for project initialization, product analysis, and RC (Observational Convergence) philosophical framework.",
   "license": "MIT",
   "type": "commonjs",
   "bin": {
-    "iannil-skills": "bin/iannil-skills.js"
+    "skills": "bin/skills.js"
   },
   "files": [
     "bin/",

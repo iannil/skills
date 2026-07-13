@@ -7,7 +7,7 @@ const { spawnSync } = require('node:child_process');
 const test = require('node:test');
 
 const root = path.resolve(__dirname, '..');
-const cli = path.join(root, 'bin', 'iannil-skills.js');
+const cli = path.join(root, 'bin', 'skills.js');
 
 const EXPECTED_SKILLS = [
   'init-project',

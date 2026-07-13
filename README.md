@@ -35,21 +35,21 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 Install all skills with the package-specific CLI:
 
 ```bash
-npx iannil-skills install all
+npx iannil/skills install all
 ```
 
 Install one skill:
 
 ```bash
-npx iannil-skills install init-project
-npx iannil-skills install product-analysis-framework
-npx iannil-skills install rc-tutor
+npx iannil/skills install init-project
+npx iannil/skills install product-analysis-framework
+npx iannil/skills install rc-tutor
 ```
 
 Preview without changing anything:
 
 ```bash
-npx iannil-skills install --dry-run
+npx iannil/skills install --dry-run
 ```
 
 ## Standard Skills Installer
@@ -57,10 +57,10 @@ npx iannil-skills install --dry-run
 For the widest AI tool compatibility, use the standard `skills` installer directly:
 
 ```bash
-npx skills add iannil-skills --skill '*'
-npx skills add iannil-skills --skill init-project
-npx skills add iannil-skills --skill product-analysis-framework
-npx skills add iannil-skills --skill rc-tutor
+npx skills add iannil/skills --skill '*'
+npx skills add iannil/skills --skill init-project
+npx skills add iannil/skills --skill product-analysis-framework
+npx skills add iannil/skills --skill rc-tutor
 ```
 
 The standard installer handles the target agent layout for tools such as Claude Code, Codex CLI, Cursor, Gemini CLI, Continue, Windsurf, OpenCode, Qwen Code, and other compatible AI coding tools.
@@ -70,13 +70,13 @@ The standard installer handles the target agent layout for tools such as Claude 
 List skills:
 
 ```bash
-node bin/iannil-skills.js list
+node bin/skills.js list
 ```
 
 Run dry-run install:
 
 ```bash
-node bin/iannil-skills.js install all --dry-run
+node bin/skills.js install all --dry-run
 ```
 
 Run tests:
