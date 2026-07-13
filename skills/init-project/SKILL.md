@@ -233,8 +233,17 @@ compatibility: "bash, write, edit"
 └── Makefile                      # 含 install / build / publish 目标
 ```
 
+#### Go 项目
+
+参考 `references/templates/go-project.md` 生成。
+
+#### Java/Kotlin 项目
+
+参考 `references/templates/java-project.md` 生成。
+
 #### 其他项目类型
-对于未在上述列表中列出的项目类型（如 Go、C++、Java/Kotlin、Elixir 等），遵循以下原则自行推断生成：
+
+对于未在上述列表中列出的项目类型（C++、Elixir、Swift 等），遵循以下原则自行推断生成：
 - 该语言/框架社区的标准目录结构
 - 对应的包管理器配置文件
 - 测试目录结构
