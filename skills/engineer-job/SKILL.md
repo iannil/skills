@@ -203,6 +203,10 @@ engineer-job（主会话）
         └── → 输出完成报告
 ```
 
+> **💡 自动执行**：以上 6 阶段编排也可以通过 `run.wf.js` Workflow 脚本自动执行，
+> 无需手动调用每个子代理。详情参见 `skills/engineer-job/references/engine.md`。
+> 使用方式：`Workflow({ script: "skills/engineer-job/run.wf.js", args: { requirements, mode } })`
+
 ### 子代理约束条件
 
 1. **边界明确** — 每个子代理的工作范围严格限制在一个阶段或一个里程碑内
