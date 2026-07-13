@@ -146,6 +146,61 @@ describe('skills', () => {
     });
   });
 
+  describe('engineer-job run.wf.js workflow script', () => {
+    const wfFile = path.join(SKILL_DIR, 'engineer-job', 'run.wf.js');
+
+    it('exists', () => {
+      assert.ok(fs.existsSync(wfFile), 'engineer-job/run.wf.js should exist');
+    });
+
+    it('has no require("fs") calls', () => {
+      const content = fs.readFileSync(wfFile, 'utf-8');
+      // File I/O is delegated to sub-agents, not done in the workflow script
+      assert.ok(!content.includes("require('fs')"), 'run.wf.js must not use require("fs")');
+      assert.ok(!content.includes('require("fs")'), 'run.wf.js must not use require("fs")');
+    });
+
+    it('has no argless new Date() calls', () => {
+      const content = fs.readFileSync(wfFile, 'utf-8');
+      // new Date() without args throws in workflow scripts; use args.startedAt or counters instead
+      // Allow new Date(someArg) but not bare new Date() — check via regex
+      const matches = content.match(/new Date\(\)/g);
+      assert.ok(!matches, 'run.wf.js must not call new Date() without arguments');
+    });
+
+    it('contains the meta export block with 6 phases', () => {
+      const content = fs.readFileSync(wfFile, 'utf-8');
+      assert.ok(content.includes('export const meta = {'), 'should export meta');
+      assert.ok(content.includes("name: 'engineer-job-run'"), 'should have correct name');
+      assert.ok(content.includes("'Scaffold'"), 'should have Scaffold phase');
+      assert.ok(content.includes("'Architect'"), 'should have Architect phase');
+      assert.ok(content.includes("'Develop'"), 'should have Develop phase');
+      assert.ok(content.includes("'Integrate'"), 'should have Integrate phase');
+      assert.ok(content.includes("'Deploy'"), 'should have Deploy phase');
+      assert.ok(content.includes("'Report'"), 'should have Report phase');
+    });
+
+    it('uses agent() and phase() workflow APIs', () => {
+      const content = fs.readFileSync(wfFile, 'utf-8');
+      assert.ok(content.includes('agent('), 'should use agent() API');
+      assert.ok(content.includes('phase('), 'should use phase() API');
+      assert.ok(content.includes('log('), 'should use log() API');
+    });
+
+    it('has PHASE_RESULT schema for structured returns', () => {
+      const content = fs.readFileSync(wfFile, 'utf-8');
+      assert.ok(content.includes('PHASE_RESULT'), 'should define PHASE_RESULT');
+      assert.ok(content.includes("'DONE'"), 'schema should have DONE status');
+      assert.ok(content.includes("'BLOCKED'"), 'schema should have BLOCKED status');
+    });
+
+    it('has recovery mechanism', () => {
+      const content = fs.readFileSync(wfFile, 'utf-8');
+      assert.ok(content.includes('recovery') || content.includes('Recover'),
+        'should handle cross-session recovery');
+    });
+  });
+
   describe('engineer-workflow self-healing', () => {
     const skillFile = path.join(SKILL_DIR, 'engineer-workflow', 'SKILL.md');
 
