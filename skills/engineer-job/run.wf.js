@@ -6,7 +6,8 @@ export const meta = {
     { title: 'Requirements', detail: 'engineer-requirements deep requirement decomposition' },
     { title: 'Architect', detail: 'engineer-architect blueprint design with architecture patterns' },
     { title: 'Frontend', detail: 'engineer-frontend-architect frontend design' },
-    { title: 'Develop', detail: 'engineer-orchestrator multi-feature development' },
+    { title: 'Develop', detail: 'deterministic milestone loop (workflow + inspector per milestone)' },
+    { title: 'Run Gate', detail: 'hard build+test gate; fix loop; DOES_NOT_RUN if unfixable' },
     { title: 'Integrate', detail: 'integration testing & production readiness' },
     { title: 'Deploy', detail: 'deployment configuration generation' },
     { title: 'Report', detail: 'final report generation' },
@@ -189,6 +190,18 @@ const MILESTONE_SCHEMA = {
     },
   },
   required: ['milestones'],
+}
+
+const RUN_GATE_SCHEMA = {
+  type: 'object',
+  properties: {
+    build_ok: { type: 'boolean' },
+    test_ok: { type: 'boolean' },
+    build_command: { type: 'string' },
+    test_command: { type: 'string' },
+    output: { type: 'string' },
+  },
+  required: ['build_ok', 'test_ok'],
 }
 
 // ── Helpers ──────────────────────────────────────────────
@@ -629,6 +642,67 @@ Inspector flagged serious drift. Re-read CONTEXT.md and fix milestone ${id} "${m
 }
 
 // ═══════════════════════════════════════════════════════════
+//  Phase 4.5 — Run Gate: hard "does it build & test" gate (Component 4)
+//  Agent-driven (Workflow 沙箱禁止直接 Bash)。失败强制修复循环；
+//  修不动标 DOES_NOT_RUN，report 头条如实反映。
+
+phase('Run Gate')
+if (!isDone('run_gate')) {
+  log('Phase 4.5: run gate — build + test must pass')
+
+  const MAX_FIX = MODE === 'normal' ? 2 : 1
+  let gate = null
+  let attempts = 0
+
+  while (attempts <= MAX_FIX) {
+    attempts++
+    gate = await agent(
+      ctx('run-gate', `=== RUN GATE: BUILD + TEST ===
+Read "project-metadata.json" for language/framework.
+Determine build & test commands:
+  1. Prefer project-native config: Makefile, package.json "scripts", pyproject.toml, Cargo.toml, go.mod.
+  2. Fallback map (if none found):
+     python/fastapi/flask -> build: "pip install -e .",   test: "pytest -q"
+     node/typescript      -> build: "npm run build --if-present", test: "npm test --if-present"
+     rust                 -> build: "cargo build",         test: "cargo test"
+     go                   -> build: "go build ./...",       test: "go test ./..."
+Run BOTH commands via Bash. Capture full output.
+Return build_ok, test_ok, the commands used, and combined output (last ~2000 chars).
+${attempts > 1 ? 'Previous attempt failed. You MAY fix the code to make build+test pass before re-running.' : ''}`),
+      { schema: RUN_GATE_SCHEMA, label: 'run-gate', phase: 'Run Gate' }
+    )
+
+    if (gate && gate.build_ok && gate.test_ok) break
+    if (attempts > MAX_FIX) break
+    log(`Phase 4.5: run gate failed (attempt ${attempts}) — fix attempt ${attempts}`)
+    await agent(
+      ctx('run-gate-fix', `=== FIX BUILD/TEST FAILURES ===
+The project build or tests are failing. Fix the code until BOTH pass.
+Last failure output:
+${(gate && gate.output) || '(no output)'}
+Do NOT skip or delete tests. Make them pass. Commit the fix. Append to .agents/job.progress.md.`),
+      { schema: PHASE_RESULT, label: 'run-gate-fix', phase: 'Run Gate' }
+    )
+  }
+
+  const passed = !!(gate && gate.build_ok && gate.test_ok)
+  runGateResult = {
+    status: passed ? 'PASS' : 'DOES_NOT_RUN',
+    attempts,
+    build_command: (gate && gate.build_command) || '',
+    test_command: (gate && gate.test_command) || '',
+    last_error: passed ? null : ((gate && gate.output) || 'unknown'),
+  }
+  log(`Phase 4.5: run gate ${passed ? 'PASS' : 'DOES_NOT_RUN'} after ${attempts} attempt(s)`)
+
+  await agent(
+    ctx('persist', `Update ".agents/job.state.json": set phases.run_gate = ${JSON.stringify({ status: runGateResult.status, attempts: runGateResult.attempts })}. Do not change any other fields.`),
+    { schema: PHASE_RESULT, label: 'persist-run-gate', phase: 'Run Gate' }
+  )
+  phasesDone.add('run_gate')
+}
+
+// ═══════════════════════════════════════════════════════════
 //  Phase 5 — Integration: 集成测试 (non-blocking)
 
 phase('Integrate')
@@ -695,6 +769,12 @@ if (!isDone('report')) {
 
   const result = await agent(
     ctx('report', `=== GENERATE FINAL REPORT ===
+RUN GATE STATUS: ${runGateResult ? runGateResult.status : 'unknown'}.
+If status is DOES_NOT_RUN, the FIRST line of your report MUST be exactly:
+  ⚠️ DOES_NOT_RUN — build/test failing; project is NOT runnable.
+Do NOT claim the project is complete in that case.
+
+Development milestone summary: ${developmentSummary || '(not available)'}.
 
 Read .agents/job.state.json for full phase status.
 Read project-metadata.json for milestone definitions.
