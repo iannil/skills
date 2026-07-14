@@ -1,5 +1,7 @@
 # iannil/skills
 
+**English** | [简体中文](README.zh-CN.md)
+
 Installable AI agent skills for project initialization, product analysis, and RC (Observational Convergence) philosophical framework.
 
 This package keeps each skill in the standard `skills/<name>/SKILL.md` layout used by the broader skills ecosystem, including the `vercel-labs/skills` installer.
@@ -11,7 +13,9 @@ This package keeps each skill in the standard `skills/<name>/SKILL.md` layout us
 Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice" methodology, the complete engineering development skill chain:
 
 - `engineer-job` — **AI Project Auto-Build Engine** (P0). Meta-orchestrator that automatically executes the full project lifecycle: scaffolding → architecture design → multi-feature development → integration testing → deployment config generation. Supports `--auto` (auto-confirm) and `--silent` (silent) modes for unattended project building.
+- `engineer-requirements` — **AI Requirements Analyst**. Decomposes vague user requirements into a structured requirements document using Event Storming + DDD strategic design — bounded contexts, business events, functional dependencies, and key state machines. Outputs `REQUIREMENTS.md` for `engineer-architect` to consume. Triggers for complex, multi-module, or multi-end systems (2+ frontends or 5+ feature modules).
 - `engineer-architect` — **AI Architect** (P0). Translates vague user requirements into a structured CONTEXT.md blueprint. Automatically researches, analyzes, and proposes technical solutions, generating an executable blueprint that includes system overview, data models, API contracts, and milestone dependency tree.
+- `engineer-frontend-architect` — **AI Frontend Architect**. Detailed frontend design performed *after* the system architecture is complete. Outputs `FRONTEND-DESIGN.md` with page tree, component tree, state-management architecture, UI state machines, and design-system tokens — for multi-surface systems (Web / mini-program / mobile). Must run after `engineer-architect`; auto-triggers when a project has 2+ frontend surfaces.
 - `engineer-orchestrator` — **AI Project Orchestration Engine** (P0). Receives the project blueprint, automatically decomposes it into a feature-level task queue, invokes engineer-workflow one by one in dependency order, and manages cross-feature integration acceptance, context reset, and cross-session progress persistence.
 - `engineer-workflow` — **AI Coding Fully Automated Workflow Engine**. Takes a single feature requirement as input and automatically executes: milestone breakdown → dispatch instructions → coding → acceptance → branch decision → commit consolidation → update blueprint.
 - `engineer-coach` — **AI Coding Process Coach**. A six-step SOP guides users through AI-assisted programming: breakdown → dispatch instructions → coding → acceptance → branch decision → consolidation.
@@ -29,6 +33,44 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 - `rc-application-tool` - Apply RC to diagnose real-world problems (decisions, teams, strategy) and analyze/rewrite marketing copy.
 - `rc-philosophy-advisor` - Discuss deep philosophical questions through the RC lens and generate new RC-style aphorisms and fragments.
 - `rc-text-assistant` - Write, reference, cite, search, and translate content related to the RC philosophical framework.
+
+## Best Practices
+
+### Pick the right entry skill
+
+The engineering skills form a chain. Enter at the point that matches your situation — each skill knows how to hand off to the next:
+
+| Your situation | Start here | Produces |
+|---|---|---|
+| "Build the whole project from scratch, unattended" | `engineer-job` | full project |
+| Complex / multi-module / multi-end system, requirements still fuzzy | `engineer-requirements` | `REQUIREMENTS.md` |
+| Clear business goal, no architecture blueprint yet | `engineer-architect` | `CONTEXT.md` |
+| Architecture done, project has a frontend (esp. 2+ surfaces) | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
+| Blueprint exists, deliver the whole project feature-by-feature | `engineer-orchestrator` | integrated project |
+| One feature, end-to-end | `engineer-workflow` | shipped feature |
+| You want to drive coding yourself, with guidance | `engineer-coach` | — |
+
+`init-project` is for **scaffolding conventions only**; for a full build use `engineer-job`.
+
+### Follow the three disciplines (red lines)
+
+These are the methodology's non-negotiables — the skills enforce them, and you should too:
+
+- *no work without a blueprint* — Don't start coding before `requirements` / `architect` / `frontend-architect` have produced their design docs.
+- *no consolidation without verification* — Never commit or "consolidate" generated code before acceptance. Run `engineer-inspector` first.
+- *rebuild on chaos* — When a session turns into a tangled mess, reset context and rebuild from the persisted blueprint. Don't power through.
+
+### Install the chain, not just one skill
+
+The engineering skills are designed to compose: `requirements → architect → frontend-architect → orchestrator → workflow → inspector`. Installing only a subset can break the handoff contracts between them, so prefer installing all of them (`./install.sh` with no args).
+
+### Keep context lean
+
+These skills emit many artifacts (`CONTEXT.md`, `REQUIREMENTS.md`, `FRONTEND-DESIGN.md`, `.agents/` state). When a conversation grows long, start a fresh session and point it at the persisted blueprint/state instead of continuing in a bloated context. `engineer-advisor` can diagnose when a reset is warranted.
+
+### Accept before you advance
+
+After any generated code, review and accept (`engineer-inspector`) **before** saying "continue" or committing. Saying "continue" without review is how architecture drift compounds.
 
 ## Install
 
@@ -51,6 +93,35 @@ Preview without changing anything:
 ```bash
 npx iannil/skills install --dry-run
 ```
+
+## Local Install (offline, with auto-update)
+
+A dependency-free `install.sh` is bundled for offline install. It copies the skills into your agent's skills directory, and **overwrites on re-run — so re-running after `git pull` updates every skill to the latest copy**.
+
+```bash
+# Install/update ALL skills into Claude Code (~/.claude/skills)
+./install.sh
+
+# Install/update specific skills only
+./install.sh init-project engineer-architect
+
+# Target a different agent — or both
+./install.sh --agent codex
+./install.sh --agent all            # Claude Code + Codex
+
+# Custom directory / preview / list
+./install.sh --target ~/my/skills
+./install.sh --dry-run
+./install.sh --list
+```
+
+Update to the latest version any time:
+
+```bash
+git pull && ./install.sh
+```
+
+It works offline (no `npx`, no download), is macOS bash 3.2 compatible, and preserves the `rc-text-assistant → rc-philosophy-advisor` symlink.
 
 ## Standard Skills Installer
 
@@ -90,19 +161,23 @@ npm test
 ```text
 skills/
 ├── engineer-job/
-│   └── SKILL.md                    # P0 — 元编排引擎 / 全自动项目构建
+│   └── SKILL.md                    # P0 — meta-orchestrator / unattended full-project build
+├── engineer-requirements/
+│   └── SKILL.md                    # requirements decomposition / Event Storming + DDD
 ├── engineer-architect/
-│   └── SKILL.md                    # P0 — 需求→蓝图自动生成
+│   └── SKILL.md                    # P0 — requirements → blueprint auto-generation
+├── engineer-frontend-architect/
+│   └── SKILL.md                    # frontend detailed design / FRONTEND-DESIGN.md
 ├── engineer-orchestrator/
-│   └── SKILL.md                    # P0 — 项目级编排引擎
+│   └── SKILL.md                    # P0 — project-level orchestration engine
 ├── engineer-workflow/
-│   └── SKILL.md                    # 全自动功能开发引擎
+│   └── SKILL.md                    # fully-automated feature development engine
 ├── engineer-coach/
-│   └── SKILL.md                    # 流程教练/六步SOP
+│   └── SKILL.md                    # process coach / six-step SOP
 ├── engineer-inspector/
-│   └── SKILL.md                    # 代码架构监理
+│   └── SKILL.md                    # code architecture inspector
 ├── engineer-advisor/
-│   └── SKILL.md                    # 编码知识顾问
+│   └── SKILL.md                    # coding knowledge advisor
 ├── init-project/
 │   ├── SKILL.md
 │   └── references/
