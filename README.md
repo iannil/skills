@@ -13,6 +13,7 @@ This package keeps each skill in the standard `skills/<name>/SKILL.md` layout us
 Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice" methodology, the complete engineering development skill chain:
 
 - `engineer-job` — **AI Project Auto-Build Engine** (P0). Meta-orchestrator that automatically executes the full project lifecycle: scaffolding → architecture design → multi-feature development → integration testing → deployment config generation. Supports `--auto` (auto-confirm) and `--silent` (silent) modes for unattended project building.
+- `engineer-cloner` — **AI Reverse Site-Clone Front-End Engine**. Given an authorized target URL and a full-access account, reverse-observes the running site via `agent-browser` (login → loop-until-dry traversal → feature ledger → API/design extraction), then produces `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` plus an honest `CLONE-FIDELITY.md` (observable-exact / inferred / unobservable), and hands off to `engineer-job` for a full-lifecycle, high-precision clone. Does design-language reconstruction + modern-stack rebuild — never raw-asset copying or backend-source claims.
 - `engineer-requirements` — **AI Requirements Analyst**. Decomposes vague user requirements into a structured requirements document using Event Storming + DDD strategic design — bounded contexts, business events, functional dependencies, and key state machines. Outputs `REQUIREMENTS.md` for `engineer-architect` to consume. Triggers for complex, multi-module, or multi-end systems (2+ frontends or 5+ feature modules).
 - `engineer-architect` — **AI Architect** (P0). Translates vague user requirements into a structured CONTEXT.md blueprint. Automatically researches, analyzes, and proposes technical solutions, generating an executable blueprint that includes system overview, data models, API contracts, and milestone dependency tree.
 - `engineer-frontend-architect` — **AI Frontend Architect**. Detailed frontend design performed *after* the system architecture is complete. Outputs `FRONTEND-DESIGN.md` with page tree, component tree, state-management architecture, UI state machines, and design-system tokens — for multi-surface systems (Web / mini-program / mobile). Must run after `engineer-architect`; auto-triggers when a project has 2+ frontend surfaces.
@@ -43,6 +44,7 @@ The engineering skills form a chain. Enter at the point that matches your situat
 | Your situation | Start here | Produces |
 |---|---|---|
 | "Build the whole project from scratch, unattended" | `engineer-job` | full project |
+| Clone an existing running site you're authorized to rebuild | `engineer-cloner` | three docs → `engineer-job` |
 | Complex / multi-module / multi-end system, requirements still fuzzy | `engineer-requirements` | `REQUIREMENTS.md` |
 | Clear business goal, no architecture blueprint yet | `engineer-architect` | `CONTEXT.md` |
 | Architecture done, project has a frontend (esp. 2+ surfaces) | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
