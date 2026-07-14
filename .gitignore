@@ -8,3 +8,6 @@ coverage/
 !.env.example
 .idea/
 .vscode/
+
+# Skill eval/benchmark scratch output
+skills/*-workspace/
