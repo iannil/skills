@@ -8,7 +8,7 @@ description: >
   TRIGGERS: 项目包含前端界面且需要详细前端设计时触发。
   当项目有多个前端端（2+）时自动触发。
   也触发于用户说"设计前端""前端架构""前端设计""页面设计"。
-compatibility: "read, write, edit"
+compatibility: "bash, read, write, edit"
 ---
 
 # engineer-frontend-architect — AI 前端架构师 / AI Frontend Architect

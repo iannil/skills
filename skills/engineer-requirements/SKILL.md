@@ -10,7 +10,7 @@ description: >
   "帮我分析需求""需求拆解""梳理需求""先做需求分析"。
   当用户提供的是完整业务领域描述（而非单功能需求）时。
   当 engineer-architect 检测到需求复杂度较高时自动推荐触发。
-compatibility: "read, write, edit"
+compatibility: "bash, read, write, edit"
 ---
 
 # engineer-requirements — AI 需求分析师 / AI Requirements Analyst
