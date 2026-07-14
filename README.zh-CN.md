@@ -13,6 +13,7 @@
 基于"实现规划驱动的 AI 辅助编程实战"方法论，构成完整的工程开发技能链：
 
 - `engineer-job` — **AI 项目全自动构建引擎**（P0）。元编排引擎，自动执行完整项目生命周期：脚手架 → 架构设计 → 多功能开发 → 集成验收 → 部署配置生成。支持 `--auto`（自动确认）与 `--silent`（静默）模式，实现无人值守的项目构建。
+- `engineer-cloner` — **AI 逆向站点克隆前置引擎**。给定授权的目标站点地址与完整权限账号，经 `agent-browser` 逆向观测线上站点（登录 → loop-until-dry 遍历 → 功能账本 → API/设计提取），产出 `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` 与诚实的 `CLONE-FIDELITY.md`（可观测精确 / 推断 / 不可观测），再交棒 `engineer-job` 完成全功能、全生命周期、高精度克隆。做设计语言重建 + 现代栈重建，不拷贝原始资产、不声称复制后端源码。
 - `engineer-requirements` — **AI 需求分析师**。基于 Event Storming + DDD 战略设计方法论，将模糊的用户需求深度拆解为结构化需求文档——识别有界上下文、业务事件、功能依赖与关键状态机。输出 `REQUIREMENTS.md` 供 `engineer-architect` 使用。当系统复杂、多模块或多端（2 个以上前端端或 5 个以上功能模块）时触发。
 - `engineer-architect` — **AI 架构师**（P0）。将模糊的用户需求转化为结构化的 CONTEXT.md 蓝图。自动调研、分析并提议技术方案，生成可执行的架构蓝图，包含系统全景、数据模型、API 契约与里程碑依赖树。
 - `engineer-frontend-architect` — **AI 前端架构师**。在系统架构完成*之后*进行的前端详细设计。输出 `FRONTEND-DESIGN.md`，包含页面树、组件树、状态管理架构、UI 状态机与设计系统 Token——适用于多端系统（Web / 小程序 / 移动端）。必须在 `engineer-architect` 之后执行；当项目有 2 个以上前端端时自动触发。
@@ -43,6 +44,7 @@
 | 你的处境 | 从这里开始 | 产出 |
 |---|---|---|
 | "从零一气呵成做完整个项目，无人值守" | `engineer-job` | 完整项目 |
+| 克隆一个你有权重建的线上站点 | `engineer-cloner` | 三文档 → `engineer-job` |
 | 复杂 / 多模块 / 多端系统，需求仍模糊 | `engineer-requirements` | `REQUIREMENTS.md` |
 | 业务目标清晰，但还没有架构蓝图 | `engineer-architect` | `CONTEXT.md` |
 | 架构已完成，项目有前端（尤其 2 个以上端） | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
