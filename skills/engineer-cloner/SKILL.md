@@ -126,7 +126,7 @@ compatibility: "agent, bash, write, edit, read"
 |:----:|:-----|:-----------|:---------|
 | 0 | **授权与范围** | 目标 URL + 账号 → 授权确认 + 范围清单 | 确认合法授权；划定 do-not-clone 边界；界定站点范围与账号权限 |
 | 1 | **侦察** | 授权范围 → 站点指纹 | 匿名踩点：技术栈指纹、路由发现、公开页面结构，写入账本初始节点 |
-| 2 | **登录全站遍历** | 站点指纹 + 账号 → 覆盖账本 | 登录后 loop-until-dry 遍历所有路由/视图/交互/状态，截图取证，账本去干 |
+| 2 | **登录全站遍历** | 站点指纹 + 账号 → 覆盖账本 | 登录后 loop-until-dry 遍历所有路由/视图/交互/状态，截图取证，账本跑干 |
 | 3 | **契约与数据模型提取** | 覆盖账本 → API 契约 + 数据模型 | 抓取网络请求/响应，提取客户端可见契约，反推数据模型，标注保真度层级 |
 | 4 | **设计语言提取** | 覆盖账本 + 截图 → 设计令牌 | 提取色彩/排版/间距/组件/布局/动效，重建设计语言（非资产拷贝） |
 | 5 | **三文档合成** | 以上全部 → 三文档 + 保真度报告 | 合成 REQUIREMENTS.md / CONTEXT.md / FRONTEND-DESIGN.md + CLONE-FIDELITY.md |
@@ -141,7 +141,7 @@ Phase 0  scope           目标 URL + 账号 + 授权 + do-not-clone 边界
 Phase 1  fingerprint     技术栈指纹 + 路由种子  ─┐
    │                                            │ 写入
    ▼                                            ▼
-Phase 2  ledger          .agents/clone.ledger.json（loop-until-dry 去干）
+Phase 2  ledger          .agents/clone.ledger.json（loop-until-dry 跑干）
    │                     .agents/clone.observations/（截图/HAR/DOM 取证）
    ▼
 Phase 3  contracts       客户端可见 API 契约 + 推断数据模型（标层级）
@@ -162,30 +162,30 @@ Phase 6  build + accept  engineer-job 构建 → 重建视图 ⇄ Phase 2 截图
 ### loop-until-dry 遍历（阶段 2 核心）
 
 ```
-# Phase 2 的核心循环：反复遍历，直到账本"去干"（不再新增未观测节点）
+# Phase 2 的核心循环：反复遍历，直到账本"跑干"（不再新增未观测节点）
 seed_frontier ← Phase 1 发现的路由种子
-将 seed_frontier 全部写入 ledger（status = "discovered"）
+将 seed_frontier 全部写入 ledger（coverage_status = "discovered"）
 
 repeat:
     new_nodes ← 0
-    for each node in ledger where status == "discovered":
+    for each node in ledger where coverage_status == "discovered":
         用 agent-browser 打开该 node（登录态）
         截图 + 抓 HAR + 记录 DOM 关键结构 → .agents/clone.observations/
         标注保真度层级（可观测精确 / 推断 / 不可观测）
         发现的子路由 / 交互 / 状态 / 表单 / 空态与错误态:
             if 未在 ledger 中:
-                加入 ledger（status = "discovered"）
+                加入 ledger（coverage_status = "discovered"）
                 new_nodes += 1
-        将该 node 置为 status = "explored"
+        将该 node 置为 coverage_status = "explored"
 
     # coverage critic 复查
     critic 追问：还有哪些入口 / 状态机分支 / 分页 / 权限视图 / 空态没走到？
-    critic 发现的遗漏节点写入 ledger（status = "discovered"）
+    critic 发现的遗漏节点写入 ledger（coverage_status = "discovered"）
     new_nodes += critic 新增数
 
-until new_nodes == 0        # 账本去干：无新增未观测节点
+until new_nodes == 0        # 账本跑干：无新增未观测节点
 
-assert 每个 node 都有 status == "explored" 且带保真度层级
+assert 每个 node 都有 coverage_status == "explored" 且带保真度层级
 ```
 
 ### 阶段 0: 授权与范围 / Authorization & Scope
@@ -197,12 +197,12 @@ assert 每个 node 都有 status == "explored" 且带保真度层级
 ### 阶段 1: 侦察 / Reconnaissance
 
 **动作**：匿名（未登录）踩点——技术栈指纹识别、公开路由发现、站点结构初探，生成路由种子。
-**输出**：站点指纹 + 路由种子，作为账本初始节点（status = "discovered"）。
+**输出**：站点指纹 + 路由种子，作为账本初始节点（coverage_status = "discovered"）。
 **参考**：观测方法见 `references/observation-playbook.md`；账本结构见 `references/coverage-ledger.schema.json`。
 
 ### 阶段 2: 登录全站遍历 / Authenticated Full-Site Traversal
 
-**动作**：用 `agent-browser` 以授权账号登录，执行上文 loop-until-dry 遍历，逐节点截图 / 抓 HAR / 记录 DOM，coverage critic 复查遗漏，直到账本去干。
+**动作**：用 `agent-browser` 以授权账号登录，执行上文 loop-until-dry 遍历，逐节点截图 / 抓 HAR / 记录 DOM，coverage critic 复查遗漏，直到账本跑干。
 **输出**：完整覆盖账本 + `.agents/clone.observations/` 取证目录，每节点带保真度层级。
 **参考**：`references/observation-playbook.md`（遍历策略、SPA 路由处理、状态取证）；`references/coverage-ledger.schema.json`（账本 schema）。
 
@@ -271,7 +271,7 @@ Workflow({
 | **未获授权 / 授权存疑** | 停在 Phase 0，不做任何带凭据访问。明确告知需要合法授权才能继续 |
 | **反爬 / 验证码阻断** | 切换半自动：由用户人工过验证码/登录，agent-browser 复用其会话继续观测；在账本记录该节点为"半自动获取" |
 | **支付 / 第三方 SaaS 页面** | 标 `不可观测`，用 mock/占位实现，绝不镜像真实支付流或第三方内部 |
-| **会话中断（超时/掉线）** | 从 `.agents/clone.ledger.json` 恢复：跳过 status == "explored" 的节点，从 "discovered" 继续遍历 |
+| **会话中断（超时/掉线）** | 从 `.agents/clone.ledger.json` 恢复：跳过 coverage_status == "explored" 的节点，从 "discovered" 继续遍历 |
 | **契约只见 2xx（错误态未触发）** | 无法观测的错误状态标 `推断`，在契约中标注"错误体为推断形状"，构建时按推断实现并在 CLONE-FIDELITY.md 说明 |
 | **SPA 路由（无独立 URL）** | 用"点击序列键"（click-sequence key）作为账本节点标识，记录到达该视图的交互路径，而非依赖 URL |
 | **受版权保护的媒体资产** | 用占位资产替代（尺寸/位置/角色一致），标 `不可观测`；重建设计语言而非拷贝原始媒体 |

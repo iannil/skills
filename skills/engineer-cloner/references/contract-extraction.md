@@ -79,7 +79,7 @@ Collapse the variable ID segment into `:id` so repeated detail hits fold into on
 
 ### 单条契约输出格式 / Per-contract output shape
 
-```markdown
+~~~markdown
 #### `POST /api/v1/orders`
 
 - **auth**: Cookie `session`（`可观测精确`）；服务端会话校验逻辑（`推断`）
@@ -99,7 +99,7 @@ Collapse the variable ID segment into `:id` so repeated detail hits fold into on
   | 400 | 请求体校验失败 | 错误体形状为推断，按同域 `400` 封套 |
   | 401 | 会话失效 | 遍历中偶发观测到 → 若抓到则升 `可观测精确` |
   | 409 | 库存冲突 | 纯推断，服务端约束不可观测 |
-```
+~~~
 
 ---
 
