@@ -176,7 +176,7 @@ repeat:
             if 未在 ledger 中:
                 加入 ledger（status = "discovered"）
                 new_nodes += 1
-        将该 node 置为 status = "observed"
+        将该 node 置为 status = "explored"
 
     # coverage critic 复查
     critic 追问：还有哪些入口 / 状态机分支 / 分页 / 权限视图 / 空态没走到？
@@ -185,7 +185,7 @@ repeat:
 
 until new_nodes == 0        # 账本去干：无新增未观测节点
 
-assert 每个 node 都有 status == "observed" 且带保真度层级
+assert 每个 node 都有 status == "explored" 且带保真度层级
 ```
 
 ### 阶段 0: 授权与范围 / Authorization & Scope
@@ -271,7 +271,7 @@ Workflow({
 | **未获授权 / 授权存疑** | 停在 Phase 0，不做任何带凭据访问。明确告知需要合法授权才能继续 |
 | **反爬 / 验证码阻断** | 切换半自动：由用户人工过验证码/登录，agent-browser 复用其会话继续观测；在账本记录该节点为"半自动获取" |
 | **支付 / 第三方 SaaS 页面** | 标 `不可观测`，用 mock/占位实现，绝不镜像真实支付流或第三方内部 |
-| **会话中断（超时/掉线）** | 从 `.agents/clone.ledger.json` 恢复：跳过 status == "observed" 的节点，从 "discovered" 继续遍历 |
+| **会话中断（超时/掉线）** | 从 `.agents/clone.ledger.json` 恢复：跳过 status == "explored" 的节点，从 "discovered" 继续遍历 |
 | **契约只见 2xx（错误态未触发）** | 无法观测的错误状态标 `推断`，在契约中标注"错误体为推断形状"，构建时按推断实现并在 CLONE-FIDELITY.md 说明 |
 | **SPA 路由（无独立 URL）** | 用"点击序列键"（click-sequence key）作为账本节点标识，记录到达该视图的交互路径，而非依赖 URL |
 | **受版权保护的媒体资产** | 用占位资产替代（尺寸/位置/角色一致），标 `不可观测`；重建设计语言而非拷贝原始媒体 |
