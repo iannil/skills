@@ -180,6 +180,15 @@ describe('skills', () => {
       assert.ok(content.includes("'Report'"), 'should have Report phase');
     });
 
+    it('has a POC phase with skip/stop switches wired to engineer-poc', () => {
+      const content = fs.readFileSync(wfFile, 'utf-8');
+      assert.ok(content.includes("'POC'"), 'meta should include the POC phase');
+      assert.ok(content.includes('skip_poc'), 'should support args.skip_poc');
+      assert.ok(content.includes('stop_at_poc'), 'should support args.stop_at_poc');
+      assert.ok(content.includes('engineer-poc'), 'should dispatch the engineer-poc agent');
+      assert.ok(content.includes('POC-MANIFEST.md'), 'orchestrate should be POC-aware via POC-MANIFEST.md');
+    });
+
     it('uses agent() and phase() workflow APIs', () => {
       const content = fs.readFileSync(wfFile, 'utf-8');
       assert.ok(content.includes('agent('), 'should use agent() API');

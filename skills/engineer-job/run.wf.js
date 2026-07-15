@@ -6,6 +6,7 @@ export const meta = {
     { title: 'Requirements', detail: 'engineer-requirements deep requirement decomposition' },
     { title: 'Architect', detail: 'engineer-architect blueprint design with architecture patterns' },
     { title: 'Frontend', detail: 'engineer-frontend-architect frontend design' },
+    { title: 'POC', detail: 'engineer-poc high-fidelity clickable prototype (skippable via skip_poc / stoppable via stop_at_poc)' },
     { title: 'Develop', detail: 'deterministic milestone loop (workflow + inspector per milestone)' },
     { title: 'Run Gate', detail: 'hard build+test gate; fix loop; DOES_NOT_RUN if unfixable' },
     { title: 'Integrate', detail: 'integration testing & production readiness' },
@@ -125,6 +126,12 @@ const detected = detectComplexity(REQUIREMENTS)
 const skip_requirements = args.skip_requirements != null ? !!args.skip_requirements : detected.skip_requirements
 const skip_frontend = args.skip_frontend != null ? !!args.skip_frontend : detected.skip_frontend
 const isSimpleProject = skip_requirements || skip_frontend
+
+// ── POC gating (Phase 3.5) ───────────────────────────────
+// POC runs by default when the project has a frontend; skip_poc opts out,
+// stop_at_poc halts the pipeline after POC (no orchestrate/run-gate/integrate/deploy).
+const skip_poc = args.skip_poc != null ? !!args.skip_poc : false
+const stop_at_poc = !!args.stop_at_poc
 
 log(`Complexity: ${detected.detected_complexity} | has_frontend=${detected.has_frontend} | skip_requirements=${skip_requirements} | skip_frontend=${skip_frontend} (${detected.complexity_reasoning})`)
 
@@ -304,7 +311,7 @@ Create the .agents/ directory and write job.state.json:
   "project": "${PROJECT_NAME}",
   "job_version": "2.0",
   "mode": "${MODE}",
-  "phases": { "init": { "status": "DONE" }, "requirements": { "status": "TODO" }, "architect": { "status": "TODO" }, "frontend": { "status": "TODO" }, "development": { "status": "TODO" }, "finalize": { "status": "TODO" }, "deploy": { "status": "TODO" }, "report": { "status": "TODO" } },
+  "phases": { "init": { "status": "DONE" }, "requirements": { "status": "TODO" }, "architect": { "status": "TODO" }, "frontend": { "status": "TODO" }, "poc": { "status": "TODO" }, "development": { "status": "TODO" }, "finalize": { "status": "TODO" }, "deploy": { "status": "TODO" }, "report": { "status": "TODO" } },
   "checkpoint": { "last_phase": "init", "next_action": "start requirements phase", "session_summary": "Project scaffolded" }
 }
 
@@ -522,12 +529,70 @@ Return structured result.`),
 }
 
 // ═══════════════════════════════════════════════════════════
+//  Phase 3.5 — engineer-poc: 高保真 POC（可跳过 / 可停留 / 可继续）
+//  Input:  REQUIREMENTS.md + FRONTEND-DESIGN.md (+ CONTEXT.md) on disk
+//  Output: 可运行前端 POC + .agents/poc.ledger.json + POC-MANIFEST.md + POC-FIDELITY.md
+//  Gate:   runs only when project has a frontend and skip_poc is false.
+// ═══════════════════════════════════════════════════════════
+
+phase('POC')
+const runPoc = !skip_frontend && !skip_poc
+if (runPoc && !isDone('poc')) {
+  log('Phase 3.5: engineer-poc — high-fidelity clickable prototype')
+
+  let result = await agent(
+    ctx('engineer-poc', `=== HIGH-FIDELITY POC GENERATION ===
+
+Read "REQUIREMENTS.md" and "FRONTEND-DESIGN.md" from disk (and "CONTEXT.md" if present for data models/contracts).
+
+Build a runnable, PURE-FRONTEND, EVOLUTIONARY POC:
+1. Identify the industry from REQUIREMENTS.md; apply skills/engineer-poc/references/industry-patterns.md conventions.
+2. Scaffold the frontend using FRONTEND-DESIGN.md tech stack (default Vite + React if unspecified); wire design tokens, routing, and a swappable mock-adapter seam (src/mocks/, per mock-layer-guide.md).
+3. Build a coverage ledger ".agents/poc.ledger.json" enumerating every page/component/state/flow (coverage_status=planned).
+4. Implement every page with ALL UI states (loading/empty/error/normal/edge) + mock data + interactions; loop-until-dry with a coverage critic until the ledger is dry.
+5. Wire cross-page flows, mock auth/roles, in-memory persistence, realistic seed data. Build + dev-server start MUST pass.
+6. Write "POC-MANIFEST.md" (pages/components/routes/mock-endpoints + mock→real evolution map) and "POC-FIDELITY.md" (per-asset 真实交互 / mock 数据 / 占位未实现).
+Label payment / third-party / pure-server logic as 占位未实现 — never fake real external services.
+
+Update ".agents/job.state.json" poc phase to DONE. Append to ".agents/job.progress.md".
+Return structured result.`),
+    { schema: PHASE_RESULT, label: 'engineer-poc', phase: 'POC' }
+  )
+
+  if (result?.status === 'BLOCKED') {
+    log('Phase 3.5 failed, retrying once...')
+    result = await agent(
+      `Retry: engineer-poc. Generate at minimum a runnable frontend POC covering the main pages with mock data, plus POC-MANIFEST.md and POC-FIDELITY.md.`,
+      { schema: PHASE_RESULT, label: 'poc-retry', phase: 'POC' }
+    )
+  }
+
+  if (!result || result.status === 'BLOCKED') {
+    await agent(
+      `Generate a minimal clickable POC of the core pages with mock data + POC-MANIFEST.md + POC-FIDELITY.md. Mark as degraded.`,
+      { schema: PHASE_RESULT, label: 'poc-degrade', phase: 'POC' }
+    )
+    log('Phase 3.5 degraded: minimal POC generated')
+  } else {
+    log('Phase 3.5 complete: POC generated')
+  }
+
+  phasesDone.add('poc')
+
+  if (stop_at_poc) {
+    log('stop_at_poc=true — halting after POC; skipping develop/run-gate/integrate/deploy, proceeding to report.')
+  }
+} else {
+  log(`Phase 3.5 skipped (skip_poc=${skip_poc}, has_frontend=${!skip_frontend})`)
+}
+
+// ═══════════════════════════════════════════════════════════
 //  Phase 4 — engineer-orchestrator: 多功能编排开发（增强版）
 //  Input:  CONTEXT.md + FRONTEND-DESIGN.md + project-metadata.json (on disk)
 //  Output: .agents/progress.json + completed code
 
 phase('Develop')
-if (!isDone('development')) {
+if (!isDone('development') && !stop_at_poc) {
   log('Phase 4: extracting milestone DAG from CONTEXT.md')
 
   const extracted = await agent(
@@ -541,6 +606,7 @@ Read "CONTEXT.md" from disk. Extract the milestone/feature list as structured da
 - frontend: true if this milestone is primarily frontend work
 If CONTEXT.md has no milestone section, return a single milestone:
   [{id:"M1", name:"implement-all", deps:[], description:"implement the whole project per CONTEXT.md", acceptance:"build and tests pass", frontend:false}]
+If "POC-MANIFEST.md" exists on disk, the frontend POC is the starting point — frontend milestones should EVOLVE the POC's mock layer into real implementation (swap the mock adapter per the evolution map) rather than rebuild pages from scratch.
 Return ONLY the structured milestones.`),
     { schema: MILESTONE_SCHEMA, label: 'milestone-extract', phase: 'Develop' }
   )
@@ -588,6 +654,7 @@ Return ONLY the structured milestones.`),
     let res = await agent(
       ctx('engineer-workflow', `=== EXECUTE MILESTONE ${id}: ${m.name} ===
 Read "CONTEXT.md" from disk for the blueprint.
+If this is a frontend milestone and "POC-MANIFEST.md" exists, build on the existing POC: replace mock-adapter calls with real implementations per the manifest's evolution map instead of rewriting the UI.
 Implement milestone ${id} "${m.name}":
 Description: ${m.description}
 Acceptance: ${m.acceptance || '(per CONTEXT.md)'}
@@ -653,7 +720,7 @@ Inspector flagged serious drift. Re-read CONTEXT.md and fix milestone ${id} "${m
 //  修不动标 DOES_NOT_RUN，report 头条如实反映。
 
 phase('Run Gate')
-if (!isDone('run_gate')) {
+if (!isDone('run_gate') && !stop_at_poc) {
   log('Phase 4.5: run gate — build + test must pass')
 
   const MAX_FIX = MODE === 'normal' ? 2 : 1
@@ -712,7 +779,7 @@ Do NOT skip or delete tests. Make them pass. Commit the fix. Append to .agents/j
 //  Phase 5 — Integration: 集成测试 (non-blocking)
 
 phase('Integrate')
-if (!isDone('finalize')) {
+if (!isDone('finalize') && !stop_at_poc) {
   log('Phase 5: integration testing')
 
   const result = await agent(
@@ -741,7 +808,7 @@ Return structured results with pass/fail per check, and any issues.`),
 //  Phase 6 — Deploy: 部署配置 (non-blocking)
 
 phase('Deploy')
-if (!isDone('deploy')) {
+if (!isDone('deploy') && !stop_at_poc) {
   log('Phase 6: deployment configuration')
 
   const result = await agent(
@@ -814,6 +881,6 @@ Return the report text in the "report" field of the result.`),
 // ═══════════════════════════════════════════════════════════
 //  Completion
 
-log(`All ${isSimpleProject ? '6' : '8'} phases completed. Project build finished.`)
+log(`All phases completed${stop_at_poc ? ' (stopped at POC)' : ''}. Mode: ${MODE}.`)
 log(`Mode: ${MODE}`)
 log(`Phases completed: ${[...phasesDone].filter(Boolean).join(', ')}`)
