@@ -114,6 +114,8 @@ Workflow({
     projectName: "<项目名>",
     skip_requirements: false,  // 简单项目设为 true
     skip_frontend: false,      // 无前端界面时设为 true
+    skip_poc: false,           // 跳过 POC 阶段（默认 false；无前端自动跳过）
+    stop_at_poc: false,        // 工程停在 POC，不进入正式实现
   }
 })
 ```
@@ -228,6 +230,7 @@ graph TD
 | 1 | requirements | `engineer-requirements` | project-metadata.json → REQUIREMENTS.md | 重试 1 次，失败则降级最小需求 |
 | 2 | architect | `engineer-architect` | project-metadata.json + REQUIREMENTS.md → CONTEXT.md | 重试 1 次，失败则降级骨架蓝图 |
 | 3 | frontend | `engineer-frontend-architect` | CONTEXT.md + REQUIREMENTS.md → FRONTEND-DESIGN.md | 重试 1 次，失败则降级最小设计 |
+| 3.5 | poc | `engineer-poc` | REQUIREMENTS.md + FRONTEND-DESIGN.md → 可运行 POC + POC-MANIFEST.md + POC-FIDELITY.md | 重试 1 次，失败则降级最小 POC；无前端或 skip_poc 时跳过 |
 | 4 | orchestrate | `engineer-orchestrator` + `engineer-workflow` × N | 蓝图 + 前端设计 → 完整代码 | 里程碑级自动自愈 |
 | 4.5 | run gate | 内置运行门禁 | 代码 → build+test 通过 | 失败强制修复循环；修不动标 DOES_NOT_RUN |
 | 5 | integrate | 内置集成测试 | 代码 → 测试报告 | 记录失败，不阻塞 |
@@ -247,6 +250,8 @@ FRONTEND-DESIGN.md ← Phase 3 (前端设计)
     ↓ 编排器/工作流读取
 工程代码
 ```
+
+**可选 POC 阶段（Phase 3.5）**：在 frontend 之后、orchestrate 之前，`engineer-poc` 可生成高保真纯前端 POC，产出 `POC-MANIFEST.md`（供 Phase 4 演进消费）与 `POC-FIDELITY.md`。默认对有前端的项目生成（`skip_poc=false`）；`stop_at_poc=true` 时工程停在 POC；`skip_poc=true` 或无前端时跳过。Phase 4 orchestrate 读取 `POC-MANIFEST.md` 时做**演进**（替换 mock 层）而非重建。
 
 **各文档职责**：
 - **REQUIREMENTS.md**: 回答"要做什么"——角色旅程、功能清单、状态机、验收条件
