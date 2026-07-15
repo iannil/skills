@@ -81,3 +81,13 @@ describe('engineer-poc references', () => {
     assert.ok(schema.properties.nodes, 'schema has nodes property');
   });
 });
+
+describe('engineer-poc README registration', () => {
+  const ROOT = path.join(__dirname, '..');
+  for (const f of ['README.md', 'README.zh-CN.md']) {
+    it(`${f} registers engineer-poc`, () => {
+      const content = fs.readFileSync(path.join(ROOT, f), 'utf-8');
+      assert.ok(content.includes('engineer-poc'), `${f} should mention engineer-poc`);
+    });
+  }
+});

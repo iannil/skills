@@ -18,6 +18,7 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 - `engineer-requirements` — **AI Requirements Analyst**. Decomposes vague user requirements into a structured requirements document using Event Storming + DDD strategic design — bounded contexts, business events, functional dependencies, and key state machines. Outputs `REQUIREMENTS.md` for `engineer-architect` to consume. Triggers for complex, multi-module, or multi-end systems (2+ frontends or 5+ feature modules).
 - `engineer-architect` — **AI Architect** (P0). Translates vague user requirements into a structured CONTEXT.md blueprint. Automatically researches, analyzes, and proposes technical solutions, generating an executable blueprint that includes system overview, data models, API contracts, and milestone dependency tree.
 - `engineer-frontend-architect` — **AI Frontend Architect**. Detailed frontend design performed *after* the system architecture is complete. Outputs `FRONTEND-DESIGN.md` with page tree, component tree, state-management architecture, UI state machines, and design-system tokens — for multi-surface systems (Web / mini-program / mobile). Must run after `engineer-architect`; auto-triggers when a project has 2+ frontend surfaces.
+- `engineer-poc` — **AI High-Fidelity POC Engine**. Turns requirements into a runnable, **pure-frontend, evolutionary** prototype: reads `REQUIREMENTS.md` + `FRONTEND-DESIGN.md` (+ `CONTEXT.md`), identifies the industry and applies a built-in pattern library, then builds every page with all UI states (loading/empty/error/normal/edge) on a swappable mock-adapter seam — full-function coverage guaranteed by a `.agents/poc.ledger.json` + loop-until-dry + coverage critic. Outputs `POC-MANIFEST.md` (mock→real evolution map) and an honest `POC-FIDELITY.md` (`真实交互` / `mock 数据` / `占位未实现`). Slots into `engineer-job` as optional Phase 3.5 — the project can **stop at the POC**, **skip it**, or **continue** as Phase 4 evolves the mock layer into a real backend. No backend required.
 - `engineer-orchestrator` — **AI Project Orchestration Engine** (P0). Receives the project blueprint, automatically decomposes it into a feature-level task queue, invokes engineer-workflow one by one in dependency order, and manages cross-feature integration acceptance, context reset, and cross-session progress persistence.
 - `engineer-workflow` — **AI Coding Fully Automated Workflow Engine**. Takes a single feature requirement as input and automatically executes: milestone breakdown → dispatch instructions → coding → acceptance → branch decision → commit consolidation → update blueprint.
 - `engineer-coach` — **AI Coding Process Coach**. A six-step SOP guides users through AI-assisted programming: breakdown → dispatch instructions → coding → acceptance → branch decision → consolidation.
@@ -50,6 +51,7 @@ The engineering skills form a chain. Enter at the point that matches your situat
 | Complex / multi-module / multi-end system, requirements still fuzzy | `engineer-requirements` | `REQUIREMENTS.md` |
 | Clear business goal, no architecture blueprint yet | `engineer-architect` | `CONTEXT.md` |
 | Architecture done, project has a frontend (esp. 2+ surfaces) | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
+| Want a high-fidelity clickable prototype before real implementation | `engineer-poc` | runnable pure-frontend POC + `POC-MANIFEST.md` → `engineer-job` |
 | Blueprint exists, deliver the whole project feature-by-feature | `engineer-orchestrator` | integrated project |
 | One feature, end-to-end | `engineer-workflow` | shipped feature |
 | You want to drive coding yourself, with guidance | `engineer-coach` | — |
@@ -172,6 +174,9 @@ skills/
 │   └── SKILL.md                    # P0 — requirements → blueprint auto-generation
 ├── engineer-frontend-architect/
 │   └── SKILL.md                    # frontend detailed design / FRONTEND-DESIGN.md
+├── engineer-poc/
+│   ├── SKILL.md                    # high-fidelity pure-frontend POC engine / optional Phase 3.5
+│   └── references/                 # industry-patterns, poc-ledger schema, mock-layer guide, templates, pipeline
 ├── engineer-orchestrator/
 │   └── SKILL.md                    # P0 — project-level orchestration engine
 ├── engineer-workflow/

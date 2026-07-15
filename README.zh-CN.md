@@ -18,6 +18,7 @@
 - `engineer-requirements` — **AI 需求分析师**。基于 Event Storming + DDD 战略设计方法论，将模糊的用户需求深度拆解为结构化需求文档——识别有界上下文、业务事件、功能依赖与关键状态机。输出 `REQUIREMENTS.md` 供 `engineer-architect` 使用。当系统复杂、多模块或多端（2 个以上前端端或 5 个以上功能模块）时触发。
 - `engineer-architect` — **AI 架构师**（P0）。将模糊的用户需求转化为结构化的 CONTEXT.md 蓝图。自动调研、分析并提议技术方案，生成可执行的架构蓝图，包含系统全景、数据模型、API 契约与里程碑依赖树。
 - `engineer-frontend-architect` — **AI 前端架构师**。在系统架构完成*之后*进行的前端详细设计。输出 `FRONTEND-DESIGN.md`，包含页面树、组件树、状态管理架构、UI 状态机与设计系统 Token——适用于多端系统（Web / 小程序 / 移动端）。必须在 `engineer-architect` 之后执行；当项目有 2 个以上前端端时自动触发。
+- `engineer-poc` — **AI 高保真 POC 生成引擎**。把需求变成可运行的**纯前端演进式**原型：读取 `REQUIREMENTS.md` + `FRONTEND-DESIGN.md`（+ `CONTEXT.md`），识别行业并套用内置模式库，在可替换的 mock 数据接缝上把每个页面的全 UI 状态（loading/empty/error/normal/edge）做出来——全功能覆盖由 `.agents/poc.ledger.json` + loop-until-dry + coverage critic 保证。产出 `POC-MANIFEST.md`（mock→真实演进映射）与诚实的 `POC-FIDELITY.md`（`真实交互` / `mock 数据` / `占位未实现`）。作为 `engineer-job` 的可选 Phase 3.5 接入——工程可**停在 POC**、可**跳过**、也可**接着** Phase 4 把 mock 层演进为真实后端。无需后端。
 - `engineer-orchestrator` — **AI 项目编排引擎**（P0）。接收项目蓝图，自动分解为功能级任务队列，按依赖顺序逐一调用 engineer-workflow，并管理跨功能集成验收、上下文重置与跨会话进度持久化。
 - `engineer-workflow` — **AI 编码全自动工作流引擎**。以单个功能需求为输入，自动执行：里程碑拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 提交固化 → 更新蓝图。
 - `engineer-coach` — **AI 编码流程教练**。以六步 SOP 引导用户完成 AI 辅助编程：拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 固化。
@@ -50,6 +51,7 @@
 | 复杂 / 多模块 / 多端系统，需求仍模糊 | `engineer-requirements` | `REQUIREMENTS.md` |
 | 业务目标清晰，但还没有架构蓝图 | `engineer-architect` | `CONTEXT.md` |
 | 架构已完成，项目有前端（尤其 2 个以上端） | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
+| 正式实现前想先要一个高保真可点击原型 | `engineer-poc` | 可运行纯前端 POC + `POC-MANIFEST.md` → `engineer-job` |
 | 蓝图已就绪，按功能逐个交付整个项目 | `engineer-orchestrator` | 集成后的项目 |
 | 单个功能，端到端完成 | `engineer-workflow` | 上线的功能 |
 | 你想自己驱动编码，仅需引导 | `engineer-coach` | — |
@@ -172,6 +174,9 @@ skills/
 │   └── SKILL.md                    # P0 — 需求→蓝图自动生成
 ├── engineer-frontend-architect/
 │   └── SKILL.md                    # 前端详细设计 / FRONTEND-DESIGN.md
+├── engineer-poc/
+│   ├── SKILL.md                    # 高保真纯前端 POC 引擎 / 可选 Phase 3.5
+│   └── references/                 # 行业模式库、账本 schema、mock 层规范、模板、流水线
 ├── engineer-orchestrator/
 │   └── SKILL.md                    # P0 — 项目级编排引擎
 ├── engineer-workflow/
