@@ -1,6 +1,6 @@
 export const meta = {
   name: 'engineer-job-run',
-  description: 'AI Project Auto-Build Engine — 8-phase orchestration. Scaffolds, analyzes requirements, architects, designs frontend, develops, integrates, deploys, and reports.',
+  description: 'AI Project Auto-Build Engine — phased orchestration. Scaffolds, analyzes requirements, architects, designs frontend, generates an optional high-fidelity POC, develops, integrates, deploys, and reports.',
   phases: [
     { title: 'Scaffold', detail: 'init-project scaffolding + project-metadata.json' },
     { title: 'Requirements', detail: 'engineer-requirements deep requirement decomposition' },
@@ -882,5 +882,4 @@ Return the report text in the "report" field of the result.`),
 //  Completion
 
 log(`All phases completed${stop_at_poc ? ' (stopped at POC)' : ''}. Mode: ${MODE}.`)
-log(`Mode: ${MODE}`)
 log(`Phases completed: ${[...phasesDone].filter(Boolean).join(', ')}`)
