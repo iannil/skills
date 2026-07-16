@@ -13,6 +13,7 @@
 基于"实现规划驱动的 AI 辅助编程实战"方法论，构成完整的工程开发技能链：
 
 - `engineer-job` — **AI 项目全自动构建引擎**（P0）。元编排引擎，自动执行完整项目生命周期：脚手架 → 架构设计 → 多功能开发 → 集成验收 → 部署配置生成。支持 `--auto`（自动确认）与 `--silent`（静默）模式，实现无人值守的项目构建。
+- `engineer-next` — **AI 进度接续路由引擎**。"随时随地接着上次继续"的万能入口。读取 engineer* 状态指纹（`.agents/job.state.json`、`.agents/progress.json`、`CONTEXT.md`、`REQUIREMENTS.md`、`project-metadata.json`、代码体量），诊断项目停在哪，路由到正确技能接续——`engineer-job`（重建参数重调其 Workflow，跳过已完成阶段）、`engineer-orchestrator`（开发进行中走里程碑级恢复，绝不重调 job 以免重跑里程碑）、`engineer-architect`（缺蓝图，或对外来项目逆向建模）、`engineer-requirements`。零 engineer* 产物的外来项目按代码量自适应接入：近乎为空→engineer-job 全新；大量代码→先逆向出蓝图。纯路由——不重写阶段、不写进度文件。
 - `engineer-cloner` — **AI 逆向站点克隆前置引擎**。给定授权的目标站点地址与完整权限账号，经 `agent-browser` 逆向观测线上站点（登录 → loop-until-dry 遍历 → 功能账本 → API/设计提取），产出 `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` 与诚实的 `CLONE-FIDELITY.md`（可观测精确 / 推断 / 不可观测），再交棒 `engineer-job` 完成全功能、全生命周期、高精度克隆。做设计语言重建 + 现代栈重建，不拷贝原始资产、不声称复制后端源码。
 - `engineer-legacy-recon` — **AI 遗留系统静态侦察前置引擎**（`engineer-cloner` 的离线兄弟）。当你进不去线上系统、但用户**把遗留系统的页面内容 + 导航菜单贴给你**（或截图 / 导出 HTML）时，本技能把这些既有材料当作唯一真相源——**不联网、不用 `agent-browser`**——静态推断出模块地图、实体字段、操作、状态机、角色权限划分。逐项标 `明示 / 推断 / 缺口`，产出 `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` 与 `RECON-FIDELITY.md`（含待用户补全的缺口清单），再交棒 `engineer-job`。仅当用户明确要用授权账号对照线上核实时，才升级到 `engineer-cloner`。
 - `engineer-requirements` — **AI 需求分析师**。基于 Event Storming + DDD 战略设计方法论，将模糊的用户需求深度拆解为结构化需求文档——识别有界上下文、业务事件、功能依赖与关键状态机。输出 `REQUIREMENTS.md` 供 `engineer-architect` 使用。当系统复杂、多模块或多端（2 个以上前端端或 5 个以上功能模块）时触发。
@@ -46,6 +47,7 @@
 | 你的处境 | 从这里开始 | 产出 |
 |---|---|---|
 | "从零一气呵成做完整个项目，无人值守" | `engineer-job` | 完整项目 |
+| "接着上次继续"/不知道用哪个技能/恢复进度 | `engineer-next` | 路由到正确的接续点 |
 | 克隆一个你有权重建的线上站点 | `engineer-cloner` | 三文档 → `engineer-job` |
 | 从粘贴的页面内容 + 菜单重建遗留系统（无线上访问） | `engineer-legacy-recon` | 三文档 + 缺口清单 → `engineer-job` |
 | 复杂 / 多模块 / 多端系统，需求仍模糊 | `engineer-requirements` | `REQUIREMENTS.md` |
@@ -168,6 +170,9 @@ npm test
 skills/
 ├── engineer-job/
 │   └── SKILL.md                    # P0 — 元编排引擎 / 全自动项目构建
+├── engineer-next/
+│   ├── SKILL.md                    # 进度接续路由——诊断状态，交接给正确的技能
+│   └── references/                 # resume-logic.js(纯函数)、detect-resume.js(CLI)、handoff-protocol.md
 ├── engineer-requirements/
 │   └── SKILL.md                    # 需求拆解 / Event Storming + DDD
 ├── engineer-architect/

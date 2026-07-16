@@ -91,3 +91,16 @@ test('SKILL.md has decision table, modes, triggers, references', () => {
   assert.ok(md.includes('detect-resume.js'), 'references detect-resume.js')
   assert.ok(md.includes('handoff-protocol.md'), 'references handoff-protocol.md')
 })
+
+test('README registers engineer-next in list + decision table + tree', () => {
+  const en = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8')
+  assert.ok(/`engineer-next`/.test(en), 'README skill list mentions engineer-next')
+  assert.ok(/继续|continue|resume/i.test(en) && /engineer-next/.test(en), 'README decision table references engineer-next for resume')
+  assert.ok(en.includes('engineer-next/'), 'README file tree has engineer-next/')
+})
+
+test('README.zh-CN registers engineer-next', () => {
+  const zh = fs.readFileSync(path.join(__dirname, '..', 'README.zh-CN.md'), 'utf8')
+  assert.ok(/`engineer-next`/.test(zh), 'README.zh-CN mentions engineer-next')
+  assert.ok(zh.includes('engineer-next/'), 'README.zh-CN file tree has engineer-next/')
+})

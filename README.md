@@ -13,6 +13,7 @@ This package keeps each skill in the standard `skills/<name>/SKILL.md` layout us
 Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice" methodology, the complete engineering development skill chain:
 
 - `engineer-job` — **AI Project Auto-Build Engine** (P0). Meta-orchestrator that automatically executes the full project lifecycle: scaffolding → architecture design → multi-feature development → integration testing → deployment config generation. Supports `--auto` (auto-confirm) and `--silent` (silent) modes for unattended project building.
+- `engineer-next` — **AI Resume Router**. The universal "continue from wherever I am" entry point. Reads the engineer-* state fingerprint (`.agents/job.state.json`, `.agents/progress.json`, `CONTEXT.md`, `REQUIREMENTS.md`, `project-metadata.json`, code volume), diagnoses where the project stopped, and hands off to the right skill to resume — `engineer-job` (re-invokes its Workflow with reconstructed args, skipping done phases), `engineer-orchestrator` (milestone-level recovery when development is mid-flight — never re-invokes job, which would redo milestones), `engineer-architect` (blueprint gap, or reverse-engineering a foreign project), or `engineer-requirements`. Foreign projects with no engineer-* artifacts onboard adaptively: near-empty → fresh `engineer-job`, substantial existing code → reverse-engineer a blueprint first. Pure router — it never re-implements phases or writes progress files.
 - `engineer-cloner` — **AI Reverse Site-Clone Front-End Engine**. Given an authorized target URL and a full-access account, reverse-observes the running site via `agent-browser` (login → loop-until-dry traversal → feature ledger → API/design extraction), then produces `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` plus an honest `CLONE-FIDELITY.md` (observable-exact / inferred / unobservable), and hands off to `engineer-job` for a full-lifecycle, high-precision clone. Does design-language reconstruction + modern-stack rebuild — never raw-asset copying or backend-source claims.
 - `engineer-legacy-recon` — **AI Legacy-System Static-Recon Front-End** (offline sibling of `engineer-cloner`). When you can't reach the live system but the user **pastes the legacy system's page content + navigation menus** (or screenshots / exported HTML), this skill treats that material as the sole source of truth — **no browsing, no `agent-browser`** — and statically infers the module map, entity fields, actions, state machines, and role/permission split. Grades every finding as `明示 / Stated`, `推断 / Inferred`, or `缺口 / Gap`, produces `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` plus a `RECON-FIDELITY.md` (with a gap list to ask the user about), then hands off to `engineer-job`. Escalate to `engineer-cloner` only if the user explicitly wants live verification with an authorized account.
 - `engineer-requirements` — **AI Requirements Analyst**. Decomposes vague user requirements into a structured requirements document using Event Storming + DDD strategic design — bounded contexts, business events, functional dependencies, and key state machines. Outputs `REQUIREMENTS.md` for `engineer-architect` to consume. Triggers for complex, multi-module, or multi-end systems (2+ frontends or 5+ feature modules).
@@ -46,6 +47,7 @@ The engineering skills form a chain. Enter at the point that matches your situat
 | Your situation | Start here | Produces |
 |---|---|---|
 | "Build the whole project from scratch, unattended" | `engineer-job` | full project |
+| "Continue from where I stopped" / don't know which skill / resume | `engineer-next` | routes to the right resume point |
 | Clone an existing running site you're authorized to rebuild | `engineer-cloner` | three docs → `engineer-job` |
 | Rebuild a legacy system from pasted page content + menus (no live access) | `engineer-legacy-recon` | three docs + gap list → `engineer-job` |
 | Complex / multi-module / multi-end system, requirements still fuzzy | `engineer-requirements` | `REQUIREMENTS.md` |
@@ -168,6 +170,9 @@ npm test
 skills/
 ├── engineer-job/
 │   └── SKILL.md                    # P0 — meta-orchestrator / unattended full-project build
+├── engineer-next/
+│   ├── SKILL.md                    # resume router — detects state, hands off to the right skill
+│   └── references/                 # resume-logic.js (pure), detect-resume.js (CLI), handoff-protocol.md
 ├── engineer-requirements/
 │   └── SKILL.md                    # requirements decomposition / Event Storming + DDD
 ├── engineer-architect/
