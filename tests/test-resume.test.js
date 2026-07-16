@@ -60,3 +60,11 @@ test('detect-resume.js CLI smoke: empty dir -> scenario 7', () => {
   assert.equal(verdict.scenario, '7', 'empty dir should be scenario 7')
   assert.equal(verdict.target_skill, 'engineer-job')
 })
+
+test('handoff-protocol.md documents every handoff kind', () => {
+  const md = fs.readFileSync(path.join(__dirname, '..', 'skills', 'engineer-next', 'references', 'handoff-protocol.md'), 'utf8')
+  for (const h of ['reinvoke-job-workflow', 'route-orchestrator', 'route-architect', 'route-architect-reverse', 'route-requirements', 'report-complete', 'report-blocked']) {
+    assert.ok(md.includes(h), `handoff-protocol.md covers ${h}`)
+  }
+  assert.ok(md.includes('reconstructed_args') || md.includes('重建参数') || md.includes('参数重建'), 'documents arg reconstruction')
+})
