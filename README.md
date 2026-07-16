@@ -1,10 +1,50 @@
 # iannil/skills
 
+**A composable AI engineering skill chain that builds whole projects unattended — from vague idea to shipped code.**
+
 **English** | [简体中文](README.zh-CN.md)
 
-Installable AI agent skills for project initialization, product analysis, and RC (Observational Convergence) philosophical framework.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Skills](https://img.shields.io/badge/skills-19-blue.svg)](#available-skills)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
+![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-This package keeps each skill in the standard `skills/<name>/SKILL.md` layout used by the broader skills ecosystem, including the `vercel-labs/skills` installer.
+19 installable skills for AI coding agents (Claude Code, Codex, Cursor, and more). The centerpiece is a **13-skill engineering chain** built on the "Implementation-Planning-Driven AI-Assisted Programming" methodology: describe what you want, and the chain runs requirements → architecture → frontend design → orchestrated development → inspection, unattended, enforcing three hard disciplines that stop architecture drift. Also ships product-analysis and RC-philosophy skill sets.
+
+Each skill uses the standard `skills/<name>/SKILL.md` layout compatible with the broader skills ecosystem (including the `vercel-labs/skills` installer), so it drops into any compliant agent.
+
+## How the engineering chain fits together
+
+```mermaid
+graph TD
+    J["engineer-job<br/>unattended full build"] --> REQ
+    N["engineer-next<br/>resume router"] -.routes to.-> J
+    CL["engineer-cloner / legacy-recon<br/>clone / recon → 3 docs"] --> J
+    REQ["engineer-requirements<br/>REQUIREMENTS.md"] --> ARCH["engineer-architect<br/>CONTEXT.md"]
+    ARCH --> FE["engineer-frontend-architect<br/>FRONTEND-DESIGN.md"]
+    FE --> ORCH["engineer-orchestrator<br/>feature queue"]
+    FE --> POC["engineer-poc<br/>optional POC"]
+    POC --> ORCH
+    ORCH --> WF["engineer-workflow<br/>one feature e2e"]
+    WF --> INS["engineer-inspector<br/>accept / drift check"]
+```
+
+Enter at whichever box matches your situation — every skill knows how to hand off to the next. Not sure where you are? Start with `engineer-next`.
+
+## Quick Start
+
+```bash
+# Install ALL skills into Claude Code (~/.claude/skills)
+git clone https://github.com/iannil/skills && cd skills
+./install.sh
+```
+
+Then in your agent, just describe the project — e.g. *"build me a task-tracker from scratch, unattended"* — and `engineer-job` takes it from there. No `npx`, no download; `install.sh` is zero-dependency and re-run-to-update.
+
+Prefer a package installer instead? `npx iannil/skills install all` — see [Install](#install) for every option.
+
+⭐ If this saves you a weekend of scaffolding, a star helps others find it.
 
 ## Available Skills
 

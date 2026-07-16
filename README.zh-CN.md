@@ -1,10 +1,50 @@
 # iannil/skills
 
+**一条可组合的 AI 工程技能链，无人值守地把一个模糊想法做成上线代码。**
+
 [English](README.md) | **简体中文**
 
-面向项目初始化、产品分析，以及 RC（观测收敛）哲学框架的可安装 AI Agent 技能包。
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Skills](https://img.shields.io/badge/skills-19-blue.svg)](#可用技能)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
+![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-本包中每个技能都遵循更广泛技能生态（包括 `vercel-labs/skills` 安装器）所使用的标准 `skills/<name>/SKILL.md` 目录结构。
+面向 AI 编码 Agent（Claude Code、Codex、Cursor 等）的 19 个可安装技能。核心是一条 **13 个技能组成的工程链**，基于"实现规划驱动的 AI 辅助编程"方法论：描述你想要什么，这条链就自动跑完 需求 → 架构 → 前端设计 → 编排开发 → 验收，无人值守，并强制执行三条阻止"架构偏移"的硬纪律。此外还附带产品分析与 RC 哲学两套技能。
+
+每个技能都遵循标准 `skills/<name>/SKILL.md` 目录结构，兼容更广泛的技能生态（含 `vercel-labs/skills` 安装器），可直接接入任何兼容的 Agent。
+
+## 工程链如何串起来
+
+```mermaid
+graph TD
+    J["engineer-job<br/>无人值守全量构建"] --> REQ
+    N["engineer-next<br/>进度接续路由"] -.路由到.-> J
+    CL["engineer-cloner / legacy-recon<br/>克隆 / 侦察 → 三文档"] --> J
+    REQ["engineer-requirements<br/>REQUIREMENTS.md"] --> ARCH["engineer-architect<br/>CONTEXT.md"]
+    ARCH --> FE["engineer-frontend-architect<br/>FRONTEND-DESIGN.md"]
+    FE --> ORCH["engineer-orchestrator<br/>功能任务队列"]
+    FE --> POC["engineer-poc<br/>可选 POC"]
+    POC --> ORCH
+    ORCH --> WF["engineer-workflow<br/>单功能端到端"]
+    WF --> INS["engineer-inspector<br/>验收 / 偏移检测"]
+```
+
+从最贴近你处境的那个节点进入——每个技能都知道如何交接给下一个。不知道自己在哪一步？先用 `engineer-next`。
+
+## 快速开始
+
+```bash
+# 安装全部技能到 Claude Code（~/.claude/skills）
+git clone https://github.com/iannil/skills && cd skills
+./install.sh
+```
+
+然后在你的 Agent 里直接描述项目——例如*"帮我从零无人值守做一个任务管理工具"*——`engineer-job` 会接管一切。无需 `npx`、无需下载；`install.sh` 零依赖，重跑即更新。
+
+想用包安装器？`npx iannil/skills install all`——完整选项见[安装](#安装)。
+
+⭐ 如果它帮你省下一个周末的脚手架时间，点个 star 能让更多人找到它。
 
 ## 可用技能
 
