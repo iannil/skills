@@ -12,7 +12,6 @@ function assessCodeVolume(stats) {
 
 // job.state.json 阶段规范顺序
 const PHASE_ORDER = ['init', 'requirements', 'architect', 'frontend', 'poc', 'development', 'run_gate', 'finalize', 'deploy', 'report']
-const DESIGN_PHASES = ['requirements', 'architect', 'frontend', 'poc']
 const REINVOKE_PHASES = ['init', 'requirements', 'architect', 'frontend', 'poc']
 const CLOSURE_PHASES = ['run_gate', 'finalize', 'deploy', 'report']
 
@@ -62,6 +61,8 @@ function buildReconstructedArgs(state, fresh) {
     requirements,
     skip_requirements: skipRequirements,
     skip_frontend: skipFrontend,
+    // 无前端即跳过 POC；project-metadata.json 不单独携带 skip_poc，
+    // job 恢复后会按 detectComplexity 自行重导，故此处与 skip_frontend 绑定即可。
     skip_poc: skipFrontend,
     stop_at_poc: false,
   }
