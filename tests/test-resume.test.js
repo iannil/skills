@@ -23,3 +23,14 @@ test('assessCodeVolume: just below LOC (499)', () => {
 test('assessCodeVolume: null stats defaults to near-empty', () => {
   assert.equal(assessCodeVolume(null), 'near-empty')
 })
+
+// detectResumePoint — 用例驱动
+const cases = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'skills', 'engineer-next', 'evals', 'resume-cases.json'), 'utf8'))
+for (const c of cases) {
+  test(`detectResumePoint: ${c.label}`, () => {
+    const v = detectResumePoint(c.state)
+    assert.equal(v.scenario, c.expected.scenario, `scenario for "${c.label}"`)
+    assert.equal(v.target_skill, c.expected.target_skill, `target_skill for "${c.label}"`)
+    assert.equal(v.handoff, c.expected.handoff, `handoff for "${c.label}"`)
+  })
+}
