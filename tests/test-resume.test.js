@@ -68,3 +68,26 @@ test('handoff-protocol.md documents every handoff kind', () => {
   }
   assert.ok(md.includes('reconstructed_args') || md.includes('重建参数') || md.includes('参数重建'), 'documents arg reconstruction')
 })
+
+test('SKILL.md frontmatter is valid', () => {
+  const md = fs.readFileSync(path.join(__dirname, '..', 'skills', 'engineer-next', 'SKILL.md'), 'utf8')
+  const fm = md.match(/^---\n([\s\S]*?)\n---/)
+  assert.ok(fm, 'has frontmatter')
+  assert.ok(/^name:\s*engineer-next/m.test(fm[1]), 'name: engineer-next')
+  assert.ok(/compatibility:.*(?:bash|agent)/.test(fm[1]), 'compatibility includes bash or agent')
+})
+
+test('SKILL.md has decision table, modes, triggers, references', () => {
+  const md = fs.readFileSync(path.join(__dirname, '..', 'skills', 'engineer-next', 'SKILL.md'), 'utf8')
+  assert.ok(md.includes('## ⚙️ 模式选择'), 'mode selection section')
+  for (const k of ['1a', '1b', '1c', '1d', '1e', '2', '3', '4', '5', '6a', '6b', '7']) {
+    assert.ok(md.includes(k), `decision table covers scenario ${k}`)
+  }
+  for (const k of ['job.state.json', 'progress.json', 'CONTEXT.md', 'REQUIREMENTS.md']) {
+    assert.ok(md.includes(k), `references ${k}`)
+  }
+  assert.ok(/继续|接着|next|continue|resume/i.test(md), 'has resume trigger phrases')
+  assert.ok(md.includes('resume-logic.js'), 'references resume-logic.js')
+  assert.ok(md.includes('detect-resume.js'), 'references detect-resume.js')
+  assert.ok(md.includes('handoff-protocol.md'), 'references handoff-protocol.md')
+})
