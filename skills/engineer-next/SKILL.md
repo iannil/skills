@@ -119,6 +119,7 @@ node skills/engineer-next/references/detect-resume.js [projectDir]
 | 1a | `job.state.json` 在，下一个未完成阶段是 **init/设计期**（requirements/architect/frontend/poc） | 该阶段 | **重调 engineer-job run.wf.js**（自动跳过 DONE 阶段）；从 job.state.json+project-metadata.json 重建参数 |
 | 1b | `job.state.json` 在，`development` 为首个未完成阶段（TODO 起步或 IN_PROGRESS） | 下一个 TODO 里程碑 | **路由 engineer-orchestrator**（里程碑级恢复）。⚠️ 不重调 job，否则重跑已完成里程碑 |
 | 1c | `job.state.json` 在，`development` DONE，但 run_gate/finalize/deploy/report 未完成 | 收尾阶段 | **重调 engineer-job run.wf.js**（不重跑里程碑） |
+| 1c+ | `job.state.json` 在，`development` DONE 但无 QA 记录 / `.agents/qa-latest.md` 结论非 PASS | 补测试验收 | **路由 engineer-qa** 跑测试门禁（②③④层），通过后再进收尾 |
 | 1d | `job.state.json` 全阶段 DONE | （已完成） | 报告"已完成"，建议 engineer-advisor 或追加功能走 architect |
 | 1e | 某阶段 BLOCKED | 该阶段 | 报告阻塞 + 路由该技能/advisor |
 | 2 | 无 job.state，但有 `.agents/progress.json` | 下一个 TODO 里程碑 | **路由 engineer-orchestrator** 恢复 |
@@ -170,6 +171,7 @@ node skills/engineer-next/references/detect-resume.js [projectDir]
 | `CONTEXT-MAP.md` 在（多模块） | 交 orchestrator 多模块编排 |
 | 检测歧义 | 严格按决策表优先级（2 > 4 等） |
 | 外来项目体量在阈值附近 | 保守走逆向(6b)——宁可有蓝图 |
+| development DONE 但测试门禁未过 | 路由 engineer-qa 补验收，PASS 后再交 job 收尾 |
 
 ---
 

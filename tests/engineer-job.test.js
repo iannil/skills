@@ -302,5 +302,22 @@ describe('skills', () => {
       assert.ok(wf.includes('90'), 'run gate should state the 90% bar');
       assert.ok(wf.includes('agent-browser'), 'integrate should drive e2e via agent-browser');
     });
+
+    it('inspector signal-6 points to engineer-qa', () => {
+      assert.ok(read('engineer-inspector').includes('engineer-qa'),
+        'inspector should delegate test compliance to engineer-qa');
+    });
+
+    it('engineer-next can route to engineer-qa', () => {
+      assert.ok(read('engineer-next').includes('engineer-qa'),
+        'resume router should know engineer-qa');
+    });
+
+    it('test-patterns names the 90% truth source', () => {
+      const tp = fs.readFileSync(
+        path.join(SKILL_DIR, 'init-project', 'references', 'test-patterns.md'), 'utf-8');
+      assert.ok(tp.includes('engineer-qa') && tp.includes('90'),
+        'test-patterns should point to engineer-qa 90% gate');
+    });
   });
 });
