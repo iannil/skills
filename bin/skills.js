@@ -44,8 +44,10 @@ function discoverSkills() {
 
   const names = fs.readdirSync(skillsRoot)
     .filter((entry) => {
-      // Skip hidden directories (e.g. workspace/eval dirs)
+      // Skip hidden directories and companion scratch/eval dirs
+      // (e.g. "<skill>-workspace"), which hold iteration artifacts, not a skill.
       if (entry.startsWith('.')) return false;
+      if (entry.endsWith('-workspace')) return false;
       const fullPath = path.join(skillsRoot, entry);
       return fs.statSync(fullPath).isDirectory();
     })
