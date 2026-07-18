@@ -301,6 +301,10 @@ describe('skills', () => {
         'run gate should check branch coverage');
       assert.ok(wf.includes('90'), 'run gate should state the 90% bar');
       assert.ok(wf.includes('agent-browser'), 'integrate should drive e2e via agent-browser');
+      // Guard the EXECUTABLE gate, not just prompt text: the run-gate pass
+      // condition must fail when the agent reports coverage_ok === false.
+      assert.ok(wf.includes('coverage_ok !== false'),
+        'run gate pass condition must enforce coverage_ok');
     });
 
     it('inspector signal-6 points to engineer-qa', () => {
