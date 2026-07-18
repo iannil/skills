@@ -319,5 +319,13 @@ describe('skills', () => {
       assert.ok(tp.includes('engineer-qa') && tp.includes('90'),
         'test-patterns should point to engineer-qa 90% gate');
     });
+
+    it('both READMEs register engineer-qa', () => {
+      const root = path.join(__dirname, '..');
+      for (const f of ['README.md', 'README.zh-CN.md']) {
+        assert.ok(fs.readFileSync(path.join(root, f), 'utf-8').includes('engineer-qa'),
+          `${f} should register engineer-qa`);
+      }
+    });
   });
 });
