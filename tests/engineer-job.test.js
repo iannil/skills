@@ -113,7 +113,7 @@ describe('skills', () => {
   describe('mode support across skills', () => {
     const skillsThatNeedMode = [
       'init-project', 'engineer-architect', 'engineer-orchestrator',
-      'engineer-workflow', 'engineer-inspector',
+      'engineer-workflow', 'engineer-inspector', 'engineer-qa',
     ];
 
     for (const skillName of skillsThatNeedMode) {
@@ -128,6 +128,48 @@ describe('skills', () => {
         assert.ok(content.includes('silent'), `${skillName} mode section should mention silent`);
       });
     }
+  });
+
+  describe('engineer-qa', () => {
+    const skillFile = path.join(SKILL_DIR, 'engineer-qa', 'SKILL.md');
+
+    it('exists with valid frontmatter', () => {
+      assert.ok(fs.existsSync(skillFile), 'engineer-qa/SKILL.md should exist');
+      const parsed = readFrontmatter(skillFile);
+      assert.ok(parsed.frontmatter.name === 'engineer-qa', 'name must be engineer-qa');
+      assert.ok(/bash|agent/.test(parsed.frontmatter.compatibility), 'compat needs bash/agent');
+    });
+
+    it('has mode selection section', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('## ⚙️ 模式选择'), 'should have mode section');
+      assert.ok(c.includes('normal') && c.includes('auto') && c.includes('silent'));
+    });
+
+    it('defines the four-stage QA lifecycle', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      for (const stage of ['静态盘点', '单元层', '集成层', 'E2E']) {
+        assert.ok(c.includes(stage), `should describe stage ${stage}`);
+      }
+    });
+
+    it('enforces 90% diff branch coverage + global ratchet', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('90'), 'should state the 90% bar');
+      assert.ok(c.includes('分支覆盖'), 'should require branch coverage');
+      assert.ok(c.includes('qa-baseline.json'), 'should use the ratchet baseline file');
+    });
+
+    it('uses agent-browser for E2E with non-UI degradation', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('agent-browser'), 'should drive E2E via agent-browser');
+      assert.ok(c.includes('降级') || c.includes('跳过'), 'should degrade for non-UI');
+    });
+
+    it('uses the three-state verdict', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('PASS') && c.includes('NEEDS_FIX') && c.includes('REBUILD'));
+    });
   });
 
   describe('engineer-orchestrator persistence', () => {
