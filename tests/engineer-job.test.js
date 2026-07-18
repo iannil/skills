@@ -170,6 +170,18 @@ describe('skills', () => {
       const c = fs.readFileSync(skillFile, 'utf-8');
       assert.ok(c.includes('PASS') && c.includes('NEEDS_FIX') && c.includes('REBUILD'));
     });
+
+    it('ships reference files', () => {
+      const ref = path.join(SKILL_DIR, 'engineer-qa', 'references');
+      for (const f of ['coverage-tools.md', 'e2e-playbook.md', 'qa-report-template.md']) {
+        assert.ok(fs.existsSync(path.join(ref, f)), `missing references/${f}`);
+      }
+      const cov = fs.readFileSync(path.join(ref, 'coverage-tools.md'), 'utf-8');
+      assert.ok(cov.includes('--cov-branch') || cov.includes('branch'),
+        'coverage-tools must document branch coverage');
+      const e2e = fs.readFileSync(path.join(ref, 'e2e-playbook.md'), 'utf-8');
+      assert.ok(e2e.includes('agent-browser'), 'e2e-playbook must reference agent-browser');
+    });
   });
 
   describe('engineer-orchestrator persistence', () => {
