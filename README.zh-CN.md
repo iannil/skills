@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Skills](https://img.shields.io/badge/skills-21-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-22-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-面向 AI 编码 Agent（Claude Code、Codex、Cursor 等）的 21 个可安装技能。核心是一条 **14 个技能组成的工程链**，基于"实现规划驱动的 AI 辅助编程"方法论：描述你想要什么，这条链就自动跑完 需求 → 架构 → 前端设计 → 编排开发 → 验收 → 测试门禁，无人值守，并强制执行三条阻止"架构偏移"的硬纪律。此外还附带产品分析与 RC 哲学两套技能。
+面向 AI 编码 Agent（Claude Code、Codex、Cursor 等）的 22 个可安装技能。核心是一条 **14 个技能组成的工程链**，基于"实现规划驱动的 AI 辅助编程"方法论：描述你想要什么，这条链就自动跑完 需求 → 架构 → 前端设计 → 编排开发 → 验收 → 测试门禁，无人值守，并强制执行三条阻止"架构偏移"的硬纪律。此外还附带产品分析、产品拷问与 RC 哲学等技能。
 
 每个技能都遵循标准 `skills/<name>/SKILL.md` 目录结构，兼容更广泛的技能生态（含 `vercel-labs/skills` 安装器），可直接接入任何兼容的 Agent。
 
@@ -72,6 +72,7 @@ git clone https://github.com/iannil/skills && cd skills
 
 - `init-project` - 完整的项目初始化工作流，包含文档、记忆、发布结构、可观测性约定，以及按语言类型的脚手架。
 - `product-analysis-framework` - 结构化的产品与创业分析框架，覆盖市场证据、用户痛点、护城河、商业模式、风险，以及可复用的创业模式。
+- `product-pusher` - **产品拷问**。把一个还没做出来的产品/创业点子，通过又软又硬的拷问对话锻造成能动手的产品定义：先一起发散，再一个个硬问题拷问（真实用户、真实痛点、生死开关握在谁手里、最便宜的验证），直到收敛出具体的产品定义——收尾给出按致命度排序的死因报告与 go/no-go/pivot 判断。协作但对抗：只戳漏洞，不当啦啦队。底层是因果链 / RC 纪律，用大白话呈现。
 
 ### RC 哲学类技能
 
@@ -248,6 +249,10 @@ skills/
 │       └── conventions-guide.md
 ├── product-analysis-framework/
 │   └── SKILL.md
+├── product-pusher/
+│   ├── SKILL.md                    # 产品/创业产品拷问——又软又硬的拷问式头脑风暴
+│   └── evals/
+│       └── evals.json
 ├── rc-application-tool/
 │   ├── SKILL.md
 │   └── evals/

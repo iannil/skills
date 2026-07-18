@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Skills](https://img.shields.io/badge/skills-21-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-22-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-21 installable skills for AI coding agents (Claude Code, Codex, Cursor, and more). The centerpiece is a **14-skill engineering chain** built on the "Implementation-Planning-Driven AI-Assisted Programming" methodology: describe what you want, and the chain runs requirements → architecture → frontend design → orchestrated development → inspection → QA test gate, unattended, enforcing three hard disciplines that stop architecture drift. Also ships product-analysis and RC-philosophy skill sets.
+22 installable skills for AI coding agents (Claude Code, Codex, Cursor, and more). The centerpiece is a **14-skill engineering chain** built on the "Implementation-Planning-Driven AI-Assisted Programming" methodology: describe what you want, and the chain runs requirements → architecture → frontend design → orchestrated development → inspection → QA test gate, unattended, enforcing three hard disciplines that stop architecture drift. Also ships product-analysis, product-pusher, and RC-philosophy skill sets.
 
 Each skill uses the standard `skills/<name>/SKILL.md` layout compatible with the broader skills ecosystem (including the `vercel-labs/skills` installer), so it drops into any compliant agent.
 
@@ -72,6 +72,7 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 
 - `init-project` - Complete project initialization workflow with docs, memory, release structure, observability conventions, and language-specific scaffolding.
 - `product-analysis-framework` - Structured product and startup analysis framework with market evidence, user pain, moat, business model, risks, and reusable startup patterns.
+- `product-pusher` - **Product Pusher**. Forge a NEW, still-unbuilt product or startup idea into a buildable definition through a grilled brainstorming dialogue: brainstorm it open, then pressure-test it one hard question at a time (real users, real pain, who holds the kill-switch, the cheapest validation) until a concrete product definition survives — ending in a ranked kill-risk report and a go/no-go/pivot call. Collaborative but adversarial: it pokes holes, not cheerleads. Built on the causal-chain / RC discipline, surfaced in plain language.
 
 ### RC Philosophy Skills
 
@@ -248,6 +249,10 @@ skills/
 │       └── conventions-guide.md
 ├── product-analysis-framework/
 │   └── SKILL.md
+├── product-pusher/
+│   ├── SKILL.md                    # product/startup Product Pusher — grilled brainstorming
+│   └── evals/
+│       └── evals.json
 ├── rc-application-tool/
 │   ├── SKILL.md
 │   └── evals/
