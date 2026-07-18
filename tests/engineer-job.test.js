@@ -293,5 +293,14 @@ describe('skills', () => {
       assert.ok(read('engineer-workflow').includes('engineer-qa'),
         'workflow acceptance should delegate to engineer-qa');
     });
+
+    it('run.wf.js run-gate enforces coverage + integrate runs e2e', () => {
+      const wf = fs.readFileSync(
+        path.join(SKILL_DIR, 'engineer-job', 'run.wf.js'), 'utf-8');
+      assert.ok(wf.includes('--cov-branch') || wf.includes('branch coverage'),
+        'run gate should check branch coverage');
+      assert.ok(wf.includes('90'), 'run gate should state the 90% bar');
+      assert.ok(wf.includes('agent-browser'), 'integrate should drive e2e via agent-browser');
+    });
   });
 });
