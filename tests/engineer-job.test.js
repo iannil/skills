@@ -285,4 +285,13 @@ describe('skills', () => {
         'engineer-workflow should have rebuild threshold table');
     });
   });
+
+  describe('engineer-qa pipeline hooks', () => {
+    const read = (s) => fs.readFileSync(path.join(SKILL_DIR, s, 'SKILL.md'), 'utf-8');
+
+    it('engineer-workflow step 7 delegates to engineer-qa', () => {
+      assert.ok(read('engineer-workflow').includes('engineer-qa'),
+        'workflow acceptance should delegate to engineer-qa');
+    });
+  });
 });
