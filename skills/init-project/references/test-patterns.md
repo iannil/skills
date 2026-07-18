@@ -3,6 +3,8 @@
 > 按项目类型定义测试的最低覆盖标准。各 skill（engineer-workflow、engineer-inspector）
 > 在每个里程碑的测试生成和验收环节参考此文件。
 
+> **门禁真源 / Gate authority**: 进入验收后，测试门禁以 `engineer-qa` 的 **diff 分支覆盖率 ≥90% + 全局 ratchet** 为准；本表的 70%/80% 为最低下限参考。
+
 ## 通用原则 / General Principles
 
 1. **分层测试**：单元测试覆盖核心逻辑，集成测试覆盖 API/数据库，E2E 覆盖关键用户链路

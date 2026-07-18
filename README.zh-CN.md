@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Skills](https://img.shields.io/badge/skills-19-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-21-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-面向 AI 编码 Agent（Claude Code、Codex、Cursor 等）的 19 个可安装技能。核心是一条 **13 个技能组成的工程链**，基于"实现规划驱动的 AI 辅助编程"方法论：描述你想要什么，这条链就自动跑完 需求 → 架构 → 前端设计 → 编排开发 → 验收，无人值守，并强制执行三条阻止"架构偏移"的硬纪律。此外还附带产品分析与 RC 哲学两套技能。
+面向 AI 编码 Agent（Claude Code、Codex、Cursor 等）的 21 个可安装技能。核心是一条 **14 个技能组成的工程链**，基于"实现规划驱动的 AI 辅助编程"方法论：描述你想要什么，这条链就自动跑完 需求 → 架构 → 前端设计 → 编排开发 → 验收 → 测试门禁，无人值守，并强制执行三条阻止"架构偏移"的硬纪律。此外还附带产品分析与 RC 哲学两套技能。
 
 每个技能都遵循标准 `skills/<name>/SKILL.md` 目录结构，兼容更广泛的技能生态（含 `vercel-labs/skills` 安装器），可直接接入任何兼容的 Agent。
 
@@ -28,6 +28,7 @@ graph TD
     POC --> ORCH
     ORCH --> WF["engineer-workflow<br/>单功能端到端"]
     WF --> INS["engineer-inspector<br/>验收 / 偏移检测"]
+    INS --> QA["engineer-qa<br/>测试门禁"]
 ```
 
 从最贴近你处境的那个节点进入——每个技能都知道如何交接给下一个。不知道自己在哪一步？先用 `engineer-next`。
@@ -64,6 +65,7 @@ git clone https://github.com/iannil/skills && cd skills
 - `engineer-workflow` — **AI 编码全自动工作流引擎**。以单个功能需求为输入，自动执行：里程碑拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 提交固化 → 更新蓝图。
 - `engineer-coach` — **AI 编码流程教练**。以六步 SOP 引导用户完成 AI 辅助编程：拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 固化。
 - `engineer-inspector` — **AI 代码架构监理**。检测架构偏移的三大信号（篡改地基 / 过度设计 / 体积失控），输出结构化验收报告。
+- `engineer-qa` — **AI 测试验收引擎**。功能开发完成后自动触发，是测试门禁的单一真源：跑测试金字塔（单元→集成→E2E），强制**变更代码分支覆盖率 ≥90%** 且全局不回退，用 `agent-browser` 驱动关键用户链路 E2E（无 UI 项目降级为 API/CLI 黑盒验收），输出 `.agents/qa-latest.md`（PASS / NEEDS_FIX / REBUILD）。
 - `engineer-advisor` — **AI 编码知识顾问**。诊断对话健康度，评估是否需要重置上下文、升维指令或彻底重建。
 
 ### 项目与产品类技能
@@ -75,6 +77,7 @@ git clone https://github.com/iannil/skills && cd skills
 
 - `rc-tutor` - 向零基础学习者讲授 RC（观测收敛）哲学框架——不预设任何哲学背景。
 - `rc-application-tool` - 用 RC 诊断现实问题（决策、团队、战略），并分析/改写营销文案。
+- `rc-causal-chain` - 把因果链分析（现代 TRIZ）重建在 RC 理论之上：逐节点生长根因链、每个节点即时校验（观察锁定），定位可用余量最大的关键缺点并反转为可解决的关键问题。
 - `rc-philosophy-advisor` - 在 RC 视角下探讨深层哲学问题，并生成新的 RC 风格箴言与片段。
 - `rc-text-assistant` - 撰写、引用、检索、翻译与 RC 哲学框架相关的内容。
 
@@ -96,6 +99,7 @@ git clone https://github.com/iannil/skills && cd skills
 | 正式实现前想先要一个高保真可点击原型 | `engineer-poc` | 可运行纯前端 POC + `POC-MANIFEST.md` → `engineer-job` |
 | 蓝图已就绪，按功能逐个交付整个项目 | `engineer-orchestrator` | 集成后的项目 |
 | 单个功能，端到端完成 | `engineer-workflow` | 上线的功能 |
+| 验证已完成功能是否通过测试门禁（单元 + 覆盖率 + E2E） | `engineer-qa` | pass/fix/rebuild 结论 |
 | 你想自己驱动编码，仅需引导 | `engineer-coach` | — |
 
 `init-project` 仅用于**脚手架约定**；若要从零做完整项目，请使用 `engineer-job`。
@@ -230,6 +234,12 @@ skills/
 │   └── SKILL.md                    # 流程教练 / 六步 SOP
 ├── engineer-inspector/
 │   └── SKILL.md                    # 代码架构监理
+├── engineer-qa/
+│   ├── SKILL.md                    # 测试验收引擎 / 测试门禁
+│   └── references/
+│       ├── coverage-tools.md
+│       ├── e2e-playbook.md
+│       └── qa-report-template.md
 ├── engineer-advisor/
 │   └── SKILL.md                    # 编码知识顾问
 ├── init-project/
@@ -239,6 +249,10 @@ skills/
 ├── product-analysis-framework/
 │   └── SKILL.md
 ├── rc-application-tool/
+│   ├── SKILL.md
+│   └── evals/
+│       └── evals.json
+├── rc-causal-chain/
 │   ├── SKILL.md
 │   └── evals/
 │       └── evals.json

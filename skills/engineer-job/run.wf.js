@@ -8,8 +8,8 @@ export const meta = {
     { title: 'Frontend', detail: 'engineer-frontend-architect frontend design' },
     { title: 'POC', detail: 'engineer-poc high-fidelity clickable prototype (skippable via skip_poc / stoppable via stop_at_poc)' },
     { title: 'Develop', detail: 'deterministic milestone loop (workflow + inspector per milestone)' },
-    { title: 'Run Gate', detail: 'hard build+test gate; fix loop; DOES_NOT_RUN if unfixable' },
-    { title: 'Integrate', detail: 'integration testing & production readiness' },
+    { title: 'Run Gate', detail: 'QA gate: build + unit + integration + diff branch coverage >=90%; fix loop; DOES_NOT_RUN if unfixable' },
+    { title: 'Integrate', detail: 'integration + agent-browser E2E (load once, degrade for non-UI) & production readiness' },
     { title: 'Deploy', detail: 'deployment configuration generation' },
     { title: 'Report', detail: 'final report generation' },
   ],
@@ -213,6 +213,9 @@ const RUN_GATE_SCHEMA = {
     build_command: { type: 'string' },
     test_command: { type: 'string' },
     output: { type: 'string' },
+    coverage_ok: { type: 'boolean' },
+    diff_coverage: { type: 'number' },
+    global_coverage: { type: 'number' },
   },
   required: ['build_ok', 'test_ok'],
 }
@@ -741,11 +744,18 @@ Determine build & test commands:
      go                   -> build: "go build ./...",       test: "go test ./..."
 Run BOTH commands via Bash. Capture full output.
 Return build_ok, test_ok, the commands used, and combined output (last ~2000 chars).
+=== COVERAGE GATE (engineer-qa ②③) ===
+After build+test pass, measure BRANCH coverage on changed files (git diff).
+Prefer project-native coverage config; fallback per engineer-qa references/coverage-tools.md
+  (e.g. python: "pytest --cov --cov-branch"; node: "jest --coverage"; c8 "--branches 90").
+Diff branch coverage MUST be >= 90% (the 90% bar). If the tool lacks branch coverage,
+degrade to line coverage and note it. Read/update ".agents/qa-baseline.json" so global
+coverage never regresses. Return coverage_ok plus measured diff/global coverage.
 ${attempts > 1 ? 'Previous attempt failed. You MAY fix the code to make build+test pass before re-running.' : ''}`),
       { schema: RUN_GATE_SCHEMA, label: 'run-gate', phase: 'Run Gate' }
     )
 
-    if (gate && gate.build_ok && gate.test_ok) break
+    if (gate && gate.build_ok && gate.test_ok && (gate.coverage_ok !== false)) break
     if (attempts > MAX_FIX) break
     log(`Phase 4.5: run gate failed (attempt ${attempts}) — fix attempt ${attempts}`)
     await agent(
@@ -758,7 +768,7 @@ Do NOT skip or delete tests. Make them pass. Commit the fix. Append to .agents/j
     )
   }
 
-  const passed = !!(gate && gate.build_ok && gate.test_ok)
+  const passed = !!(gate && gate.build_ok && gate.test_ok && (gate.coverage_ok !== false))
   runGateResult = {
     status: passed ? 'PASS' : 'DOES_NOT_RUN',
     attempts,
@@ -796,7 +806,14 @@ Read project-metadata.json for project type and testing config.
 UPDATE job.state.json finalize phase status.
 APPEND to job.progress.md.
 
-Return structured results with pass/fail per check, and any issues.`),
+Return structured results with pass/fail per check, and any issues.
+
+=== E2E ACCEPTANCE (engineer-qa ④, load once) ===
+Drive key user journeys end-to-end. If the project has a UI, use the agent-browser skill
+(start server, script navigate/fill/click/assert, screenshot to .agents/qa-e2e/).
+If NO UI (pure API/CLI/library), degrade per engineer-qa references/e2e-playbook.md:
+API -> HTTP black-box CRUD + error paths; CLI -> subcommand e2e; library -> skip and note.
+Record E2E pass/fail and whether it was degraded. DO NOT block — record and continue.`),
     { schema: PHASE_RESULT, label: 'integration', phase: 'Integrate' }
   )
 

@@ -133,6 +133,7 @@ Workflow({
 - 真跑 build + test（通过 agent 的 Bash 工具）。
 - 失败 → 强制修复循环（normal=2 / auto=1 / silent=1 次）。
 - 修不动 → 标 `DOES_NOT_RUN`，最终报告头条如实标注，**不宣称完成**。
+- 覆盖率门禁：本轮 diff 分支覆盖率 ≥90%，全局 ratchet 不回退（委托 engineer-qa ②③层，见其 references/coverage-tools.md）。
 
 ### Phase 3: Integrate
 
@@ -142,6 +143,7 @@ Workflow({
 1. 编译/构建检查
 2. 全部测试运行
 3. 生产就绪检查（仅服务端/Web 应用）
+4. agent-browser E2E 关键用户链路负载一次（无 UI 降级为黑盒，委托 engineer-qa ④层）。
 
 ### Phase 4: Deploy
 

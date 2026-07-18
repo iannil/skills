@@ -113,7 +113,7 @@ describe('skills', () => {
   describe('mode support across skills', () => {
     const skillsThatNeedMode = [
       'init-project', 'engineer-architect', 'engineer-orchestrator',
-      'engineer-workflow', 'engineer-inspector',
+      'engineer-workflow', 'engineer-inspector', 'engineer-qa',
     ];
 
     for (const skillName of skillsThatNeedMode) {
@@ -128,6 +128,60 @@ describe('skills', () => {
         assert.ok(content.includes('silent'), `${skillName} mode section should mention silent`);
       });
     }
+  });
+
+  describe('engineer-qa', () => {
+    const skillFile = path.join(SKILL_DIR, 'engineer-qa', 'SKILL.md');
+
+    it('exists with valid frontmatter', () => {
+      assert.ok(fs.existsSync(skillFile), 'engineer-qa/SKILL.md should exist');
+      const parsed = readFrontmatter(skillFile);
+      assert.ok(parsed.frontmatter.name === 'engineer-qa', 'name must be engineer-qa');
+      assert.ok(/bash|agent/.test(parsed.frontmatter.compatibility), 'compat needs bash/agent');
+    });
+
+    it('has mode selection section', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('## ⚙️ 模式选择'), 'should have mode section');
+      assert.ok(c.includes('normal') && c.includes('auto') && c.includes('silent'));
+    });
+
+    it('defines the four-stage QA lifecycle', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      for (const stage of ['静态盘点', '单元层', '集成层', 'E2E']) {
+        assert.ok(c.includes(stage), `should describe stage ${stage}`);
+      }
+    });
+
+    it('enforces 90% diff branch coverage + global ratchet', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('90'), 'should state the 90% bar');
+      assert.ok(c.includes('分支覆盖'), 'should require branch coverage');
+      assert.ok(c.includes('qa-baseline.json'), 'should use the ratchet baseline file');
+    });
+
+    it('uses agent-browser for E2E with non-UI degradation', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('agent-browser'), 'should drive E2E via agent-browser');
+      assert.ok(c.includes('降级') || c.includes('跳过'), 'should degrade for non-UI');
+    });
+
+    it('uses the three-state verdict', () => {
+      const c = fs.readFileSync(skillFile, 'utf-8');
+      assert.ok(c.includes('PASS') && c.includes('NEEDS_FIX') && c.includes('REBUILD'));
+    });
+
+    it('ships reference files', () => {
+      const ref = path.join(SKILL_DIR, 'engineer-qa', 'references');
+      for (const f of ['coverage-tools.md', 'e2e-playbook.md', 'qa-report-template.md']) {
+        assert.ok(fs.existsSync(path.join(ref, f)), `missing references/${f}`);
+      }
+      const cov = fs.readFileSync(path.join(ref, 'coverage-tools.md'), 'utf-8');
+      assert.ok(cov.includes('--cov-branch') || cov.includes('branch'),
+        'coverage-tools must document branch coverage');
+      const e2e = fs.readFileSync(path.join(ref, 'e2e-playbook.md'), 'utf-8');
+      assert.ok(e2e.includes('agent-browser'), 'e2e-playbook must reference agent-browser');
+    });
   });
 
   describe('engineer-orchestrator persistence', () => {
@@ -229,6 +283,53 @@ describe('skills', () => {
       const content = fs.readFileSync(skillFile, 'utf-8');
       assert.ok(content.includes('重建') && content.includes('阈值'),
         'engineer-workflow should have rebuild threshold table');
+    });
+  });
+
+  describe('engineer-qa pipeline hooks', () => {
+    const read = (s) => fs.readFileSync(path.join(SKILL_DIR, s, 'SKILL.md'), 'utf-8');
+
+    it('engineer-workflow step 7 delegates to engineer-qa', () => {
+      assert.ok(read('engineer-workflow').includes('engineer-qa'),
+        'workflow acceptance should delegate to engineer-qa');
+    });
+
+    it('run.wf.js run-gate enforces coverage + integrate runs e2e', () => {
+      const wf = fs.readFileSync(
+        path.join(SKILL_DIR, 'engineer-job', 'run.wf.js'), 'utf-8');
+      assert.ok(wf.includes('--cov-branch') || wf.includes('branch coverage'),
+        'run gate should check branch coverage');
+      assert.ok(wf.includes('90'), 'run gate should state the 90% bar');
+      assert.ok(wf.includes('agent-browser'), 'integrate should drive e2e via agent-browser');
+      // Guard the EXECUTABLE gate, not just prompt text: the run-gate pass
+      // condition must fail when the agent reports coverage_ok === false.
+      assert.ok(wf.includes('coverage_ok !== false'),
+        'run gate pass condition must enforce coverage_ok');
+    });
+
+    it('inspector signal-6 points to engineer-qa', () => {
+      assert.ok(read('engineer-inspector').includes('engineer-qa'),
+        'inspector should delegate test compliance to engineer-qa');
+    });
+
+    it('engineer-next can route to engineer-qa', () => {
+      assert.ok(read('engineer-next').includes('engineer-qa'),
+        'resume router should know engineer-qa');
+    });
+
+    it('test-patterns names the 90% truth source', () => {
+      const tp = fs.readFileSync(
+        path.join(SKILL_DIR, 'init-project', 'references', 'test-patterns.md'), 'utf-8');
+      assert.ok(tp.includes('engineer-qa') && tp.includes('90'),
+        'test-patterns should point to engineer-qa 90% gate');
+    });
+
+    it('both READMEs register engineer-qa', () => {
+      const root = path.join(__dirname, '..');
+      for (const f of ['README.md', 'README.zh-CN.md']) {
+        assert.ok(fs.readFileSync(path.join(root, f), 'utf-8').includes('engineer-qa'),
+          `${f} should register engineer-qa`);
+      }
     });
   });
 });

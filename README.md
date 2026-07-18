@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Skills](https://img.shields.io/badge/skills-19-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-21-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-19 installable skills for AI coding agents (Claude Code, Codex, Cursor, and more). The centerpiece is a **13-skill engineering chain** built on the "Implementation-Planning-Driven AI-Assisted Programming" methodology: describe what you want, and the chain runs requirements → architecture → frontend design → orchestrated development → inspection, unattended, enforcing three hard disciplines that stop architecture drift. Also ships product-analysis and RC-philosophy skill sets.
+21 installable skills for AI coding agents (Claude Code, Codex, Cursor, and more). The centerpiece is a **14-skill engineering chain** built on the "Implementation-Planning-Driven AI-Assisted Programming" methodology: describe what you want, and the chain runs requirements → architecture → frontend design → orchestrated development → inspection → QA test gate, unattended, enforcing three hard disciplines that stop architecture drift. Also ships product-analysis and RC-philosophy skill sets.
 
 Each skill uses the standard `skills/<name>/SKILL.md` layout compatible with the broader skills ecosystem (including the `vercel-labs/skills` installer), so it drops into any compliant agent.
 
@@ -28,6 +28,7 @@ graph TD
     POC --> ORCH
     ORCH --> WF["engineer-workflow<br/>one feature e2e"]
     WF --> INS["engineer-inspector<br/>accept / drift check"]
+    INS --> QA["engineer-qa<br/>test gate"]
 ```
 
 Enter at whichever box matches your situation — every skill knows how to hand off to the next. Not sure where you are? Start with `engineer-next`.
@@ -64,6 +65,7 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 - `engineer-workflow` — **AI Coding Fully Automated Workflow Engine**. Takes a single feature requirement as input and automatically executes: milestone breakdown → dispatch instructions → coding → acceptance → branch decision → commit consolidation → update blueprint.
 - `engineer-coach` — **AI Coding Process Coach**. A six-step SOP guides users through AI-assisted programming: breakdown → dispatch instructions → coding → acceptance → branch decision → consolidation.
 - `engineer-inspector` — **AI Code Architecture Inspector**. Detects three major signals of architecture drift (foundation tampering / over-engineering / size runaway) and outputs a structured acceptance report.
+- `engineer-qa` — **AI Test Acceptance Engine**. Auto-triggers after feature development as the single source of truth for the test gate: runs the test pyramid (unit → integration → E2E), enforces **≥90% branch coverage on changed code** with a global no-regression ratchet, and drives key user journeys end-to-end via `agent-browser` (degrading to black-box API/CLI acceptance for non-UI projects). Emits `.agents/qa-latest.md` with a `PASS / NEEDS_FIX / REBUILD` verdict.
 - `engineer-advisor` — **AI Coding Knowledge Advisor**. Diagnoses conversation health, evaluates whether context reset, instruction elevation, or complete rebuild is needed.
 
 ### Project & Product Skills
@@ -75,6 +77,7 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 
 - `rc-tutor` - Teach the RC (Observational Convergence) philosophical framework to complete beginners — zero philosophy background assumed.
 - `rc-application-tool` - Apply RC to diagnose real-world problems (decisions, teams, strategy) and analyze/rewrite marketing copy.
+- `rc-causal-chain` - Causal Chain Analysis (modern TRIZ) rebuilt on RC theory: grow a root-cause chain node-by-node, verify each node (observational locking), and locate the key disadvantage (max available margin) to flip into a solvable key problem.
 - `rc-philosophy-advisor` - Discuss deep philosophical questions through the RC lens and generate new RC-style aphorisms and fragments.
 - `rc-text-assistant` - Write, reference, cite, search, and translate content related to the RC philosophical framework.
 
@@ -96,6 +99,7 @@ The engineering skills form a chain. Enter at the point that matches your situat
 | Want a high-fidelity clickable prototype before real implementation | `engineer-poc` | runnable pure-frontend POC + `POC-MANIFEST.md` → `engineer-job` |
 | Blueprint exists, deliver the whole project feature-by-feature | `engineer-orchestrator` | integrated project |
 | One feature, end-to-end | `engineer-workflow` | shipped feature |
+| Verify a finished feature meets the test gate (unit + coverage + E2E) | `engineer-qa` | pass/fix/rebuild verdict |
 | You want to drive coding yourself, with guidance | `engineer-coach` | — |
 
 `init-project` is for **scaffolding conventions only**; for a full build use `engineer-job`.
@@ -230,6 +234,12 @@ skills/
 │   └── SKILL.md                    # process coach / six-step SOP
 ├── engineer-inspector/
 │   └── SKILL.md                    # code architecture inspector
+├── engineer-qa/
+│   ├── SKILL.md                    # test acceptance engine / test gate
+│   └── references/
+│       ├── coverage-tools.md
+│       ├── e2e-playbook.md
+│       └── qa-report-template.md
 ├── engineer-advisor/
 │   └── SKILL.md                    # coding knowledge advisor
 ├── init-project/
@@ -239,6 +249,10 @@ skills/
 ├── product-analysis-framework/
 │   └── SKILL.md
 ├── rc-application-tool/
+│   ├── SKILL.md
+│   └── evals/
+│       └── evals.json
+├── rc-causal-chain/
 │   ├── SKILL.md
 │   └── evals/
 │       └── evals.json
