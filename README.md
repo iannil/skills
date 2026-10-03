@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-29-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-30-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-29 installable skills for Codex, Claude Code, and other agents that support skills: 14 for engineering, 3 for projects and products, 7 for web novel writing, and 5 for RC (Observational Convergence) philosophy.
+30 installable skills for Codex, Claude Code, and other agents that support skills: 14 for engineering, 3 for projects and products, 8 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
 
 Each skill defines its workflow in `skills/<name>/SKILL.md`, with supporting references, scripts, or agent configuration where needed. Choose a skill for a specific task or combine several into a workflow.
 
@@ -43,27 +43,8 @@ See [Install](#install) for more options. If these skills help you, a star helps
 |---|---|---:|---|
 | Build, verify, or resume a software project | [Engineering](#engineering-skills) | 14 | `engineer-job` / `engineer-next` |
 | Set up a project, analyze a product, or test an idea | [Projects & products](#project--product-skills) | 3 | `init-project` / `product-pusher` |
-| Plan, continue, review, or revise Chinese web fiction | [Web novel writing](#web-novel-writing-skills) | 7 | `write-webnovel` |
+| Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 8 | `write-book` / `write-webnovel` |
 | Learn RC, diagnose problems, analyze causes, or write | [RC philosophy](#rc-philosophy-skills) | 5 | `rc-tutor` / `rc-application-tool` |
-
-## How the engineering chain fits together
-
-```mermaid
-graph TD
-    J["engineer-job<br/>unattended full build"] --> REQ
-    N["engineer-next<br/>resume router"] -.routes to.-> J
-    CL["engineer-cloner / legacy-recon<br/>clone / recon → 3 docs"] --> J
-    REQ["engineer-requirements<br/>REQUIREMENTS.md"] --> ARCH["engineer-architect<br/>CONTEXT.md"]
-    ARCH --> FE["engineer-frontend-architect<br/>FRONTEND-DESIGN.md"]
-    FE --> ORCH["engineer-orchestrator<br/>feature queue"]
-    FE --> POC["engineer-poc<br/>optional POC"]
-    POC --> ORCH
-    ORCH --> WF["engineer-workflow<br/>one feature e2e"]
-    WF --> INS["engineer-inspector<br/>accept / drift check"]
-    INS --> QA["engineer-qa<br/>test gate"]
-```
-
-Enter at whichever box matches your situation — every skill knows how to hand off to the next. Not sure where you are? Start with `engineer-next`.
 
 ## Available Skills
 
@@ -92,10 +73,13 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 - `product-analysis-framework` - Structured product and startup analysis framework with market evidence, user pain, moat, business model, risks, and reusable startup patterns.
 - `product-pusher` - **Product Pusher**. Forge a NEW, still-unbuilt product or startup idea into a buildable definition through a grilled brainstorming dialogue: brainstorm it open, then pressure-test it one hard question at a time (real users, real pain, who holds the kill-switch, the cheapest validation) until a concrete product definition survives — ending in a ranked kill-risk report and a go/no-go/pivot call. Collaborative but adversarial: it pokes holes, not cheerleads. Built on the causal-chain / RC discipline, surfaced in plain language.
 
-### Web Novel Writing Skills
+### Book & Web Novel Writing Skills
 
-Built for character-driven Chinese long-form fiction and ensemble stories, covering planning, drafting, review, and revision. Use `write-webnovel` as the general entry point, or choose one of the six focused skills for a specific problem.
+`write-book` handles book planning, chapter drafting, continuation, and whole-book revision, with attention to arguments, terminology, examples, and progression.
 
+The seven web novel skills are built for character-driven Chinese long-form fiction and ensemble stories, covering planning, drafting, review, and revision. Use `write-webnovel` as the general entry point, or choose one of the six focused skills for a specific problem.
+
+- `write-book` - Plan, draft, continue, and revise Chinese books while maintaining consistency across chapters.
 - `write-webnovel` - Web novel writing: story planning, serialization, characterization, and multi-chapter revision.
 - `novel-character-agency` - Character desires, agency, voice, ensemble differentiation, and consistent growth.
 - `novel-comedy-engine` - Character-driven humor, misunderstandings, and comedy across chapters.
@@ -116,6 +100,7 @@ Built for character-driven Chinese long-form fiction and ensemble stories, cover
 
 | Current problem | Skill | Focus |
 |---|---|---|
+| Planning a book, drafting chapters, or revising a full manuscript | `write-book` | Book structure, complete chapters, and consistent arguments and terminology |
 | Planning a new story, designing an arc, or writing the next chapter | `write-webnovel` | Story plans, prose, or multi-chapter revision |
 | Passive characters, disposable supporting roles, or indistinct voices | `novel-character-agency` | Desires, active choices, and consistent growth |
 | Humor relies on banter, repeated jokes, or foolish behavior | `novel-comedy-engine` | Comic events driven by character desires |
@@ -126,7 +111,7 @@ Built for character-driven Chinese long-form fiction and ensemble stories, cover
 
 Provide the project entry point, target chapters, and scope. Specify whether you want a review or edits to the manuscript. Multi-chapter revision uses the original text and surrounding context to check continuity in facts, character knowledge, and foreshadowing. Start with `write-webnovel` or `novel-retention-edit` for structural diagnosis, then select a focused skill as needed.
 
-These methods were distilled from work on the Chinese novel 《我们宗门正在逃跑》 and can be applied to other fiction. Its characters, setting, and project-specific procedures apply only when working on that novel. See each `SKILL.md` for the workflow and its `references/` directory for source notes and adaptation details.
+The seven web novel skills were distilled from work on the Chinese novel 《我们宗门正在逃跑》 and can be applied to other fiction. Its characters, setting, and project-specific procedures apply only when working on that novel. See each `SKILL.md` for the workflow and its `references/` directory for source notes and adaptation details.
 
 ## Engineering Workflow Practices
 
@@ -185,6 +170,7 @@ Install one skill:
 npx iannil/skills install init-project
 npx iannil/skills install product-analysis-framework
 npx iannil/skills install rc-tutor
+npx iannil/skills install write-book
 npx iannil/skills install write-webnovel
 ```
 
@@ -262,7 +248,7 @@ npm test
 
 ## Repository Layout
 
-All 29 skill entry points are listed below. Individual skill directories may also contain `references/` (supporting material), `agents/` (agent configuration), `scripts/` (utilities), and `evals/` (evaluation examples).
+All 30 skill entry points are listed below. Individual skill directories may also contain `references/` (supporting material), `agents/` (agent configuration), `scripts/` (utilities), and `evals/` (evaluation examples).
 
 ```text
 skills/
@@ -294,6 +280,7 @@ skills/
 ├── rc-philosophy-advisor/SKILL.md
 ├── rc-text-assistant/SKILL.md
 ├── rc-tutor/SKILL.md
+├── write-book/SKILL.md
 └── write-webnovel/SKILL.md
 ```
 

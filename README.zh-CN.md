@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-29-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-30-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-29 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent。覆盖四类工作：14 个工程技能、3 个项目与产品技能、7 个网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
+30 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent。覆盖四类工作：14 个工程技能、3 个项目与产品技能、8 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
 
 每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
 
@@ -43,27 +43,8 @@ cd skills
 |---|---|---:|---|
 | 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 14 | `engineer-job` / `engineer-next` |
 | 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 3 | `init-project` / `product-pusher` |
-| 构思、续写、审读或修订中文网文 | [网文创作类](#网文创作类技能) | 7 | `write-webnovel` |
+| 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 8 | `write-book` / `write-webnovel` |
 | 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
-
-## 工程链如何串起来
-
-```mermaid
-graph TD
-    J["engineer-job<br/>无人值守全量构建"] --> REQ
-    N["engineer-next<br/>进度接续路由"] -.路由到.-> J
-    CL["engineer-cloner / legacy-recon<br/>克隆 / 侦察 → 三文档"] --> J
-    REQ["engineer-requirements<br/>REQUIREMENTS.md"] --> ARCH["engineer-architect<br/>CONTEXT.md"]
-    ARCH --> FE["engineer-frontend-architect<br/>FRONTEND-DESIGN.md"]
-    FE --> ORCH["engineer-orchestrator<br/>功能任务队列"]
-    FE --> POC["engineer-poc<br/>可选 POC"]
-    POC --> ORCH
-    ORCH --> WF["engineer-workflow<br/>单功能端到端"]
-    WF --> INS["engineer-inspector<br/>验收 / 偏移检测"]
-    INS --> QA["engineer-qa<br/>测试门禁"]
-```
-
-从最贴近你处境的那个节点进入——每个技能都知道如何交接给下一个。不知道自己在哪一步？先用 `engineer-next`。
 
 ## 可用技能
 
@@ -92,10 +73,13 @@ graph TD
 - `product-analysis-framework` - 结构化的产品与创业分析框架，覆盖市场证据、用户痛点、护城河、商业模式、风险，以及可复用的创业模式。
 - `product-pusher` - **产品拷问**。把一个还没做出来的产品/创业点子，通过又软又硬的拷问对话锻造成能动手的产品定义：先一起发散，再一个个硬问题拷问（真实用户、真实痛点、生死开关握在谁手里、最便宜的验证），直到收敛出具体的产品定义——收尾给出按致命度排序的死因报告与 go/no-go/pivot 判断。协作但对抗：只戳漏洞，不当啦啦队。底层是因果链 / RC 纪律，用大白话呈现。
 
-### 网文创作类技能
+### 书籍与网文创作类技能
 
-围绕人物驱动的中文长篇与群像写作，覆盖构思、正文、审读和修订。`write-webnovel` 是综合入口；其余六个技能用于处理具体问题，可以独立选用。
+`write-book` 用于书籍规划、章节撰写、续写和整书修订，关注论证、术语、案例与章节递进的一致性。
 
+七个网文技能围绕人物驱动的中文长篇与群像写作，覆盖构思、正文、审读和修订。`write-webnovel` 是综合入口；其余六个技能用于处理具体问题，可以独立选用。
+
+- `write-book` - 中文书籍规划、撰写、续写与整书修订，维护跨章节一致性。
 - `write-webnovel` - 网文创作总入口：构思、连载续写、人物塑造与连续章节修订。
 - `novel-character-agency` - 人物欲望、主动选择、声口、群像差异与成长连续性。
 - `novel-comedy-engine` - 人物欲望驱动的包袱、误会与跨章喜剧事件。
@@ -112,10 +96,11 @@ graph TD
 - `rc-philosophy-advisor` - 在 RC 视角下探讨深层哲学问题，并生成新的 RC 风格箴言与片段。
 - `rc-text-assistant` - 撰写、引用、检索、翻译与 RC 哲学框架相关的内容。
 
-## 网文技能怎么选
+## 写作技能怎么选
 
 | 当前问题 | 使用技能 | 交付重点 |
 |---|---|---|
+| 规划新书、展开章节、续写书稿或整书改稿 | `write-book` | 全书结构、完整章节及论证与术语一致性 |
 | 新作构思、故事单元设计、续写下一章 | `write-webnovel` | 故事方案、正文或连续章节修订 |
 | 人物被剧情推着走、配角工具化、声口雷同 | `novel-character-agency` | 欲望、主动选择与成长连续性 |
 | 笑点靠插科打诨、重复包袱或人物降智 | `novel-comedy-engine` | 人物欲望引发的喜剧事件 |
@@ -126,7 +111,7 @@ graph TD
 
 使用时提供作品入口、目标章节和任务范围，并说明要“审读建议”还是“实际改稿”。多章修订需要读取原文及必要前后文，再检查事实、人物知识和伏笔的连续性。可以先用 `write-webnovel` 或 `novel-retention-edit` 诊断结构，再按问题选用专项技能。
 
-这组方法提炼自《我们宗门正在逃跑》的创作实践，可用于其他小说；书中人物、设定与专用流程只在该作品的任务中启用。具体方法见各技能的 `SKILL.md`，来源与适配说明见其 `references/`。
+七个网文技能的方法提炼自《我们宗门正在逃跑》的创作实践，可用于其他小说；书中人物、设定与专用流程只在该作品的任务中启用。具体方法见各技能的 `SKILL.md`，来源与适配说明见其 `references/`。
 
 ## 工程工作流最佳实践
 
@@ -185,6 +170,7 @@ npx iannil/skills install all
 npx iannil/skills install init-project
 npx iannil/skills install product-analysis-framework
 npx iannil/skills install rc-tutor
+npx iannil/skills install write-book
 npx iannil/skills install write-webnovel
 ```
 
@@ -262,7 +248,7 @@ npm test
 
 ## 仓库结构
 
-下面列出全部 29 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
+下面列出全部 30 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
 
 ```text
 skills/
@@ -294,6 +280,7 @@ skills/
 ├── rc-philosophy-advisor/SKILL.md
 ├── rc-text-assistant/SKILL.md
 ├── rc-tutor/SKILL.md
+├── write-book/SKILL.md
 └── write-webnovel/SKILL.md
 ```
 
