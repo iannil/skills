@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-30-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-36-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-30 installable skills for Codex, Claude Code, and other agents that support skills: 14 for engineering, 3 for projects and products, 8 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
+36 installable skills for Codex, Claude Code, and other agents that support skills: 17 for engineering, 1 for Agent evaluation, 3 for projects and products, 10 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
 
 Each skill defines its workflow in `skills/<name>/SKILL.md`, with supporting references, scripts, or agent configuration where needed. Choose a skill for a specific task or combine several into a workflow.
 
@@ -41,10 +41,11 @@ See [Install](#install) for more options. If these skills help you, a star helps
 
 | What you want to do | Category | Count | Common entry points |
 |---|---|---:|---|
-| Build, verify, or resume a software project | [Engineering](#engineering-skills) | 14 | `engineer-job` / `engineer-next` |
+| Build, verify, or resume a software project | [Engineering](#engineering-skills) | 17 | `engineer-job` / `engineer-next` |
 | Set up a project, analyze a product, or test an idea | [Projects & products](#project--product-skills) | 3 | `init-project` / `product-pusher` |
-| Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 8 | `write-book` / `write-webnovel` |
+| Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 10 | `write-book` / `write-webnovel` |
 | Learn RC, diagnose problems, analyze causes, or write | [RC philosophy](#rc-philosophy-skills) | 5 | `rc-tutor` / `rc-application-tool` |
+| Evaluate Agent learning, reuse and transfer | [Agent evaluation](#agent-evaluation-skills) | 1 | `agent-learning-eval` |
 
 ## Available Skills
 
@@ -64,8 +65,16 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 - `engineer-workflow` — **AI Coding Fully Automated Workflow Engine**. Takes a single feature requirement as input and automatically executes: milestone breakdown → dispatch instructions → coding → acceptance → branch decision → commit consolidation → update blueprint.
 - `engineer-coach` — **AI Coding Process Coach**. A six-step SOP guides users through AI-assisted programming: breakdown → dispatch instructions → coding → acceptance → branch decision → consolidation.
 - `engineer-inspector` — **AI Code Architecture Inspector**. Detects three major signals of architecture drift (foundation tampering / over-engineering / size runaway) and outputs a structured acceptance report.
-- `engineer-qa` — **AI Test Acceptance Engine**. Auto-triggers after feature development as the single source of truth for the test gate: runs the test pyramid (unit → integration → E2E), enforces **≥90% branch coverage on changed code** with a global no-regression ratchet, and drives key user journeys end-to-end via `agent-browser` (degrading to black-box API/CLI acceptance for non-UI projects). Emits `.agents/qa-latest.md` with a `PASS / NEEDS_FIX / REBUILD` verdict.
+- `engineer-qa` — **Engineering Test Acceptance**. Selects checks and coverage policy from task risk and project requirements, separates mock, real integration and target-environment evidence, and returns PASS / NEEDS_FIX / UNVERIFIED. Failures do not authorize a worktree reset.
 - `engineer-advisor` — **AI Coding Knowledge Advisor**. Diagnoses conversation health, evaluates whether context reset, instruction elevation, or complete rebuild is needed.
+
+- `engineer-reconcile` — Reconcile actual implementation, verification evidence, project status, documentation and memory.
+- `engineer-build-performance` — Optimize build/dev latency with measured baselines, cache invalidation checks and output equivalence.
+- `engineer-release` — Coordinate program, plugin, image and downstream releases; distinguish published artifacts from verified live versions.
+
+### Agent Evaluation Skills
+
+- `agent-learning-eval` — Design and run controlled learning, reuse and transfer evaluations, with difficulty calibration, cost accounting and regression analysis.
 
 ### Project & Product Skills
 
@@ -87,6 +96,9 @@ The seven web novel skills are built for character-driven Chinese long-form fict
 - `novel-retention-edit` - Opening appeal, serialization pacing, payoffs, chapter boundaries, and anticipation.
 - `novel-reveal-design` - Misread legends, identity secrets, foreshadowing payoffs, and plot reversals.
 - `novel-tactical-payoff` - Credible tactics, underdog victories, ensemble cooperation, and concrete outcomes.
+
+- `book-content-audit` — Audit and revise arguments, facts, cases and technical examples while preserving substantive content.
+- `book-export-qa` — Verify source-to-export consistency, bilingual editions, navigation and layout across PDF/EPUB/DOCX.
 
 ### RC Philosophy Skills
 
@@ -113,6 +125,15 @@ Provide the project entry point, target chapters, and scope. Specify whether you
 
 The seven web novel skills were distilled from work on the Chinese novel 《我们宗门正在逃跑》 and can be applied to other fiction. Its characters, setting, and project-specific procedures apply only when working on that novel. See each `SKILL.md` for the workflow and its `references/` directory for source notes and adaptation details.
 
+## Specialist Boundaries
+
+- Resume with `engineer-next`; reconcile conflicting status and implementation with `engineer-reconcile`.
+- Design or simplify with `engineer-architect`, review structure with `engineer-inspector`, verify behavior with `engineer-qa`, and coordinate releases with `engineer-release`.
+- Write and plan series with `write-book`, audit content with `book-content-audit`, and verify generated editions with `book-export-qa`.
+- Evaluate learning gains with `agent-learning-eval`; saved assets and passing software tests are not evidence of learning gains.
+
+Demo data, AI editors, technical manuscript checks, open-source delivery, RC consistency and source adaptation live in task-specific references. New specialists can run independently and do not require every optional collaborating skill to be installed.
+
 ## Engineering Workflow Practices
 
 ### Pick the right entry skill
@@ -130,8 +151,8 @@ The engineering skills form a chain. Enter at the point that matches your situat
 | Architecture done, project has a frontend (esp. 2+ surfaces) | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
 | Want a high-fidelity clickable prototype before real implementation | `engineer-poc` | runnable pure-frontend POC + `POC-MANIFEST.md` → `engineer-job` |
 | Blueprint exists, deliver the whole project feature-by-feature | `engineer-orchestrator` | integrated project |
-| One feature, end-to-end | `engineer-workflow` | shipped feature |
-| Verify a finished feature meets the test gate (unit + coverage + E2E) | `engineer-qa` | pass/fix/rebuild verdict |
+| One feature, end-to-end | `engineer-workflow` | implemented and verified feature |
+| Verify a finished feature meets the test gate (unit + coverage + E2E) | `engineer-qa` | PASS / NEEDS_FIX / UNVERIFIED verdict |
 | You want to drive coding yourself, with guidance | `engineer-coach` | — |
 
 `init-project` is for **scaffolding conventions only**; for a full build use `engineer-job`.
@@ -142,7 +163,7 @@ These are the methodology's non-negotiables — the skills enforce them, and you
 
 - *no work without a blueprint* — Don't start coding before `requirements` / `architect` / `frontend-architect` have produced their design docs.
 - *no consolidation without verification* — Never commit or "consolidate" generated code before acceptance. Run `engineer-inspector` first.
-- *rebuild on chaos* — When a session turns into a tangled mess, reset context and rebuild from the persisted blueprint. Don't power through.
+- *diagnose before restarting* — Preserve current work and evidence, identify the cause, and resume from verified state. Resetting conversational context does not mean discarding code.
 
 ### Install the chain, not just one skill
 
@@ -248,12 +269,16 @@ npm test
 
 ## Repository Layout
 
-All 30 skill entry points are listed below. Individual skill directories may also contain `references/` (supporting material), `agents/` (agent configuration), `scripts/` (utilities), and `evals/` (evaluation examples).
+All 36 skill entry points are listed below. Individual skill directories may also contain `references/` (supporting material), `agents/` (agent configuration), `scripts/` (utilities), and `evals/` (evaluation examples).
 
 ```text
 skills/
+├── agent-learning-eval/SKILL.md
+├── book-content-audit/SKILL.md
+├── book-export-qa/SKILL.md
 ├── engineer-advisor/SKILL.md
 ├── engineer-architect/SKILL.md
+├── engineer-build-performance/SKILL.md
 ├── engineer-cloner/SKILL.md
 ├── engineer-coach/SKILL.md
 ├── engineer-frontend-architect/SKILL.md
@@ -264,6 +289,8 @@ skills/
 ├── engineer-orchestrator/SKILL.md
 ├── engineer-poc/SKILL.md
 ├── engineer-qa/SKILL.md
+├── engineer-reconcile/SKILL.md
+├── engineer-release/SKILL.md
 ├── engineer-requirements/SKILL.md
 ├── engineer-workflow/SKILL.md
 ├── init-project/SKILL.md

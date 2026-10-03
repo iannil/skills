@@ -123,7 +123,7 @@ Workflow({
 - 完成的项目代码（按里程碑依赖顺序生成）
 - 更新后的 `CONTEXT.md`（里程碑状态标记为完成）
 
-**失败处理**: 里程碑级自愈（重建 ≤ 2 次 → 降级 → 跳过）
+**失败处理**: 里程碑级诊断与定向修复；必需失败项保持未完成，不自动重置或删减范围
 
 ### Phase 2.5: Run Gate (hard gate)
 
@@ -133,7 +133,7 @@ Workflow({
 - 真跑 build + test（通过 agent 的 Bash 工具）。
 - 失败 → 强制修复循环（normal=2 / auto=1 / silent=1 次）。
 - 修不动 → 标 `DOES_NOT_RUN`，最终报告头条如实标注，**不宣称完成**。
-- 覆盖率门禁：本轮 diff 分支覆盖率 ≥90%，全局 ratchet 不回退（委托 engineer-qa ②③层，见其 references/coverage-tools.md）。
+- 覆盖率门禁：使用项目约定的分支覆盖率和基线策略，未约定时按变更风险判断，不强加统一百分比（委托 engineer-qa ②③层，见其 references/coverage-tools.md）。
 
 ### Phase 3: Integrate
 

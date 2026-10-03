@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-30-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-36-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-30 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent。覆盖四类工作：14 个工程技能、3 个项目与产品技能、8 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
+36 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、3 个项目与产品技能、10 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
 
 每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
 
@@ -41,10 +41,11 @@ cd skills
 
 | 你想做什么 | 技能分类 | 数量 | 常用入口 |
 |---|---|---:|---|
-| 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 14 | `engineer-job` / `engineer-next` |
+| 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 17 | `engineer-job` / `engineer-next` |
 | 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 3 | `init-project` / `product-pusher` |
-| 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 8 | `write-book` / `write-webnovel` |
+| 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 10 | `write-book` / `write-webnovel` |
 | 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
+| 验证 Agent 学习、复用与迁移收益 | [Agent 评测](#agent-评测技能) | 1 | `agent-learning-eval` |
 
 ## 可用技能
 
@@ -64,8 +65,16 @@ cd skills
 - `engineer-workflow` — **AI 编码全自动工作流引擎**。以单个功能需求为输入，自动执行：里程碑拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 提交固化 → 更新蓝图。
 - `engineer-coach` — **AI 编码流程教练**。以六步 SOP 引导用户完成 AI 辅助编程：拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 固化。
 - `engineer-inspector` — **AI 代码架构监理**。检测架构偏移的三大信号（篡改地基 / 过度设计 / 体积失控），输出结构化验收报告。
-- `engineer-qa` — **AI 测试验收引擎**。功能开发完成后自动触发，是测试门禁的单一真源：跑测试金字塔（单元→集成→E2E），强制**变更代码分支覆盖率 ≥90%** 且全局不回退，用 `agent-browser` 驱动关键用户链路 E2E（无 UI 项目降级为 API/CLI 黑盒验收），输出 `.agents/qa-latest.md`（PASS / NEEDS_FIX / REBUILD）。
+- `engineer-qa` — **工程测试验收**。按任务风险和项目约定选择测试与覆盖率口径，区分模拟、真实集成和目标环境证据，输出 PASS / NEEDS_FIX / UNVERIFIED；失败不会自动重置工作树。
 - `engineer-advisor` — **AI 编码知识顾问**。诊断对话健康度，评估是否需要重置上下文、升维指令或彻底重建。
+
+- `engineer-reconcile` — 项目事实与文档校准：从实际实现和验证证据重建进度，整理文档与记忆。
+- `engineer-build-performance` — 构建性能优化：测量 build/dev 等待时间，验证缓存失效、增量输出与资源代价。
+- `engineer-release` — 版本发布与依赖协同：协调主程序、插件、镜像及下游版本，分别确认发布和线上状态。
+
+### Agent 评测技能
+
+- `agent-learning-eval` — 设计与执行学习、复用和迁移对照实验，校准题目难度，记录成本、退化及结论边界。
 
 ### 项目与产品类技能
 
@@ -87,6 +96,9 @@ cd skills
 - `novel-retention-edit` - 开篇吸引力、连载节奏、情节兑现、章界与下一章期待。
 - `novel-reveal-design` - 传说误读、身份秘密、伏笔回收与剧情反转。
 - `novel-tactical-payoff` - 智谋较量、以弱胜强、群像协作与具体胜负兑现。
+
+- `book-content-audit` — 书稿内容审计与修订：核验论证、事实、案例和技术示例，保护有效内容。
+- `book-export-qa` — 书籍导出产物验收：核对源稿、双语和 PDF/EPUB/DOCX 的版本、内容及排版。
 
 ### RC 哲学类技能
 
@@ -113,6 +125,15 @@ cd skills
 
 七个网文技能的方法提炼自《我们宗门正在逃跑》的创作实践，可用于其他小说；书中人物、设定与专用流程只在该作品的任务中启用。具体方法见各技能的 `SKILL.md`，来源与适配说明见其 `references/`。
 
+## 专项技能的分工
+
+- 继续开发用 `engineer-next`；进度与代码互相矛盾时先用 `engineer-reconcile`。
+- 架构设计与精简用 `engineer-architect`；结构审查用 `engineer-inspector`；行为验证用 `engineer-qa`；版本发布用 `engineer-release`。
+- 写书与系列定位用 `write-book`；系统内容审计用 `book-content-audit`；生成文件验收用 `book-export-qa`。
+- `agent-learning-eval` 验证学习收益，不把资产数量或测试通过当作进化证据。
+
+演示数据、AI 编辑器、技术书稿核验、开源交付、RC 一致性和素材改编按需加载相关技能的参考模块，不增加平行入口。新专项可独立使用；缺少可选协作技能时按当前工具和证据完成任务。
+
 ## 工程工作流最佳实践
 
 ### 选对入口技能
@@ -130,8 +151,8 @@ cd skills
 | 架构已完成，项目有前端（尤其 2 个以上端） | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
 | 正式实现前想先要一个高保真可点击原型 | `engineer-poc` | 可运行纯前端 POC + `POC-MANIFEST.md` → `engineer-job` |
 | 蓝图已就绪，按功能逐个交付整个项目 | `engineer-orchestrator` | 集成后的项目 |
-| 单个功能，端到端完成 | `engineer-workflow` | 上线的功能 |
-| 验证已完成功能是否通过测试门禁（单元 + 覆盖率 + E2E） | `engineer-qa` | pass/fix/rebuild 结论 |
+| 单个功能，端到端完成 | `engineer-workflow` | 已实现并验收的功能 |
+| 验证已完成功能是否通过测试门禁（单元 + 覆盖率 + E2E） | `engineer-qa` | PASS / NEEDS_FIX / UNVERIFIED 结论 |
 | 你想自己驱动编码，仅需引导 | `engineer-coach` | — |
 
 `init-project` 仅用于**脚手架约定**；若要从零做完整项目，请使用 `engineer-job`。
@@ -142,7 +163,7 @@ cd skills
 
 - *无图纸不开工* — 在 `requirements` / `architect` / `frontend-architect` 产出设计文档之前，不要开始编码。
 - *无验证不固化* — 永远不要在验收之前提交或"固化"生成的代码。先跑 `engineer-inspector`。
-- *逢混乱必重建* — 当会话变成一团乱麻时，重置上下文并从持久化的蓝图重建。不要硬撑下去。
+- *先诊断再调整* — 保留当前改动与证据，定位原因后从已核实状态接续；重置对话上下文不等于丢弃代码。
 
 ### 整链安装，而非只装一个
 
@@ -248,12 +269,16 @@ npm test
 
 ## 仓库结构
 
-下面列出全部 30 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
+下面列出全部 36 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
 
 ```text
 skills/
+├── agent-learning-eval/SKILL.md
+├── book-content-audit/SKILL.md
+├── book-export-qa/SKILL.md
 ├── engineer-advisor/SKILL.md
 ├── engineer-architect/SKILL.md
+├── engineer-build-performance/SKILL.md
 ├── engineer-cloner/SKILL.md
 ├── engineer-coach/SKILL.md
 ├── engineer-frontend-architect/SKILL.md
@@ -264,6 +289,8 @@ skills/
 ├── engineer-orchestrator/SKILL.md
 ├── engineer-poc/SKILL.md
 ├── engineer-qa/SKILL.md
+├── engineer-reconcile/SKILL.md
+├── engineer-release/SKILL.md
 ├── engineer-requirements/SKILL.md
 ├── engineer-workflow/SKILL.md
 ├── init-project/SKILL.md

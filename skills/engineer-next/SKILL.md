@@ -12,7 +12,8 @@ description: >
   当用户想接着上次的进度继续、但不确定停在哪、也不指定具体技能时触发。
   ROUTING RULE: 用户明确指定了起点（"从零做完整项目"→engineer-job；"实现某功能"→engineer-workflow；
   "画蓝图"→engineer-architect）时让位给那个技能；只有"不确定在哪、想接着继续"时才用本技能。
-compatibility: "agent, bash, write, edit, read"
+metadata:
+  compatibility: "agent, bash, write, edit, read"
 ---
 
 # engineer-next — AI 进度接续路由引擎 / AI Resume Router
@@ -38,7 +39,7 @@ engineer-next 是一个**精准的调度员**：用最小代价搞清楚"项目�
 
 ### 三条核心原则
 
-1. **状态即文件，诊断即读文件 / State Is Files** —— 只读既有 `job.state.json` / `progress.json` / `project-metadata.json` / `CONTEXT.md` / `REQUIREMENTS.md` / `FRONTEND-DESIGN.md` / `POC-MANIFEST.md`，不写自己的进度。检测优先级：`job.state.json → progress.json → CONTEXT.md → 用户`。
+1. **状态即文件，诊断即读文件 / State Is Files** —— 只读既有 `job.state.json` / `progress.json` / `project-metadata.json` / `CONTEXT.md` / `REQUIREMENTS.md` / `FRONTEND-DESIGN.md` / `POC-MANIFEST.md`，不写自己的进度。默认读取顺序：`job.state.json → progress.json → CONTEXT.md`；这不是可信度排序，用户当前明确决定优先，冲突时先校准。
 2. **复用既有恢复，绝不重跑 / Reuse Recovery, Never Redo** —— 接续的命门是"从断点继续"。典型陷阱：重调 `engineer-job` 在 development 阶段会重跑所有里程碑——所以"开发进行中"必须走 `engineer-orchestrator` 的里程碑级恢复。
 3. **降级优于阻塞 / Degrade Over Block** —— 状态文件损坏/检测歧义，按既定优先级降级判定，只在 normal 模式提示用户。
 
@@ -72,6 +73,14 @@ engineer-next 是一个**精准的调度员**：用最小代价搞清楚"项目�
 **mode 透传**：交接时把同一 `--mode` 透传给 target_skill。
 
 ---
+
+## 路由前的事实冲突检查
+
+状态指纹与检测脚本给出接续候选，不证明实现或验收状态。交接前轻量核对当前 Git 状态、关键产物是否存在以及最新验收记录是否属于当前版本。
+
+若出现“状态完成但实现入口缺失”“报告与当前代码版本不符”或多个进度文件互相矛盾，先使用可用的 `engineer-reconcile` 校准，再重新判断断点。仅 HEAD 前进不是自动判定冲突的依据。不改写检测脚本输出协议；本步为候选判决后的人工语义核查。
+
+本技能保持只读，不写进度或亲自重建文档；缺少校准技能时给出具体冲突及接续任务，不将旧标记当成完成证据。工程 QA 的 UNVERIFIED 表示必需证据未取得，不路由为已完成发布。
 
 ## 🔍 诊断流程 / Diagnosis Flow
 

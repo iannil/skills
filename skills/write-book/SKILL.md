@@ -1,7 +1,8 @@
 ---
 name: write-book
-description: 参考祝融说 books 与 practices 的写作方法，规划、撰写、续写和修订中文书籍，保持全书论证、术语、案例和章节递进的一致性。适用于写新书、设计目录、展开章节、续写书稿或整书改稿；不用于普通短文章、单纯摘要或站点部署。
-compatibility: Requires an agent with file reading and editing tools.
+description: 参考祝融说 books 与 practices 的写作方法，规划单本或系列书籍、撰写、续写和修订中文书籍，保持全书论证、术语、案例和章节递进的一致性。适用于写新书、设计目录、展开章节、续写书稿或整书改稿；不用于普通短文章、单纯摘要或站点部署。
+metadata:
+  compatibility: Requires an agent with file reading and editing tools.
 ---
 
 # 写书
@@ -18,6 +19,10 @@ compatibility: Requires an agent with file reading and editing tools.
 - **整书修订**：先找论证缺口、重复章节、术语漂移和承诺未兑现处，再按影响修改；不要仅做逐句润色。
 
 选结构和语体时读 [写作路径与样本](references/writing-patterns.md)。在祝融说仓库落盘时另读 [仓库约定](references/repository.md)。不在该仓库写书时，直接交付用户要求的文稿格式。
+
+## 系列与专项审计
+
+系列定位、跨册重复或修订后内容变薄时，读 [系列定位与修订保留](references/series-and-preservation.md)。常规自检留在本技能；需要系统证据审计时使用可用的 `book-content-audit`，发行文件检查使用 `book-export-qa`。只按当前问题选用，不要求写每章都经过整套审计。
 
 ## 让全书有一条推进线
 

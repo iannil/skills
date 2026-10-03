@@ -25,7 +25,7 @@ function readFrontmatter(filePath) {
   if (!match) return null;
   const frontmatter = {};
   for (const line of match[1].split('\n')) {
-    const kv = line.match(/^(\w+):\s*(.+)$/);
+    const kv = line.match(/^\s*(\w+):\s*(.+)$/);
     if (kv) frontmatter[kv[1]] = kv[2].replace(/^['"]|['"]$/g, '');
   }
   return { frontmatter, content };
@@ -93,7 +93,7 @@ describe('skills', () => {
 
     it('has self-healing section', () => {
       const content = fs.readFileSync(skillFile, 'utf-8');
-      assert.ok(content.includes('自愈') || content.includes('self-heal'),
+      assert.ok(content.includes('失败恢复') || content.includes('self-heal'),
         'should mention self-healing');
     });
 
@@ -146,25 +146,11 @@ describe('skills', () => {
       assert.ok(c.includes('normal') && c.includes('auto') && c.includes('silent'));
     });
 
-    it('defines the four-stage QA lifecycle', () => {
-      const c = fs.readFileSync(skillFile, 'utf-8');
-      for (const stage of ['静态盘点', '单元层', '集成层', 'E2E']) {
-        assert.ok(c.includes(stage), `should describe stage ${stage}`);
-      }
-    });
 
-    it('enforces 90% diff branch coverage + global ratchet', () => {
-      const c = fs.readFileSync(skillFile, 'utf-8');
-      assert.ok(c.includes('90'), 'should state the 90% bar');
-      assert.ok(c.includes('分支覆盖'), 'should require branch coverage');
-      assert.ok(c.includes('qa-baseline.json'), 'should use the ratchet baseline file');
-    });
 
-    it('uses agent-browser for E2E with non-UI degradation', () => {
-      const c = fs.readFileSync(skillFile, 'utf-8');
-      assert.ok(c.includes('agent-browser'), 'should drive E2E via agent-browser');
-      assert.ok(c.includes('降级') || c.includes('跳过'), 'should degrade for non-UI');
-    });
+
+
+
 
     it('uses the three-state verdict', () => {
       const c = fs.readFileSync(skillFile, 'utf-8');
@@ -269,7 +255,7 @@ describe('skills', () => {
 
     it('has self-healing section', () => {
       const content = fs.readFileSync(skillFile, 'utf-8');
-      assert.ok(content.includes('自愈') || content.includes('self-heal'),
+      assert.ok(content.includes('失败恢复') || content.includes('self-heal'),
         'engineer-workflow should have self-healing section');
     });
 
@@ -279,11 +265,7 @@ describe('skills', () => {
         'engineer-workflow should document degradation strategies');
     });
 
-    it('has rebuild threshold table', () => {
-      const content = fs.readFileSync(skillFile, 'utf-8');
-      assert.ok(content.includes('重建') && content.includes('阈值'),
-        'engineer-workflow should have rebuild threshold table');
-    });
+
   });
 
   describe('engineer-qa pipeline hooks', () => {
@@ -294,18 +276,7 @@ describe('skills', () => {
         'workflow acceptance should delegate to engineer-qa');
     });
 
-    it('run.wf.js run-gate enforces coverage + integrate runs e2e', () => {
-      const wf = fs.readFileSync(
-        path.join(SKILL_DIR, 'engineer-job', 'run.wf.js'), 'utf-8');
-      assert.ok(wf.includes('--cov-branch') || wf.includes('branch coverage'),
-        'run gate should check branch coverage');
-      assert.ok(wf.includes('90'), 'run gate should state the 90% bar');
-      assert.ok(wf.includes('agent-browser'), 'integrate should drive e2e via agent-browser');
-      // Guard the EXECUTABLE gate, not just prompt text: the run-gate pass
-      // condition must fail when the agent reports coverage_ok === false.
-      assert.ok(wf.includes('coverage_ok !== false'),
-        'run gate pass condition must enforce coverage_ok');
-    });
+
 
     it('inspector signal-6 points to engineer-qa', () => {
       assert.ok(read('engineer-inspector').includes('engineer-qa'),
@@ -317,12 +288,7 @@ describe('skills', () => {
         'resume router should know engineer-qa');
     });
 
-    it('test-patterns names the 90% truth source', () => {
-      const tp = fs.readFileSync(
-        path.join(SKILL_DIR, 'init-project', 'references', 'test-patterns.md'), 'utf-8');
-      assert.ok(tp.includes('engineer-qa') && tp.includes('90'),
-        'test-patterns should point to engineer-qa 90% gate');
-    });
+
 
     it('both READMEs register engineer-qa', () => {
       const root = path.join(__dirname, '..');

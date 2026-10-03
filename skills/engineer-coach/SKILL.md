@@ -9,7 +9,8 @@ description: >
   "let's build""start coding""implement feature""new feature""我来写""怎么做"等开始编写新功能或新模块的请求。
   ALSO TRIGGER on: 用户描述了一个需求或任务后询问"怎么开始""从哪里开始""第一步是什么"。
   This is a process coaching skill — invoke it whenever coding work begins, not just when explicitly asked.
-compatibility: "bash, write, edit, read"
+metadata:
+  compatibility: "bash, write, edit, read"
 ---
 
 # engineer-coach — AI 编码流程教练 / AI Coding Process Coach
@@ -174,17 +175,10 @@ graph TD
 |------|------|
 | ✅ 所有验收标准通过，无架构偏移 | **通过** → 进入第六步 |
 | ⚠️ 有小瑕疵但可以快速修正 | 使用升维指令引导 AI 修正一次，修正后重新验收 |
-| ❌ 修正后仍有问题，或代码更加混乱 | **彻底重建** → 执行 `git reset --hard`，回到上一个干净的 commit |
-| 🔴 发现篡改地基 | 立即重建，不做任何修正尝试 |
+| ❌ 修正后仍有问题 | 重新定位原因，保留工作树和失败证据；有依据时提出局部修复或重规划方案 |
+| 🔴 核心契约变化 | 核对需求依据、兼容性与迁移影响，不能仅凭文件变化判重建 |
 
-**如果决定彻底重建**:
-```bash
-# 丢弃所有未提交更改，回退到上一个经过验收的 commit
-git reset --hard HEAD
-```
-然后告诉用户："我们回退到了上一个干净的节点。请重新审视我们第二步的指令是否写清楚了，优化后再让 AI 重新生成。"
-
-**纪律**: 绝对不要尝试手动微调 AI 生成的问题代码。在 AI 时代，丢弃错误代码的成本是零，理解它并手工修改的成本极高。
+修复次数不决定重建。不得自动硬重置、删除用户改动或缩减目标；重规划和破坏性回滚是不同操作。
 
 ### 第六步：固化 & 更新图纸 / Step 6: Commit & Update Blueprint
 
@@ -380,7 +374,7 @@ AI 为了处理一个极低概率的边缘情况或修复一个小 Bug，引入�
 
 ## 🔄 三步纠错法 / Triple Error Correction
 
-当 AI 生成的代码跑不通或逻辑偏移时，不要手动修补。执行以下三步：
+当代码跑不通或逻辑偏移时，先取得失败证据，再选择局部修复或结构调整。可按以下三步定位：
 
 ### 第一步：升维指令 / Elevate Instructions
 
@@ -392,30 +386,13 @@ AI 为了处理一个极低概率的边缘情况或修复一个小 Bug，引入�
 
 用架构师的语言指出结构性问题，给 AI **1-2 次**自我修正的机会。如果修正有效，回到正常验收流程。
 
-### 第二步：叫停实施 / Stop Implementation
+### 第二步：停止无证据重试
 
-如果连续两次纠错后，AI 还在兜圈子，或者修复 Bug 引入了新问题：
-- **不要**进行第三、第四次争辩
-- **不要**沉没成本谬误（"已经改了两轮了，再来一轮可能就好了"）
-- 直接告诉用户："当前的对话上下文中 AI 已经无法正确修正了，我们进入第三步——彻底重建。"
+同一失败没有新证据时暂停该修复路径，分清环境、需求、实现和测试问题；继续可独立推进的工作。
 
-### 第三步：彻底重建 / Complete Rebuild
+### 第三步：根据证据重新规划
 
-1. 用户确认后，执行：
-   ```bash
-   git reset --hard HEAD
-   ```
-2. 回到上一个干净的 commit 节点
-3. 协助用户重新审视第二步的指令是否描述清晰
-4. 修改/优化指令后，让 AI 从干净的节点重新出码
-
-> **为什么必须重建而不是修补？**
-> 大模型的生成成本极其廉价，而架构师的脑力带宽极其昂贵。阅读并理解 AI 的面条代码所消耗的心智成本，远超让 AI 重新生成一份。在 AI 时代，抛弃错误代码的成本为零。
->
-> **Why rebuild instead of patch?**
-> AI generation is cheap; architect brainpower is expensive. Reading and untangling AI's spaghetti code costs far more than regenerating from scratch. The cost of discarding bad code in the AI era is zero.
-
----
+保护工作树与数据，说明局部修复为什么不足、替代方案和影响。仅在明确授权范围内执行修改，不把重规划解释为丢弃未提交改动。
 
 ## 🚫 红线纪律 / Red Line Discipline
 
@@ -435,13 +412,9 @@ AI 为了处理一个极低概率的边缘情况或修复一个小 Bug，引入�
 - [ ] 是否发生了架构偏移？（检查三大信号）
 - [ ] 边缘异常处理完整吗？（不要"带着裂缝盖楼"）
 
-### 红线三：逢混乱必重建 / When in Doubt, Rebuild
+### 红线三：先诊断再调整
 
-**不得**在混乱的对话中继续纠缠。以下情况都意味着需要重建：
-- AI 开始胡言乱语、兜圈子
-- 修复一个 Bug 引入了三个新 Bug
-- 当前对话超过 15-20 轮
-- 代码中出现了"不知道为什么这样写但能跑"的段落
+循环修复或上下文失真时先保存证据与当前工作，再定位原因。对话轮数不是重建依据；上下文整理、局部修复、架构重规划与丢弃代码是不同动作，不相互推导授权。
 
 ---
 

@@ -5,10 +5,11 @@ description: >
   framework (Observational Convergence / 观察收敛). Trigger when the user wants to:
   write an article about RC, reference a specific passage or axiom, find a quote from
   the RC corpus, expand an RC idea, translate RC concepts between CN and EN, explain
-  RC to a specific audience, cite RC in academic writing, or compare RC terminology.
+  RC to a specific audience, cite RC in academic writing, compare RC terminology, or audit extensions for consistency with a specified RC source.
   Has access to a 387-entry curated corpus of original RC notes for precise quotation
   and cross-referencing. Bilingual.
-compatibility: "read, write"
+metadata:
+  compatibility: "read, write"
 ---
 
 # RC Text Assistant — RC 文本辅助工具
@@ -28,6 +29,10 @@ This skill provides **precise, reference-backed assistance** for any text work i
 | Translate RC terms | Precise bilingual terminology with usage context |
 | Expand RC ideas | Develop concepts while maintaining framework fidelity |
 | Compare RC terms | Distinguish similar concepts (e.g., 次级建构 vs 降维投影) |
+
+## 理论延伸审计
+
+用户要求审计 RC 延伸、核对与总纲是否一致或区分原意与新推论时，读 [理论延伸一致性审计](references/consistency-audit.md)。优先使用用户指定的现行总纲；经验事实另行核验，不以内部自洽代替证据。
 
 ## Reference: Philosophy Corpus
 

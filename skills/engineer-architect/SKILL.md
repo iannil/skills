@@ -12,7 +12,8 @@ description: >
   "帮我搭建""帮我设计""架构设计""系统设计"。也适用于已有部分代码但没有蓝图的项目：
   "帮我分析现有项目""项目的架构是什么""帮我整理一下""已有代码，帮我理清结构"。
   当用户开始一个新项目但没有任何文档时，此 skill 应优先于 engineer-coach 触发。
-compatibility: "bash, write, read, edit"
+metadata:
+  compatibility: "bash, write, read, edit"
 ---
 
 # engineer-architect — AI 架构师 / AI System Architect
@@ -22,6 +23,12 @@ compatibility: "bash, write, read, edit"
 > **Source**: The methodology of this skill originates from "AI-Assisted Programming Practice Based on Implementation Planning". Visit [zhurongshuo.com] for more context.
 
 ---
+
+## 已有系统与专项设计
+
+用户要求简化、解耦或确定核心时，读 [核心识别与精简](references/simplification.md)，从实际调用链判断保留和调整范围。只校准实际进度与文档时优先使用可用的 `engineer-reconcile`，不为整理任务重做蓝图。
+
+包含 AI 生成与持续人工编辑时，按需读 [AI 编辑器架构](references/ai-editor.md)，明确版本、运行身份、候选冲突和来源快照。普通前端项目不加载这一模块。
 
 ## 🎯 核心理念 / Core Philosophy
 

@@ -1,7 +1,8 @@
 ---
 name: write-webnovel
 description: "中文网文的构思、连载续写、人物塑造、全书或连续章节修订及追读审读。适用于用户要求写正文、设计故事单元、改善开篇吸引力、重复感、人物主动性、胜利兑现和下一章期待；尤其适合人物驱动的长篇与群像。基于《逃跑》创作实践提炼，其他小说不继承该书设定。不用于非虚构文章润色、分发运营或收入预测。"
-compatibility: Requires an agent with file reading and editing tools.
+metadata:
+  compatibility: Requires an agent with file reading and editing tools.
 ---
 
 # 网文撰写
@@ -20,6 +21,10 @@ compatibility: Requires an agent with file reading and editing tools.
 - 构思、拆单元、写正文：读 [故事与场景方法](references/storycraft.md)。续写还要读前文实际结果和本章依赖，不能仅看细纲。
 - 多章修订、重排、事实核验：读 [连续性与修订](references/continuity-and-revision.md)。先连读问题区间及其前后承接，再判断病因。
 - 用户询问技能依据或要求更新方法时：读 [提炼依据](references/sources.md)。不要把参考文件全部装入每次写作上下文。
+
+## 原始素材改编
+
+从短篇、思想笔记或历史材料构思长篇时，读 [原始素材改编](references/source-adaptation.md)，将素材转化为人物选择与故事因果，不机械逐篇对应章节。
 
 ## 写作主链
 

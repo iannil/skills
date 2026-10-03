@@ -1,99 +1,58 @@
 ---
 name: engineer-qa
-description: >
-  AI 测试验收引擎 — 功能开发完成后自动触发的测试门禁。执行测试金字塔全生命周期验收：
-  单元测试 + 本轮变更(diff)分支覆盖率 ≥90% 硬门禁（全局 ratchet 不回退）、集成测试覆盖
-  实体 CRUD 与错误路径、用 agent-browser 驱动关键用户链路 E2E。是 engineer* 系列
-  测试/覆盖率/E2E 门禁的单一真源；无 UI 项目优雅降级为黑盒验收。
-  TRIGGERS: 用户说"测试验收""跑一下测试""覆盖率够不够""E2E""端到端测试""验收测试"
-  "test acceptance""run the tests""coverage""e2e""是不是测够了"。
-  ALSO TRIGGER: 功能/里程碑开发完成后（管道自动接入），在提交固化前执行测试门禁。
-compatibility: "bash, read, write, agent"
+description: 根据任务风险、项目约定与验收目标执行功能测试和交付验证，区分模拟、真实集成与生产证据。适用于功能或里程碑验收、回归、覆盖率与端到端检查；不以统一覆盖率替代正确性判断。
+metadata:
+  compatibility: "bash, read, write, agent"
 ---
 
-# engineer-qa — AI 测试验收引擎 / AI Test Acceptance Engine
+# 工程测试验收
 
-> **来源声明**: 本 skill 的方法论来源于《基于实现规划的 AI 辅助编程实战》。更多内容请访问 [zhurongshuo.com]。
->
-> **Source**: The methodology of this skill originates from "AI-Assisted Programming Practice Based on Implementation Planning".
+验收结论必须限定范围、版本与环境。已有项目要求继续遵守；没有既定覆盖率门槛时不自行强加固定百分比或每函数测试数量。测试运行由本技能负责，架构审查可由 `engineer-inspector` 负责。
 
-## 🎯 核心理念 / Core Philosophy
+## 确定范围和判据
 
-"能跑通" ≠ "验收通过"。验收通过 = **测试金字塔全层绿灯 + 本轮分支覆盖率 ≥90% +
-全局覆盖率不回退 + 关键用户链路 E2E 通过**。无验证不固化——测试必须真跑、真过、真达标。
+读取用户本次要求、项目规则、验收条件和真实变更。一起查看暂存、未暂存及相关未跟踪文件；不要因工作树 diff 为空就把最近一次无关提交当成本轮。分支审查使用已确认的基准，范围不明则注明限制。
 
-## 🚦 触发条件 / When to Trigger
+有 CONTEXT.md 时检查是否仍适用；没有蓝图时从需求、当前实现和项目测试约定形成明确判据，不要求先生成蓝图才能验收。保留工作树原状和现有数据。
 
-**中文触发：**
-- "测试验收"、"跑一下测试"、"覆盖率够不够"、"是不是测够了"
-- "E2E"、"端到端测试"、"验收测试"
+选择能验证具体风险的检查：
 
-**English triggers:**
-- "test acceptance"、"run the tests"、"coverage"、"e2e"
+| 变更 | 验证重点 |
+| --- | --- |
+| 文案、注释、纯排版 | 内容、链接、构建或渲染检查；不强制新增单元测试 |
+| 业务逻辑或缺陷修复 | 可复现失败、关键分支与回归；断言可观察行为 |
+| 接口、持久化、权限 | 集成行为、错误路径、数据一致性及权限边界 |
+| 用户旅程 | 真实入口、服务响应、状态保存与关键端到端结果 |
+| 安装与交付 | 干净环境安装、默认配置及打包资源完整性 |
 
-**管道自动接入 / Pipeline auto-hook:**
-功能或里程碑开发完成后，由 engineer* 管道在提交固化前自动调用本 skill 执行测试门禁——
-不需要用户显式请求。When a feature or milestone completes, the engineer* pipeline invokes
-this skill automatically as the test gate before any commit is finalized.
+遵守项目要求的检查。通过后只在新改动、失败或未解决风险需要时扩大验证，不以测试数量代替信心。
 
-## ⚙️ 模式选择 / Mode Selection
+## 执行并分层记录证据
 
-通过 `--mode` 参数控制自动确认程度（默认 normal）：
+优先使用项目现有命令和工具。覆盖率涉及任务时读 [覆盖率口径](references/coverage-tools.md)；UI 或跨系统链路读 [端到端验证](references/e2e-playbook.md)。工具不可用时选择有效替代并报告边界。
 
-| 模式 | 行为 |
-|:----:|------|
-| normal | 出验收报告，等待用户决定下一步 |
-| auto | 自动执行三态决策：PASS→继续，NEEDS_FIX→升维修一次复验，REBUILD→git reset 重建(≤2) |
-| silent | 全自动静默，仅 🔴 输出，报告落盘 .agents/qa-latest.md |
+模拟接口通过仅证明相应模拟场景；真实 API 成功也不等于生产全链路通过。分别标记静态检查、单元、模拟集成、真实集成、本地端到端和目标环境验证，不把环境缺失写成成功。
 
-## 📋 工作前提 / Prerequisites
+只有相关任务才加载 [专项场景](references/scenario-validation.md)：业务演示数据、AI 编辑器协同、备份恢复。真实付费调用、外部写入沿用已有授权；缺少条件时完成可执行检查并列出缺口。
 
-1. **CONTEXT.md 可读** — 从中读取测试策略、验收标准与关键用户链路；缺失时从对话历史推断并在报告中标注。
-2. **变更范围明确** — 通过 `git diff` 确定本轮变更文件集，作为 diff 覆盖率门禁的分母。
-3. **工具链探测** — 探测项目的测试与覆盖率工具链（Jest/Vitest/pytest/go test 等），确认能产出分支覆盖数据。
+## 失败处理
 
-## 🔍 四阶段工作流 / Four-Stage QA Lifecycle
+先区分产品缺陷、测试或验收器缺陷、环境错误、历史失败与偶发问题。修复已授权的本轮问题，复现并验证相关回归；重复同一失败而没有新证据时停止盲目重试，给出原因和下一步。
 
-### ① 静态盘点 / Inventory
-读 CONTEXT.md（测试策略、验收标准、用户链路、词汇表）；探测项目类型(API/CLI/Web/Library)；
-探测测试与覆盖率工具链（见 `references/coverage-tools.md`）；确定本轮变更范围（`git diff`）。
+修复次数不决定是否重建。保护用户修改，不执行破坏性重置、不静默缩减需求或跳过必验项来制造通过。确需架构重做时记录方案；旧调用方使用 REBUILD 标签时只表示需重规划，不表示授权删除或重置。
 
-### ② 单元层 / Unit
-运行单元测试（全部通过）；计算**本轮变更(diff)分支覆盖率 ≥ 90% 硬门禁**；
-每核心函数 1 happy + 2 edge（空输入/异常参数/极限值）。覆盖率不足 → NEEDS_FIX，报告未覆盖分支 `file:line`。
+## 结论与交接
 
-### ③ 集成层 / Integration
-运行集成测试（全部通过）；业务实体 **CRUD 全链路 + 错误路径**（400/404/500 或等价异常）全覆盖。
+| 结论 | 含义 |
+| --- | --- |
+| PASS | 本次范围的必需验收已实际通过；列出不属于本次范围的检查 |
+| NEEDS_FIX | 有已证实缺陷或未满足的项目门槛，需要修正 |
+| UNVERIFIED | 必需证据因环境、范围或数据不足无法取得，不能判通过 |
 
-### ④ E2E 层 / End-to-End（功能/项目完成后负载一次）
-用 **agent-browser** 驱动关键用户链路（登录→核心操作→登出 / 创建→读取→更新→删除），
-截图取证存 `.agents/qa-e2e/`。详见 `references/e2e-playbook.md`。
-**无 UI 项目**：优雅**降级**——API→端点黑盒 E2E，CLI→子命令 E2E，Library→跳过并在报告标注。
+部分通过时逐项记录，不让一个总体绿灯隐藏必需未验证项。调用方无法消费 UNVERIFIED 时保留详细报告并使用其未完成状态，不强行映射为 PASS。
 
-## 📊 覆盖率门禁 / Coverage Gate
-- 本轮硬门禁：diff 分支覆盖率 `< 90%` → NEEDS_FIX。
-- 全局 ratchet：读写 `.agents/qa-baseline.json`；全局覆盖率低于基线 → NEEDS_FIX；达标则更新基线（只升不降）。
-- 首次无基线：建立基线，仅 diff 门禁。
-- 工具不支持分支覆盖：降级为行覆盖 + 报告告警。
+使用 [报告模板](references/qa-report-template.md) 按需裁剪，默认复用项目验收记录位置，无约定时写 `.agents/qa-latest.md`。已授权后续实现可继续；单纯验收不自动提交或发布。normal/auto/silent 仅影响呈现和授权范围内的自动推进，不改变判据或操作权限。
 
-## 🧭 三态决策 / Branch Decision
+## ⚙️ 模式选择
 
-| 结论 | 条件 | normal | auto / silent |
-|:----:|------|--------|---------------|
-| ✅ PASS | 四层全绿 + diff 分支≥90% + 全局不回退 | 出报告建议提交 | 继续 |
-| ⚠️ NEEDS_FIX | 测试失败/覆盖不足/全局回退/E2E 单链路失败 | 出报告等决策 | 升维修一次复验 |
-| 🛑 REBUILD | 修一次后仍失败/根本性错误 | 建议重建 | git reset --hard 重建(≤2) |
-
-## 📄 报告模板 / Report Template
-见 `references/qa-report-template.md`，输出到 `.agents/qa-latest.md`。
-
-## ⚠️ 边界情况 / Edge Cases
-
-- **无 CONTEXT.md** — 从对话历史推断测试策略与验收标准，并在报告中标注"无蓝图验收"。
-- **无 git 仓库** — 无法计算 diff 覆盖率，降级为全量覆盖率门禁并告警。
-- **diff 为空** — 回退到 `HEAD~1..HEAD` 作为本轮变更范围。
-- **无测试框架** — 直接判 NEEDS_FIX，报告中给出推荐的工具链与最小接入步骤。
-- **E2E 起服务失败** — 降级为可执行的最深层验收（集成层），并在报告标注 E2E 未执行原因。
-- **首次无 baseline** — 建立 `.agents/qa-baseline.json` 基线，本轮仅执行 diff 门禁。
-- **E2E flake** — 单链路失败自动重试 1 次；复现失败才计入 NEEDS_FIX。
-- **用户要求跳过测试** — 提醒"无验证不固化"，如坚持跳过则在报告与提交信息中显式标注未验收。
+normal 展示必要结果；auto 在已有授权内继续；silent 减少过程输出。三种模式使用相同验收判据，并保留失败、未验证和恢复信息。

@@ -8,7 +8,7 @@ export const meta = {
     { title: 'Frontend', detail: 'engineer-frontend-architect frontend design' },
     { title: 'POC', detail: 'engineer-poc high-fidelity clickable prototype (skippable via skip_poc / stoppable via stop_at_poc)' },
     { title: 'Develop', detail: 'deterministic milestone loop (workflow + inspector per milestone)' },
-    { title: 'Run Gate', detail: 'QA gate: build + unit + integration + diff branch coverage >=90%; fix loop; DOES_NOT_RUN if unfixable' },
+    { title: 'Run Gate', detail: 'QA gate: required build, tests and project-specific coverage; diagnose failures; report missing evidence' },
     { title: 'Integrate', detail: 'integration + agent-browser E2E (load once, degrade for non-UI) & production readiness' },
     { title: 'Deploy', detail: 'deployment configuration generation' },
     { title: 'Report', detail: 'final report generation' },
@@ -214,10 +214,11 @@ const RUN_GATE_SCHEMA = {
     test_command: { type: 'string' },
     output: { type: 'string' },
     coverage_ok: { type: 'boolean' },
+    coverage_reason: { type: 'string' },
     diff_coverage: { type: 'number' },
     global_coverage: { type: 'number' },
   },
-  required: ['build_ok', 'test_ok'],
+  required: ['build_ok', 'test_ok', 'coverage_ok', 'coverage_reason'],
 }
 
 // ── Helpers ──────────────────────────────────────────────
@@ -229,6 +230,7 @@ function ctx(phase, extra = '') {
     `Mode: ${MODE}`,
     `Requirements: "${REQUIREMENTS}"`,
     `Phase: ${phase}`,
+    "Preserve existing work and requirements. Mode does not expand authorization. Do not hard-reset, silently reduce scope, publish or include unrelated changes in commits. Mark missing required evidence as incomplete.",
   ]
   if (extra) lines.push('', extra)
   return lines.join('\n')
@@ -742,39 +744,44 @@ Determine build & test commands:
      node/typescript      -> build: "npm run build --if-present", test: "npm test --if-present"
      rust                 -> build: "cargo build",         test: "cargo test"
      go                   -> build: "go build ./...",       test: "go test ./..."
-Run BOTH commands via Bash. Capture full output.
+Run the applicable required commands via Bash. Capture full output. An absent script or --if-present no-op is not verification. If a step is legitimately inapplicable, explain the alternative evidence; missing required evidence must not return true.
 Return build_ok, test_ok, the commands used, and combined output (last ~2000 chars).
 === COVERAGE GATE (engineer-qa ②③) ===
-After build+test pass, measure BRANCH coverage on changed files (git diff).
-Prefer project-native coverage config; fallback per engineer-qa references/coverage-tools.md
-  (e.g. python: "pytest --cov --cov-branch"; node: "jest --coverage"; c8 "--branches 90").
-Diff branch coverage MUST be >= 90% (the 90% bar). If the tool lacks branch coverage,
-degrade to line coverage and note it. Read/update ".agents/qa-baseline.json" so global
-coverage never regresses. Return coverage_ok plus measured diff/global coverage.
+Use engineer-qa to select risk-relevant checks and the project's explicit coverage policy.
+Measure branch coverage only where supported and required; never substitute line coverage silently.
+Use the confirmed change range, including relevant new files. Whole-file coverage is not diff coverage.
+Do not impose a universal percentage, fixed test count or a new ratchet policy.
+Reuse a comparable existing baseline only if project policy requires it.
+Return coverage_ok=true only when the applicable policy is satisfied, or when no numerical policy
+applies and the selected risk-relevant checks have passed. Explain that in coverage_reason.
+If required evidence is missing or a policy fails, return coverage_ok=false with the reason.
+Do not invent numerical coverage for an unavailable metric.
 ${attempts > 1 ? 'Previous attempt failed. You MAY fix the code to make build+test pass before re-running.' : ''}`),
       { schema: RUN_GATE_SCHEMA, label: 'run-gate', phase: 'Run Gate' }
     )
 
-    if (gate && gate.build_ok && gate.test_ok && (gate.coverage_ok !== false)) break
+    if (gate && gate.build_ok && gate.test_ok && (gate.coverage_ok === true)) break
     if (attempts > MAX_FIX) break
     log(`Phase 4.5: run gate failed (attempt ${attempts}) — fix attempt ${attempts}`)
     await agent(
       ctx('run-gate-fix', `=== FIX BUILD/TEST FAILURES ===
-The project build or tests are failing. Fix the code until BOTH pass.
+The run gate did not pass. Diagnose whether this is a product defect, missing evidence, test defect or environment failure. Fix only supported causes within the authorized scope; preserve existing work and requirements.
 Last failure output:
 ${(gate && gate.output) || '(no output)'}
-Do NOT skip or delete tests. Make them pass. Commit the fix. Append to .agents/job.progress.md.`),
+Coverage policy: ${(gate && gate.coverage_reason) || '(not reported)'}
+Do NOT skip required checks, delete valid tests, hard-reset or shrink requirements to pass. Commit only if already authorized, selecting reviewed task files. Append actual progress and unresolved evidence to .agents/job.progress.md.`),
       { schema: PHASE_RESULT, label: 'run-gate-fix', phase: 'Run Gate' }
     )
   }
 
-  const passed = !!(gate && gate.build_ok && gate.test_ok && (gate.coverage_ok !== false))
+  const passed = !!(gate && gate.build_ok && gate.test_ok && (gate.coverage_ok === true))
   runGateResult = {
     status: passed ? 'PASS' : 'DOES_NOT_RUN',
     attempts,
     build_command: (gate && gate.build_command) || '',
     test_command: (gate && gate.test_command) || '',
-    last_error: passed ? null : ((gate && gate.output) || 'unknown'),
+    last_error: passed ? null : ((gate && gate.output) || (gate && gate.coverage_reason) || 'unknown'),
+    coverage_reason: (gate && gate.coverage_reason) || '',
   }
   log(`Phase 4.5: run gate ${passed ? 'PASS' : 'DOES_NOT_RUN'} after ${attempts} attempt(s)`)
 
@@ -861,7 +868,8 @@ if (!isDone('report')) {
     ctx('report', `=== GENERATE FINAL REPORT ===
 RUN GATE STATUS: ${runGateResult ? runGateResult.status : 'unknown'}.
 If status is DOES_NOT_RUN, the FIRST line of your report MUST be exactly:
-  ⚠️ DOES_NOT_RUN — build/test failing; project is NOT runnable.
+  ⚠️ DOES_NOT_RUN — required run-gate verification did not pass.
+Distinguish confirmed failures from missing evidence; do not assert the whole project is unrunnable without evidence.
 Do NOT claim the project is complete in that case.
 
 Development milestone summary: ${developmentSummary || '(not available)'}.
@@ -875,7 +883,7 @@ Generate a comprehensive markdown report covering:
 2. MILESTONE TABLE — id, name, status, degraded?, rebuild count, tests
 3. FILE CHANGES — total files created/modified
 4. TEST RESULTS — total tests, passed, failed
-5. DEPLOYMENT — what was generated
+5. DEPLOYMENT — distinguish config generated, artifact published, downstream upgraded, and live version verified. Do not publish unless authorized; use engineer-release when available for requested releases.
 6. GLOSSARY AUDIT — total terms, any consistency issues
 7. KNOWN ISSUES — skipped features, unresolved integration problems
 8. DEGRADATION LOG — any milestones that were degraded/skipped

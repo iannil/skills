@@ -12,7 +12,8 @@ description: >
   且用户表达的是完成多个功能/整个项目的意图时触发。
   也触发于：用户刚完成 architect 设计后说"开始做吧""开始开发"。
   此 skill 应比 engineer-workflow 优先触发当有多个功能需要实现时。
-compatibility: "bash, write, edit, read"
+metadata:
+  compatibility: "bash, write, edit, read"
 ---
 
 # engineer-orchestrator — AI 项目编排引擎 / AI Project Orchestrator
@@ -672,10 +673,12 @@ engineer-workflow 完成单个功能后，orchestrator 不能只是"哦好，下
 
 当前对话已进行 [N] 轮，已完成 [N] 个功能。建议重置上下文以保持 AI 输出质量。
 
-### 重置前提交
+### 重置前保存
+
+已有提交授权时提交本轮文件；否则保存工作树与接续记录，不要求为重置对话而新增提交授权。
 
 ```bash
-git add -A
+git add -- <已审查且属于本轮的文件路径>
 git commit -m "feat: [刚完成的功能名] — [描述]"
 ```
 
@@ -703,9 +706,9 @@ git commit -m "feat: [刚完成的功能名] — [描述]"
 - [ ] 集成验收已通过
 - [ ] CONTEXT.md 已更新
 - [ ] progress.json 已更新
-- [ ] 所有变更已 commit
+- [ ] 本轮改动和用户原有改动均已保留，已授权的提交只包含本轮审查过的文件
 
-**纪律**: 不允许为了"先重置再补提交"而跳过验收。**无验证不固化、无提交不重置。**
+**纪律**: 不允许为了"先重置再补提交"而跳过验收。**验收与未完成状态如实保存；对话接续不以提交为前提。**
 ```
 
 ---

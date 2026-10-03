@@ -1,7 +1,8 @@
 ---
 name: novel-retention-edit
 description: "诊断和修订小说开篇、连续章节或全书的重复感、兑现过晚、章界和下一章期待。适用于读起来慢、一直准备、缺少追读动力等问题；不是通用逐句润色或商业留存预测。"
-compatibility: Requires an agent with file reading and editing tools.
+metadata:
+  compatibility: Requires an agent with file reading and editing tools.
 ---
 
 # 连载节奏与追读修订
@@ -39,6 +40,10 @@ compatibility: Requires an agent with file reading and editing tools.
 先列应保留的高潮、关系变化、必要条件和情绪停留，再提出最小有效修改。删字率不是目标；章节合并、段落压缩与关键结果前移分别说明。不能靠把已发生事件改称“铺垫”掩盖倒序矛盾。
 
 区分无变化与低强度：告别、吃饭、病客、夜谈可兑现亲近、自由与生活改变，不强加笑点、危机或悬崖。分章优先完成一个可感知变化；具体期待可来自好奇、想见成功、关系牵挂或局势担忧。
+
+## 对照作品与情绪分布
+
+用户明确要求同类作品对照、连续章节情绪分析时，读 [同类作品对照与情绪兑现](references/comparison-and-emotion.md)。以实际读过的文本和场景功能为依据，避免给每章固定情绪配额。
 
 ## 修订后验证
 
