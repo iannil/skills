@@ -1,18 +1,50 @@
 # iannil/skills
 
-**一条可组合的 AI 工程技能链，无人值守地把一个模糊想法做成上线代码。**
+**让 AI Agent 帮你开发软件、打磨网文、分析产品与探索哲学。**
 
 [English](README.md) | **简体中文**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
 [![Skills](https://img.shields.io/badge/skills-29-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-面向 AI 编码 Agent（Claude Code、Codex、Cursor 等）的 29 个可安装技能。核心是一条 **14 个技能组成的工程链**，基于"实现规划驱动的 AI 辅助编程"方法论：描述你想要什么，这条链就自动跑完 需求 → 架构 → 前端设计 → 编排开发 → 验收 → 测试门禁，无人值守，并强制执行三条阻止"架构偏移"的硬纪律。此外还附带产品分析、产品拷问与 RC 哲学等技能。
+29 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent。覆盖四类工作：14 个工程技能、3 个项目与产品技能、7 个网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
 
-每个技能都遵循标准 `skills/<name>/SKILL.md` 目录结构，兼容更广泛的技能生态（含 `vercel-labs/skills` 安装器），可直接接入任何兼容的 Agent。
+每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
+
+## 快速开始
+
+本地安装需要 Git 和 Bash；使用下方脚本无需 Node.js。克隆仓库需要联网，克隆后的安装可以离线完成。
+
+```bash
+git clone https://github.com/iannil/skills.git
+cd skills
+# 安装全部技能到 Codex（~/.codex/skills）
+./install.sh --agent codex
+```
+
+使用 Claude Code 时运行 `./install.sh`，默认安装到 `~/.claude/skills`；两者都安装用 `./install.sh --agent all`。
+
+安装后，在 Agent 中指定技能名并描述任务，例如：
+
+- **开发软件**：“用 engineer-job，从零做一个任务管理工具。”
+- **写作续篇**：“用 write-webnovel，读完现有正文和设定后续写下一章。”
+- **精修文字**：“用 novel-prose-readability，精修这段文字，保留人物声口与叙事视角。”
+- **梳理产品**：“用 product-pusher，帮我找出这个产品点子最需要验证的假设。”
+- **学习哲学**：“用 rc-tutor，从零解释观测收敛。”
+
+更多选项见[安装](#安装)。如果这些技能对你有帮助，欢迎点一个 star。
+
+## 按任务选技能
+
+| 你想做什么 | 技能分类 | 数量 | 常用入口 |
+|---|---|---:|---|
+| 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 14 | `engineer-job` / `engineer-next` |
+| 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 3 | `init-project` / `product-pusher` |
+| 构思、续写、审读或修订中文网文 | [网文创作类](#网文创作类技能) | 7 | `write-webnovel` |
+| 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
 
 ## 工程链如何串起来
 
@@ -32,20 +64,6 @@ graph TD
 ```
 
 从最贴近你处境的那个节点进入——每个技能都知道如何交接给下一个。不知道自己在哪一步？先用 `engineer-next`。
-
-## 快速开始
-
-```bash
-# 安装全部技能到 Claude Code（~/.claude/skills）
-git clone https://github.com/iannil/skills && cd skills
-./install.sh
-```
-
-然后在你的 Agent 里直接描述项目——例如*"帮我从零无人值守做一个任务管理工具"*——`engineer-job` 会接管一切。无需 `npx`、无需下载；`install.sh` 零依赖，重跑即更新。
-
-想用包安装器？`npx iannil/skills install all`——完整选项见[安装](#安装)。
-
-⭐ 如果它帮你省下一个周末的脚手架时间，点个 star 能让更多人找到它。
 
 ## 可用技能
 
@@ -76,6 +94,8 @@ git clone https://github.com/iannil/skills && cd skills
 
 ### 网文创作类技能
 
+围绕人物驱动的中文长篇与群像写作，覆盖构思、正文、审读和修订。`write-webnovel` 是综合入口；其余六个技能用于处理具体问题，可以独立选用。
+
 - `write-webnovel` - 网文创作总入口：构思、连载续写、人物塑造与连续章节修订。
 - `novel-character-agency` - 人物欲望、主动选择、声口、群像差异与成长连续性。
 - `novel-comedy-engine` - 人物欲望驱动的包袱、误会与跨章喜剧事件。
@@ -92,7 +112,23 @@ git clone https://github.com/iannil/skills && cd skills
 - `rc-philosophy-advisor` - 在 RC 视角下探讨深层哲学问题，并生成新的 RC 风格箴言与片段。
 - `rc-text-assistant` - 撰写、引用、检索、翻译与 RC 哲学框架相关的内容。
 
-## 最佳实践
+## 网文技能怎么选
+
+| 当前问题 | 使用技能 | 交付重点 |
+|---|---|---|
+| 新作构思、故事单元设计、续写下一章 | `write-webnovel` | 故事方案、正文或连续章节修订 |
+| 人物被剧情推着走、配角工具化、声口雷同 | `novel-character-agency` | 欲望、主动选择与成长连续性 |
+| 笑点靠插科打诨、重复包袱或人物降智 | `novel-comedy-engine` | 人物欲望引发的喜剧事件 |
+| 句意难懂、指代不明、动作难跟、解释重复 | `novel-prose-readability` | 局部或连续章节的文字精修 |
+| 开篇慢、一直准备、兑现过晚、缺少下一章期待 | `novel-retention-edit` | 节奏、情节兑现与章界调整 |
+| 伏笔难回收、谜底临时补、反转不改变行动 | `novel-reveal-design` | 线索、揭晓与人物行动的因果衔接 |
+| 计策不可信、对手降智、主角赢了却没有所得 | `novel-tactical-payoff` | 智谋对抗、协作与具体胜果 |
+
+使用时提供作品入口、目标章节和任务范围，并说明要“审读建议”还是“实际改稿”。多章修订需要读取原文及必要前后文，再检查事实、人物知识和伏笔的连续性。可以先用 `write-webnovel` 或 `novel-retention-edit` 诊断结构，再按问题选用专项技能。
+
+这组方法提炼自《我们宗门正在逃跑》的创作实践，可用于其他小说；书中人物、设定与专用流程只在该作品的任务中启用。具体方法见各技能的 `SKILL.md`，来源与适配说明见其 `references/`。
+
+## 工程工作流最佳实践
 
 ### 选对入口技能
 
@@ -149,6 +185,7 @@ npx iannil/skills install all
 npx iannil/skills install init-project
 npx iannil/skills install product-analysis-framework
 npx iannil/skills install rc-tutor
+npx iannil/skills install write-webnovel
 ```
 
 预览而不改动任何东西：
@@ -167,6 +204,9 @@ npx iannil/skills install --dry-run
 
 # 只安装/更新指定技能
 ./install.sh init-project engineer-architect
+
+# 只安装网文创作入口和文字精修技能到 Codex
+./install.sh --agent codex write-webnovel novel-prose-readability
 
 # 安装到其他 Agent——或两者都装
 ./install.sh --agent codex
@@ -195,6 +235,7 @@ npx skills add iannil/skills --skill '*'
 npx skills add iannil/skills --skill init-project
 npx skills add iannil/skills --skill product-analysis-framework
 npx skills add iannil/skills --skill rc-tutor
+npx skills add iannil/skills --skill write-webnovel
 ```
 
 标准安装器会为 Claude Code、Codex CLI、Cursor、Gemini CLI、Continue、Windsurf、OpenCode、Qwen Code 等兼容的 AI 编码工具处理目标 Agent 的目录布局。
@@ -221,86 +262,39 @@ npm test
 
 ## 仓库结构
 
+下面列出全部 29 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
+
 ```text
 skills/
-├── engineer-job/
-│   └── SKILL.md                    # P0 — 元编排引擎 / 全自动项目构建
-├── engineer-next/
-│   ├── SKILL.md                    # 进度接续路由——诊断状态，交接给正确的技能
-│   └── references/                 # resume-logic.js(纯函数)、detect-resume.js(CLI)、handoff-protocol.md
-├── engineer-requirements/
-│   └── SKILL.md                    # 需求拆解 / Event Storming + DDD
-├── engineer-architect/
-│   └── SKILL.md                    # P0 — 需求→蓝图自动生成
-├── engineer-frontend-architect/
-│   └── SKILL.md                    # 前端详细设计 / FRONTEND-DESIGN.md
-├── engineer-poc/
-│   ├── SKILL.md                    # 高保真纯前端 POC 引擎 / 可选 Phase 3.5
-│   └── references/                 # 行业模式库、账本 schema、mock 层规范、模板、流水线
-├── engineer-orchestrator/
-│   └── SKILL.md                    # P0 — 项目级编排引擎
-├── engineer-workflow/
-│   └── SKILL.md                    # 全自动功能开发引擎
-├── engineer-coach/
-│   └── SKILL.md                    # 流程教练 / 六步 SOP
-├── engineer-inspector/
-│   └── SKILL.md                    # 代码架构监理
-├── engineer-qa/
-│   ├── SKILL.md                    # 测试验收引擎 / 测试门禁
-│   └── references/
-│       ├── coverage-tools.md
-│       ├── e2e-playbook.md
-│       └── qa-report-template.md
-├── engineer-advisor/
-│   └── SKILL.md                    # 编码知识顾问
-├── init-project/
-│   ├── SKILL.md
-│   └── references/
-│       └── conventions-guide.md
-├── product-analysis-framework/
-│   └── SKILL.md
-├── product-pusher/
-│   ├── SKILL.md                    # 产品/创业产品拷问——又软又硬的拷问式头脑风暴
-│   └── evals/
-│       └── evals.json
-├── write-webnovel/
-│   └── SKILL.md
-├── novel-character-agency/
-│   └── SKILL.md
-├── novel-comedy-engine/
-│   └── SKILL.md
-├── novel-prose-readability/
-│   └── SKILL.md
-├── novel-retention-edit/
-│   └── SKILL.md
-├── novel-reveal-design/
-│   └── SKILL.md
-├── novel-tactical-payoff/
-│   └── SKILL.md
-├── rc-application-tool/
-│   ├── SKILL.md
-│   └── evals/
-│       └── evals.json
-├── rc-causal-chain/
-│   ├── SKILL.md
-│   └── evals/
-│       └── evals.json
-├── rc-philosophy-advisor/
-│   ├── SKILL.md
-│   ├── evals/
-│   │   └── evals.json
-│   └── references/
-│       └── philosophy-corpus.md
-├── rc-text-assistant/
-│   ├── SKILL.md
-│   ├── evals/
-│   │   └── evals.json
-│   └── references/
-│       └── philosophy-corpus.md → (符号链接，指向 ../rc-philosophy-advisor/references/)
-└── rc-tutor/
-    ├── SKILL.md
-    └── evals/
-        └── evals.json
+├── engineer-advisor/SKILL.md
+├── engineer-architect/SKILL.md
+├── engineer-cloner/SKILL.md
+├── engineer-coach/SKILL.md
+├── engineer-frontend-architect/SKILL.md
+├── engineer-inspector/SKILL.md
+├── engineer-job/SKILL.md
+├── engineer-legacy-recon/SKILL.md
+├── engineer-next/SKILL.md
+├── engineer-orchestrator/SKILL.md
+├── engineer-poc/SKILL.md
+├── engineer-qa/SKILL.md
+├── engineer-requirements/SKILL.md
+├── engineer-workflow/SKILL.md
+├── init-project/SKILL.md
+├── novel-character-agency/SKILL.md
+├── novel-comedy-engine/SKILL.md
+├── novel-prose-readability/SKILL.md
+├── novel-retention-edit/SKILL.md
+├── novel-reveal-design/SKILL.md
+├── novel-tactical-payoff/SKILL.md
+├── product-analysis-framework/SKILL.md
+├── product-pusher/SKILL.md
+├── rc-application-tool/SKILL.md
+├── rc-causal-chain/SKILL.md
+├── rc-philosophy-advisor/SKILL.md
+├── rc-text-assistant/SKILL.md
+├── rc-tutor/SKILL.md
+└── write-webnovel/SKILL.md
 ```
 
 ## 许可证

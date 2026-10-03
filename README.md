@@ -1,18 +1,50 @@
 # iannil/skills
 
-**A composable AI engineering skill chain that builds whole projects unattended — from vague idea to shipped code.**
+**AI agent skills for software, fiction, product analysis, and philosophy.**
 
 **English** | [简体中文](README.zh-CN.md)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
 [![Skills](https://img.shields.io/badge/skills-29-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-29 installable skills for AI coding agents (Claude Code, Codex, Cursor, and more). The centerpiece is a **14-skill engineering chain** built on the "Implementation-Planning-Driven AI-Assisted Programming" methodology: describe what you want, and the chain runs requirements → architecture → frontend design → orchestrated development → inspection → QA test gate, unattended, enforcing three hard disciplines that stop architecture drift. Also ships product-analysis, product-pusher, and RC-philosophy skill sets.
+29 installable skills for Codex, Claude Code, and other agents that support skills: 14 for engineering, 3 for projects and products, 7 for web novel writing, and 5 for RC (Observational Convergence) philosophy.
 
-Each skill uses the standard `skills/<name>/SKILL.md` layout compatible with the broader skills ecosystem (including the `vercel-labs/skills` installer), so it drops into any compliant agent.
+Each skill defines its workflow in `skills/<name>/SKILL.md`, with supporting references, scripts, or agent configuration where needed. Choose a skill for a specific task or combine several into a workflow.
+
+## Quick Start
+
+Local installation requires Git and Bash; the script below does not require Node.js. Cloning requires a network connection; installation from the local checkout works offline.
+
+```bash
+git clone https://github.com/iannil/skills.git
+cd skills
+# Install all skills into Codex (~/.codex/skills)
+./install.sh --agent codex
+```
+
+For Claude Code, run `./install.sh` to install into `~/.claude/skills`. Use `./install.sh --agent all` to install into both.
+
+Then name a skill and describe your task in your agent:
+
+- **Build software:** “Use engineer-job to build a task tracker from scratch.”
+- **Continue a novel:** “Use write-webnovel to read the existing chapters and story notes, then write the next chapter.”
+- **Polish prose:** “Use novel-prose-readability to revise this passage while preserving character voice and viewpoint.”
+- **Explore a product:** “Use product-pusher to identify the assumptions I need to validate in this product idea.”
+- **Learn philosophy:** “Use rc-tutor to explain Observational Convergence from first principles.”
+
+See [Install](#install) for more options. If these skills help you, a star helps others find them.
+
+## Choose by Task
+
+| What you want to do | Category | Count | Common entry points |
+|---|---|---:|---|
+| Build, verify, or resume a software project | [Engineering](#engineering-skills) | 14 | `engineer-job` / `engineer-next` |
+| Set up a project, analyze a product, or test an idea | [Projects & products](#project--product-skills) | 3 | `init-project` / `product-pusher` |
+| Plan, continue, review, or revise Chinese web fiction | [Web novel writing](#web-novel-writing-skills) | 7 | `write-webnovel` |
+| Learn RC, diagnose problems, analyze causes, or write | [RC philosophy](#rc-philosophy-skills) | 5 | `rc-tutor` / `rc-application-tool` |
 
 ## How the engineering chain fits together
 
@@ -32,20 +64,6 @@ graph TD
 ```
 
 Enter at whichever box matches your situation — every skill knows how to hand off to the next. Not sure where you are? Start with `engineer-next`.
-
-## Quick Start
-
-```bash
-# Install ALL skills into Claude Code (~/.claude/skills)
-git clone https://github.com/iannil/skills && cd skills
-./install.sh
-```
-
-Then in your agent, just describe the project — e.g. *"build me a task-tracker from scratch, unattended"* — and `engineer-job` takes it from there. No `npx`, no download; `install.sh` is zero-dependency and re-run-to-update.
-
-Prefer a package installer instead? `npx iannil/skills install all` — see [Install](#install) for every option.
-
-⭐ If this saves you a weekend of scaffolding, a star helps others find it.
 
 ## Available Skills
 
@@ -76,6 +94,8 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 
 ### Web Novel Writing Skills
 
+Built for character-driven Chinese long-form fiction and ensemble stories, covering planning, drafting, review, and revision. Use `write-webnovel` as the general entry point, or choose one of the six focused skills for a specific problem.
+
 - `write-webnovel` - Web novel writing: story planning, serialization, characterization, and multi-chapter revision.
 - `novel-character-agency` - Character desires, agency, voice, ensemble differentiation, and consistent growth.
 - `novel-comedy-engine` - Character-driven humor, misunderstandings, and comedy across chapters.
@@ -92,7 +112,23 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 - `rc-philosophy-advisor` - Discuss deep philosophical questions through the RC lens and generate new RC-style aphorisms and fragments.
 - `rc-text-assistant` - Write, reference, cite, search, and translate content related to the RC philosophical framework.
 
-## Best Practices
+## Choosing a Writing Skill
+
+| Current problem | Skill | Focus |
+|---|---|---|
+| Planning a new story, designing an arc, or writing the next chapter | `write-webnovel` | Story plans, prose, or multi-chapter revision |
+| Passive characters, disposable supporting roles, or indistinct voices | `novel-character-agency` | Desires, active choices, and consistent growth |
+| Humor relies on banter, repeated jokes, or foolish behavior | `novel-comedy-engine` | Comic events driven by character desires |
+| Unclear sentences, confusing action, or repetitive explanation | `novel-prose-readability` | Passage-level or multi-chapter prose revision |
+| Slow openings, endless setup, delayed payoffs, or weak anticipation | `novel-retention-edit` | Pacing, payoffs, and chapter boundaries |
+| Unresolved clues, improvised reveals, or twists with no consequences | `novel-reveal-design` | Causal links between clues, revelations, and action |
+| Implausible tactics, weakened opponents, or victories without rewards | `novel-tactical-payoff` | Credible contests, cooperation, and concrete gains |
+
+Provide the project entry point, target chapters, and scope. Specify whether you want a review or edits to the manuscript. Multi-chapter revision uses the original text and surrounding context to check continuity in facts, character knowledge, and foreshadowing. Start with `write-webnovel` or `novel-retention-edit` for structural diagnosis, then select a focused skill as needed.
+
+These methods were distilled from work on the Chinese novel 《我们宗门正在逃跑》 and can be applied to other fiction. Its characters, setting, and project-specific procedures apply only when working on that novel. See each `SKILL.md` for the workflow and its `references/` directory for source notes and adaptation details.
+
+## Engineering Workflow Practices
 
 ### Pick the right entry skill
 
@@ -149,6 +185,7 @@ Install one skill:
 npx iannil/skills install init-project
 npx iannil/skills install product-analysis-framework
 npx iannil/skills install rc-tutor
+npx iannil/skills install write-webnovel
 ```
 
 Preview without changing anything:
@@ -167,6 +204,9 @@ A dependency-free `install.sh` is bundled for offline install. It copies the ski
 
 # Install/update specific skills only
 ./install.sh init-project engineer-architect
+
+# Install only the writing entry point and prose revision skill into Codex
+./install.sh --agent codex write-webnovel novel-prose-readability
 
 # Target a different agent — or both
 ./install.sh --agent codex
@@ -195,6 +235,7 @@ npx skills add iannil/skills --skill '*'
 npx skills add iannil/skills --skill init-project
 npx skills add iannil/skills --skill product-analysis-framework
 npx skills add iannil/skills --skill rc-tutor
+npx skills add iannil/skills --skill write-webnovel
 ```
 
 The standard installer handles the target agent layout for tools such as Claude Code, Codex CLI, Cursor, Gemini CLI, Continue, Windsurf, OpenCode, Qwen Code, and other compatible AI coding tools.
@@ -221,86 +262,39 @@ npm test
 
 ## Repository Layout
 
+All 29 skill entry points are listed below. Individual skill directories may also contain `references/` (supporting material), `agents/` (agent configuration), `scripts/` (utilities), and `evals/` (evaluation examples).
+
 ```text
 skills/
-├── engineer-job/
-│   └── SKILL.md                    # P0 — meta-orchestrator / unattended full-project build
-├── engineer-next/
-│   ├── SKILL.md                    # resume router — detects state, hands off to the right skill
-│   └── references/                 # resume-logic.js (pure), detect-resume.js (CLI), handoff-protocol.md
-├── engineer-requirements/
-│   └── SKILL.md                    # requirements decomposition / Event Storming + DDD
-├── engineer-architect/
-│   └── SKILL.md                    # P0 — requirements → blueprint auto-generation
-├── engineer-frontend-architect/
-│   └── SKILL.md                    # frontend detailed design / FRONTEND-DESIGN.md
-├── engineer-poc/
-│   ├── SKILL.md                    # high-fidelity pure-frontend POC engine / optional Phase 3.5
-│   └── references/                 # industry-patterns, poc-ledger schema, mock-layer guide, templates, pipeline
-├── engineer-orchestrator/
-│   └── SKILL.md                    # P0 — project-level orchestration engine
-├── engineer-workflow/
-│   └── SKILL.md                    # fully-automated feature development engine
-├── engineer-coach/
-│   └── SKILL.md                    # process coach / six-step SOP
-├── engineer-inspector/
-│   └── SKILL.md                    # code architecture inspector
-├── engineer-qa/
-│   ├── SKILL.md                    # test acceptance engine / test gate
-│   └── references/
-│       ├── coverage-tools.md
-│       ├── e2e-playbook.md
-│       └── qa-report-template.md
-├── engineer-advisor/
-│   └── SKILL.md                    # coding knowledge advisor
-├── init-project/
-│   ├── SKILL.md
-│   └── references/
-│       └── conventions-guide.md
-├── product-analysis-framework/
-│   └── SKILL.md
-├── product-pusher/
-│   ├── SKILL.md                    # product/startup Product Pusher — grilled brainstorming
-│   └── evals/
-│       └── evals.json
-├── write-webnovel/
-│   └── SKILL.md
-├── novel-character-agency/
-│   └── SKILL.md
-├── novel-comedy-engine/
-│   └── SKILL.md
-├── novel-prose-readability/
-│   └── SKILL.md
-├── novel-retention-edit/
-│   └── SKILL.md
-├── novel-reveal-design/
-│   └── SKILL.md
-├── novel-tactical-payoff/
-│   └── SKILL.md
-├── rc-application-tool/
-│   ├── SKILL.md
-│   └── evals/
-│       └── evals.json
-├── rc-causal-chain/
-│   ├── SKILL.md
-│   └── evals/
-│       └── evals.json
-├── rc-philosophy-advisor/
-│   ├── SKILL.md
-│   ├── evals/
-│   │   └── evals.json
-│   └── references/
-│       └── philosophy-corpus.md
-├── rc-text-assistant/
-│   ├── SKILL.md
-│   ├── evals/
-│   │   └── evals.json
-│   └── references/
-│       └── philosophy-corpus.md → (symlink to ../rc-philosophy-advisor/references/)
-└── rc-tutor/
-    ├── SKILL.md
-    └── evals/
-        └── evals.json
+├── engineer-advisor/SKILL.md
+├── engineer-architect/SKILL.md
+├── engineer-cloner/SKILL.md
+├── engineer-coach/SKILL.md
+├── engineer-frontend-architect/SKILL.md
+├── engineer-inspector/SKILL.md
+├── engineer-job/SKILL.md
+├── engineer-legacy-recon/SKILL.md
+├── engineer-next/SKILL.md
+├── engineer-orchestrator/SKILL.md
+├── engineer-poc/SKILL.md
+├── engineer-qa/SKILL.md
+├── engineer-requirements/SKILL.md
+├── engineer-workflow/SKILL.md
+├── init-project/SKILL.md
+├── novel-character-agency/SKILL.md
+├── novel-comedy-engine/SKILL.md
+├── novel-prose-readability/SKILL.md
+├── novel-retention-edit/SKILL.md
+├── novel-reveal-design/SKILL.md
+├── novel-tactical-payoff/SKILL.md
+├── product-analysis-framework/SKILL.md
+├── product-pusher/SKILL.md
+├── rc-application-tool/SKILL.md
+├── rc-causal-chain/SKILL.md
+├── rc-philosophy-advisor/SKILL.md
+├── rc-text-assistant/SKILL.md
+├── rc-tutor/SKILL.md
+└── write-webnovel/SKILL.md
 ```
 
 ## License
