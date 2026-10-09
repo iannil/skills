@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-36-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-38-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-36 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、3 个项目与产品技能、10 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
+38 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、5 个项目与产品技能、10 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
 
 每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
 
@@ -42,7 +42,7 @@ cd skills
 | 你想做什么 | 技能分类 | 数量 | 常用入口 |
 |---|---|---:|---|
 | 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 17 | `engineer-job` / `engineer-next` |
-| 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 3 | `init-project` / `product-pusher` |
+| 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 5 | `init-project` / `product-pusher` |
 | 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 10 | `write-book` / `write-webnovel` |
 | 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
 | 验证 Agent 学习、复用与迁移收益 | [Agent 评测](#agent-评测技能) | 1 | `agent-learning-eval` |
@@ -79,6 +79,8 @@ cd skills
 ### 项目与产品类技能
 
 - `init-project` - 完整的项目初始化工作流，包含文档、记忆、发布结构、可观测性约定，以及按语言类型的脚手架。
+- `commercial-positioning-research` - 寻找差异化商业定位，深度核验真实需求、替代方案、付费证据与经营条件，输出附来源和可复算模型的商业价值报告；证据不足就不推荐。
+- `seo-geo-methodology` - 循证 SEO / GEO 优化：诊断搜索发现与 AI 引用问题，改进内容，分别衡量搜索可见度、AI 引用和业务结果，不承诺排名或增长。
 - `product-analysis-framework` - 结构化的产品与创业分析框架，覆盖市场证据、用户痛点、护城河、商业模式、风险，以及可复用的创业模式。
 - `product-pusher` - **产品拷问**。把一个还没做出来的产品/创业点子，通过又软又硬的拷问对话锻造成能动手的产品定义：先一起发散，再一个个硬问题拷问（真实用户、真实痛点、生死开关握在谁手里、最便宜的验证），直到收敛出具体的产品定义——收尾给出按致命度排序的死因报告与 go/no-go/pivot 判断。协作但对抗：只戳漏洞，不当啦啦队。底层是因果链 / RC 纪律，用大白话呈现。
 
@@ -300,6 +302,8 @@ skills/
 ├── novel-retention-edit/SKILL.md
 ├── novel-reveal-design/SKILL.md
 ├── novel-tactical-payoff/SKILL.md
+├── commercial-positioning-research/SKILL.md
+├── seo-geo-methodology/SKILL.md
 ├── product-analysis-framework/SKILL.md
 ├── product-pusher/SKILL.md
 ├── rc-application-tool/SKILL.md

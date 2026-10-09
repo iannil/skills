@@ -11,6 +11,8 @@ const cli = path.join(root, 'bin', 'skills.js');
 
 const EXPECTED_SKILLS = [
   'init-project',
+  'commercial-positioning-research',
+  'seo-geo-methodology',
   'product-analysis-framework',
   'rc-application-tool',
   'rc-philosophy-advisor',

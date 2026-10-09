@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-36-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-38-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-36 installable skills for Codex, Claude Code, and other agents that support skills: 17 for engineering, 1 for Agent evaluation, 3 for projects and products, 10 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
+38 installable skills for Codex, Claude Code, and other agents that support skills: 17 for engineering, 1 for Agent evaluation, 5 for projects and products, 10 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
 
 Each skill defines its workflow in `skills/<name>/SKILL.md`, with supporting references, scripts, or agent configuration where needed. Choose a skill for a specific task or combine several into a workflow.
 
@@ -42,7 +42,7 @@ See [Install](#install) for more options. If these skills help you, a star helps
 | What you want to do | Category | Count | Common entry points |
 |---|---|---:|---|
 | Build, verify, or resume a software project | [Engineering](#engineering-skills) | 17 | `engineer-job` / `engineer-next` |
-| Set up a project, analyze a product, or test an idea | [Projects & products](#project--product-skills) | 3 | `init-project` / `product-pusher` |
+| Set up a project, analyze a product, or test an idea | [Projects & products](#project--product-skills) | 5 | `init-project` / `product-pusher` |
 | Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 10 | `write-book` / `write-webnovel` |
 | Learn RC, diagnose problems, analyze causes, or write | [RC philosophy](#rc-philosophy-skills) | 5 | `rc-tutor` / `rc-application-tool` |
 | Evaluate Agent learning, reuse and transfer | [Agent evaluation](#agent-evaluation-skills) | 1 | `agent-learning-eval` |
@@ -79,6 +79,8 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 ### Project & Product Skills
 
 - `init-project` - Complete project initialization workflow with docs, memory, release structure, observability conventions, and language-specific scaffolding.
+- `commercial-positioning-research` - Research differentiated positioning, test demand and payment evidence against real alternatives, and deliver a sourced commercial-value report with reproducible economics. Reject unsupported directions.
+- `seo-geo-methodology` - Evidence-based SEO and generative search optimization: investigate discovery and citation barriers, improve content, and measure search visibility, AI citations and business outcomes separately.
 - `product-analysis-framework` - Structured product and startup analysis framework with market evidence, user pain, moat, business model, risks, and reusable startup patterns.
 - `product-pusher` - **Product Pusher**. Forge a NEW, still-unbuilt product or startup idea into a buildable definition through a grilled brainstorming dialogue: brainstorm it open, then pressure-test it one hard question at a time (real users, real pain, who holds the kill-switch, the cheapest validation) until a concrete product definition survives — ending in a ranked kill-risk report and a go/no-go/pivot call. Collaborative but adversarial: it pokes holes, not cheerleads. Built on the causal-chain / RC discipline, surfaced in plain language.
 
@@ -300,6 +302,8 @@ skills/
 ├── novel-retention-edit/SKILL.md
 ├── novel-reveal-design/SKILL.md
 ├── novel-tactical-payoff/SKILL.md
+├── commercial-positioning-research/SKILL.md
+├── seo-geo-methodology/SKILL.md
 ├── product-analysis-framework/SKILL.md
 ├── product-pusher/SKILL.md
 ├── rc-application-tool/SKILL.md
