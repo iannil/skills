@@ -1,7 +1,8 @@
 ---
 name: seo-geo-methodology
 description: "为网站、产品与知识内容开展循证 SEO / GEO（生成式搜索优化）：调研当前规则、诊断搜索与 AI 引用问题、改进内容、制定实施方案或评估效果。用于搜索可见度、AI 提及/引用及其转化优化；单纯润色文案或泛增长策划无需使用。"
-compatibility: Codex, Claude Code, and agents with web search, page reading, and file tools.
+metadata:
+  compatibility: Codex, Claude Code, and agents with web search, page reading, and file tools.
 ---
 
 # SEO / GEO 循证优化

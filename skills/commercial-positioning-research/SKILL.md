@@ -1,7 +1,8 @@
 ---
 name: commercial-positioning-research
 description: 为产品寻找差异化商业定位，并通过真实需求、竞品替代、付费证据、获客与单位经济深度调研筛选，输出有来源的商业价值报告。用于寻找长期商业化方向、判断某个定位是否值得投入或重审已有定位；不将文案包装、功能脑暴或行业规模当作商业验证。
-compatibility: Codex, Claude Code, and agents with web search, page reading, and file tools.
+metadata:
+  compatibility: Codex, Claude Code, and agents with web search, page reading, and file tools.
 ---
 
 # 商业定位与价值验证
