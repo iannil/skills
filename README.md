@@ -79,7 +79,7 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 ### Project & Product Skills
 
 - `init-project` - Complete project initialization workflow with docs, memory, release structure, observability conventions, and language-specific scaffolding.
-- `commercial-positioning-research` - Research differentiated positioning, test demand and payment evidence against real alternatives, and deliver a sourced commercial-value report with reproducible economics. Reject unsupported directions.
+- `commercial-positioning-research` - Research differentiated positioning, assess commercial evidence and the value of the next investment separately, and deliver a sourced report with reproducible economics and stage-appropriate validation plans.
 - `seo-geo-methodology` - Evidence-based SEO and generative search optimization: investigate discovery and citation barriers, improve content, and measure search visibility, AI citations and business outcomes separately.
 - `product-analysis-framework` - Structured product and startup analysis framework with market evidence, user pain, moat, business model, risks, and reusable startup patterns.
 - `product-pusher` - **Product Pusher**. Forge a NEW, still-unbuilt product or startup idea into a buildable definition through a grilled brainstorming dialogue: brainstorm it open, then pressure-test it one hard question at a time (real users, real pain, who holds the kill-switch, the cheapest validation) until a concrete product definition survives — ending in a ranked kill-risk report and a go/no-go/pivot call. Collaborative but adversarial: it pokes holes, not cheerleads. Built on the causal-chain / RC discipline, surfaced in plain language.
