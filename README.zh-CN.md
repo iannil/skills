@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-38-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-39-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-38 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、5 个项目与产品技能、10 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
+39 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、5 个项目与产品技能、11 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
 
 每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
 
@@ -43,7 +43,7 @@ cd skills
 |---|---|---:|---|
 | 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 17 | `engineer-job` / `engineer-next` |
 | 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 5 | `init-project` / `product-pusher` |
-| 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 10 | `write-book` / `write-webnovel` |
+| 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 11 | `write-book` / `write-webnovel` |
 | 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
 | 验证 Agent 学习、复用与迁移收益 | [Agent 评测](#agent-评测技能) | 1 | `agent-learning-eval` |
 
@@ -99,6 +99,7 @@ cd skills
 - `novel-reveal-design` - 传说误读、身份秘密、伏笔回收与剧情反转。
 - `novel-tactical-payoff` - 智谋较量、以弱胜强、群像协作与具体胜负兑现。
 
+- `book-polish` — 出版级书稿润色：按目标读者与理论、实践、小说等类型校准阅读难度，保留内容精度、作者风格与阅读节奏。
 - `book-content-audit` — 书稿内容审计与修订：核验论证、事实、案例和技术示例，保护有效内容。
 - `book-export-qa` — 书籍导出产物验收：核对源稿、双语和 PDF/EPUB/DOCX 的版本、内容及排版。
 
@@ -131,7 +132,7 @@ cd skills
 
 - 继续开发用 `engineer-next`；进度与代码互相矛盾时先用 `engineer-reconcile`。
 - 架构设计与精简用 `engineer-architect`；结构审查用 `engineer-inspector`；行为验证用 `engineer-qa`；版本发布用 `engineer-release`。
-- 写书与系列定位用 `write-book`；系统内容审计用 `book-content-audit`；生成文件验收用 `book-export-qa`。
+- 写书与系列定位用 `write-book`；按读者与类型润色用 `book-polish`；系统内容审计用 `book-content-audit`；生成文件验收用 `book-export-qa`。
 - `agent-learning-eval` 验证学习收益，不把资产数量或测试通过当作进化证据。
 
 演示数据、AI 编辑器、技术书稿核验、开源交付、RC 一致性和素材改编按需加载相关技能的参考模块，不增加平行入口。新专项可独立使用；缺少可选协作技能时按当前工具和证据完成任务。
@@ -271,13 +272,14 @@ npm test
 
 ## 仓库结构
 
-下面列出全部 36 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
+下面列出全部 39 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
 
 ```text
 skills/
 ├── agent-learning-eval/SKILL.md
 ├── book-content-audit/SKILL.md
 ├── book-export-qa/SKILL.md
+├── book-polish/SKILL.md
 ├── engineer-advisor/SKILL.md
 ├── engineer-architect/SKILL.md
 ├── engineer-build-performance/SKILL.md

@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-38-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-39-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-38 installable skills for Codex, Claude Code, and other agents that support skills: 17 for engineering, 1 for Agent evaluation, 5 for projects and products, 10 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
+39 installable skills for Codex, Claude Code, and other agents that support skills: 17 for engineering, 1 for Agent evaluation, 5 for projects and products, 11 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
 
 Each skill defines its workflow in `skills/<name>/SKILL.md`, with supporting references, scripts, or agent configuration where needed. Choose a skill for a specific task or combine several into a workflow.
 
@@ -43,7 +43,7 @@ See [Install](#install) for more options. If these skills help you, a star helps
 |---|---|---:|---|
 | Build, verify, or resume a software project | [Engineering](#engineering-skills) | 17 | `engineer-job` / `engineer-next` |
 | Set up a project, analyze a product, or test an idea | [Projects & products](#project--product-skills) | 5 | `init-project` / `product-pusher` |
-| Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 10 | `write-book` / `write-webnovel` |
+| Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 11 | `write-book` / `write-webnovel` |
 | Learn RC, diagnose problems, analyze causes, or write | [RC philosophy](#rc-philosophy-skills) | 5 | `rc-tutor` / `rc-application-tool` |
 | Evaluate Agent learning, reuse and transfer | [Agent evaluation](#agent-evaluation-skills) | 1 | `agent-learning-eval` |
 
@@ -99,6 +99,7 @@ The seven web novel skills are built for character-driven Chinese long-form fict
 - `novel-reveal-design` - Misread legends, identity secrets, foreshadowing payoffs, and plot reversals.
 - `novel-tactical-payoff` - Credible tactics, underdog victories, ensemble cooperation, and concrete outcomes.
 
+- `book-polish` — Polish manuscripts for publication, adapting reading difficulty to the audience and book type while preserving precision, authorial voice, and reading rhythm.
 - `book-content-audit` — Audit and revise arguments, facts, cases and technical examples while preserving substantive content.
 - `book-export-qa` — Verify source-to-export consistency, bilingual editions, navigation and layout across PDF/EPUB/DOCX.
 
@@ -131,7 +132,7 @@ The seven web novel skills were distilled from work on the Chinese novel 《我�
 
 - Resume with `engineer-next`; reconcile conflicting status and implementation with `engineer-reconcile`.
 - Design or simplify with `engineer-architect`, review structure with `engineer-inspector`, verify behavior with `engineer-qa`, and coordinate releases with `engineer-release`.
-- Write and plan series with `write-book`, audit content with `book-content-audit`, and verify generated editions with `book-export-qa`.
+- Write and plan series with `write-book`, polish for the audience and book type with `book-polish`, audit content with `book-content-audit`, and verify generated editions with `book-export-qa`.
 - Evaluate learning gains with `agent-learning-eval`; saved assets and passing software tests are not evidence of learning gains.
 
 Demo data, AI editors, technical manuscript checks, open-source delivery, RC consistency and source adaptation live in task-specific references. New specialists can run independently and do not require every optional collaborating skill to be installed.
@@ -271,13 +272,14 @@ npm test
 
 ## Repository Layout
 
-All 36 skill entry points are listed below. Individual skill directories may also contain `references/` (supporting material), `agents/` (agent configuration), `scripts/` (utilities), and `evals/` (evaluation examples).
+All 39 skill entry points are listed below. Individual skill directories may also contain `references/` (supporting material), `agents/` (agent configuration), `scripts/` (utilities), and `evals/` (evaluation examples).
 
 ```text
 skills/
 ├── agent-learning-eval/SKILL.md
 ├── book-content-audit/SKILL.md
 ├── book-export-qa/SKILL.md
+├── book-polish/SKILL.md
 ├── engineer-advisor/SKILL.md
 ├── engineer-architect/SKILL.md
 ├── engineer-build-performance/SKILL.md
