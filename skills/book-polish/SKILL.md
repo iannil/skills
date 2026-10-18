@@ -1,6 +1,8 @@
 ---
 name: book-polish
 description: 按目标读者和书籍类型，以电子书或实体书出版为质量目标润色已有书稿。适用于理论、学术、科普、实践、教材、散文、小说与网文的片段、章节或整书精修；校准阅读难度，保留内容精度与作者风格，改善理解、表达和阅读节奏。不替代从零写书、系统事实审计或导出排版验收。
+metadata:
+  compatibility: Requires an agent with file reading and editing tools.
 ---
 
 # 面向出版的分类型书稿润色
