@@ -55,3 +55,22 @@
 - [秦鞅：网文写作的顿悟](https://www.zhihu.com/question/1940701266222257670/answer/1967585812368561385)：名词先行、信息分批与张弛。抓取页面的“更多回答”还展示纯纯的橙与宾南北雁的内容；两者仅作页面附带参考，不混称指定回答正文。
 
 校准：动作数量、字数、章数及情绪四角度均为作者启发式，不是实测阈值或已核验心理学模型；不保留“读者永远正确”“可以不顾逻辑”“压抑越狠越爽”“最多三个视角”及固定反转频次等绝对化断言。十序列为可选危机成长模板，需求分类不要求逐层满足；不据这些方法承诺签约、收入或读者留存。
+
+## 2026-10-18 深度调研增补
+
+新增 reader-experience.md 与 scene-workshop.md；修订情绪先行、有效动作、序列五真假胜利、持续升级和成果永久等过强措辞。新文件的流程、卡片与例子是编辑综合，不是论文原始结论。研究为定向核查，非系统综述；旧基线样例表现良好，不能追认为失败，也不据新增术语的使用宣称写作质量提升。
+
+| 来源 | 证据类型与使用范围 |
+| --- | --- |
+| [Writing Excuses 10.31](https://writingexcuses.com/writing-excuses-10-31-how-do-i-control-the-readers-sense-of-progress/) | 已读官方创作讨论；进度与承诺匹配，不是实验定律 |
+| [Ingermanson：Renaming MRUs](https://www.advancedfictionwriting.com/blog/2009/06/04/renaming-mrus/) | 技法介绍；外部刺激与视角反应，不冒称直接读过 Swain 原典 |
+| [乌贼访谈](https://www.chinawriter.com.cn/n1/2025/0107/c404024-40396807.html) | 作者经验；分卷结构、人物与读者反馈的边界 |
+| [吱吱访谈](https://www.chinawriter.com.cn/n1/2022/0126/c404024-32340067.html) | 作者经验；生活细节、温暖人物与不同创作路径 |
+| [番茄百万长篇课程](https://fanqienovel.com/writer/zone/article/7449229727572688920) | 平台刊载作者经验；阶段兑现、疲劳与缓冲，不是算法规则 |
+| [番茄开篇课程](https://fanqienovel.com/writer/zone/article/7478306809401327640) | 偏女频的作者经验；减少无用信息与关系启动，不外推统一字数阈值 |
+| [Trabasso 与 van den Broek，1985](https://www.sciencedirect.com/science/article/pii/0749596X8590049X) | 本轮依据公开摘要；因果连接与记忆、重要性判断，不能推导动作数量标准 |
+| [Loewenstein，1994](https://www.cmu.edu/dietrich/sds/docs/loewenstein/PsychofCuriosity.pdf) | 好奇的信息差理论；转为写作提示属综合推论 |
+| [Maslow，1943](https://psychclassics.yorku.ca/Maslow/motivation) | 原文说明层级并非严格固定，允许需要同时部分满足；不把示意百分比当角色参数 |
+| [Schibler 等：叙事悬崖结尾](https://researchconnect.suny.edu/en/publications/investigating-responses-to-narrative-cliffhangers-using-affective/) | 本轮依据公开摘要，两实验 N=202、273；部分比较下续篇意愿提高，非实际付费或长期留存 |
+
+伊扎德四维归属仅核至中文教学资料层，未核英文原典且定义有差异，不作心理学配方。动作数与节奏的关系没有本轮直接实验支持；视角稳定的研究也不能推出必须单视角或必须每句以主角作主语。起点相关官方课程未取得完整正文，晋江仅核实分类与帮助页，不据此编造平台创作通则。叙事投入研究中较少发现不一致的现象，不意味着可以放弃逻辑。
