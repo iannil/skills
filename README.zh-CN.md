@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-39-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-40-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-39 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、5 个项目与产品技能、11 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
+40 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、5 个项目与产品技能、12 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
 
 每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
 
@@ -43,7 +43,7 @@ cd skills
 |---|---|---:|---|
 | 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 17 | `engineer-job` / `engineer-next` |
 | 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 5 | `init-project` / `product-pusher` |
-| 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 11 | `write-book` / `write-webnovel` |
+| 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 12 | `write-book` / `write-webnovel` |
 | 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
 | 验证 Agent 学习、复用与迁移收益 | [Agent 评测](#agent-评测技能) | 1 | `agent-learning-eval` |
 
@@ -88,10 +88,11 @@ cd skills
 
 `write-book` 用于书籍规划、章节撰写、续写和整书修订，关注论证、术语、案例与章节递进的一致性。
 
-七个网文技能围绕人物驱动的中文长篇与群像写作，覆盖构思、正文、审读和修订。`write-webnovel` 是综合入口；其余六个技能用于处理具体问题，可以独立选用。
+网文技能围绕人物驱动的中文长篇与群像写作，覆盖构思、正文、审读和修订。`write-webnovel` 是综合入口；荒诞修仙喜剧使用 `writing-absurd-xianxia`，其余六个专项技能处理具体技法问题，均可独立选用。
 
 - `write-book` - 中文书籍规划、撰写、续写与整书修订，维护跨章节一致性。
 - `write-webnovel` - 网文创作总入口：构思、连载续写、人物塑造与连续章节修订。
+- `writing-absurd-xianxia` - 离谱成仙：荒诞合理的大脑洞修仙喜剧爽文，支持反反套路、多重反转、正文续写和改稿，保留实际胜果。
 - `novel-character-agency` - 人物欲望、主动选择、声口、群像差异与成长连续性。
 - `novel-comedy-engine` - 人物欲望驱动的包袱、误会与跨章喜剧事件。
 - `novel-prose-readability` - 文字易读性诊断与精修，保留人物声口、叙事视角和情绪。
@@ -117,6 +118,7 @@ cd skills
 |---|---|---|
 | 规划新书、展开章节、续写书稿或整书改稿 | `write-book` | 全书结构、完整章节及论证与术语一致性 |
 | 新作构思、故事单元设计、续写下一章 | `write-webnovel` | 故事方案、正文或连续章节修订 |
+| 荒诞合理、反反套路、多重反转、爆笑又爽的修仙故事 | `writing-absurd-xianxia` | 大脑洞规则、人物喜剧、反制破局与持续胜果 |
 | 人物被剧情推着走、配角工具化、声口雷同 | `novel-character-agency` | 欲望、主动选择与成长连续性 |
 | 笑点靠插科打诨、重复包袱或人物降智 | `novel-comedy-engine` | 人物欲望引发的喜剧事件 |
 | 句意难懂、指代不明、动作难跟、解释重复 | `novel-prose-readability` | 局部或连续章节的文字精修 |
@@ -314,7 +316,8 @@ skills/
 ├── rc-text-assistant/SKILL.md
 ├── rc-tutor/SKILL.md
 ├── write-book/SKILL.md
-└── write-webnovel/SKILL.md
+├── write-webnovel/SKILL.md
+└── writing-absurd-xianxia/SKILL.md
 ```
 
 ## 许可证

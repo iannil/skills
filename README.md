@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-39-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-40-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-39 installable skills for Codex, Claude Code, and other agents that support skills: 17 for engineering, 1 for Agent evaluation, 5 for projects and products, 11 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
+40 installable skills for Codex, Claude Code, and other agents that support skills: 17 for engineering, 1 for Agent evaluation, 5 for projects and products, 12 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
 
 Each skill defines its workflow in `skills/<name>/SKILL.md`, with supporting references, scripts, or agent configuration where needed. Choose a skill for a specific task or combine several into a workflow.
 
@@ -43,7 +43,7 @@ See [Install](#install) for more options. If these skills help you, a star helps
 |---|---|---:|---|
 | Build, verify, or resume a software project | [Engineering](#engineering-skills) | 17 | `engineer-job` / `engineer-next` |
 | Set up a project, analyze a product, or test an idea | [Projects & products](#project--product-skills) | 5 | `init-project` / `product-pusher` |
-| Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 11 | `write-book` / `write-webnovel` |
+| Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 12 | `write-book` / `write-webnovel` |
 | Learn RC, diagnose problems, analyze causes, or write | [RC philosophy](#rc-philosophy-skills) | 5 | `rc-tutor` / `rc-application-tool` |
 | Evaluate Agent learning, reuse and transfer | [Agent evaluation](#agent-evaluation-skills) | 1 | `agent-learning-eval` |
 
@@ -88,10 +88,11 @@ Based on the "Implementation Planning-Driven AI-Assisted Programming in Practice
 
 `write-book` handles book planning, chapter drafting, continuation, and whole-book revision, with attention to arguments, terminology, examples, and progression.
 
-The seven web novel skills are built for character-driven Chinese long-form fiction and ensemble stories, covering planning, drafting, review, and revision. Use `write-webnovel` as the general entry point, or choose one of the six focused skills for a specific problem.
+The web novel skills support character-driven Chinese long-form fiction and ensemble stories. Use `write-webnovel` as the general entry point, `writing-absurd-xianxia` for absurd cultivation comedy, or one of the six focused skills for a specific craft problem.
 
 - `write-book` - Plan, draft, continue, and revise Chinese books while maintaining consistency across chapters.
 - `write-webnovel` - Web novel writing: story planning, serialization, characterization, and multi-chapter revision.
+- `writing-absurd-xianxia` - Absurd cultivation comedy: coherent world rules, countered anti-tropes, layered reversals, and satisfying victories; supports concepts, prose, continuation, and revision.
 - `novel-character-agency` - Character desires, agency, voice, ensemble differentiation, and consistent growth.
 - `novel-comedy-engine` - Character-driven humor, misunderstandings, and comedy across chapters.
 - `novel-prose-readability` - Prose readability diagnosis and revision while preserving voice, viewpoint, and emotion.
@@ -117,6 +118,7 @@ The seven web novel skills are built for character-driven Chinese long-form fict
 |---|---|---|
 | Planning a book, drafting chapters, or revising a full manuscript | `write-book` | Book structure, complete chapters, and consistent arguments and terminology |
 | Planning a new story, designing an arc, or writing the next chapter | `write-webnovel` | Story plans, prose, or multi-chapter revision |
+| Absurd cultivation comedy with layered reversals and satisfying wins | `writing-absurd-xianxia` | Coherent big ideas, countered anti-tropes, comic scenes, and lasting gains |
 | Passive characters, disposable supporting roles, or indistinct voices | `novel-character-agency` | Desires, active choices, and consistent growth |
 | Humor relies on banter, repeated jokes, or foolish behavior | `novel-comedy-engine` | Comic events driven by character desires |
 | Unclear sentences, confusing action, or repetitive explanation | `novel-prose-readability` | Passage-level or multi-chapter prose revision |
@@ -314,7 +316,8 @@ skills/
 ├── rc-text-assistant/SKILL.md
 ├── rc-tutor/SKILL.md
 ├── write-book/SKILL.md
-└── write-webnovel/SKILL.md
+├── write-webnovel/SKILL.md
+└── writing-absurd-xianxia/SKILL.md
 ```
 
 ## License
