@@ -16,9 +16,10 @@ async function runGate(results) {
   const calls = [];
   let reads = 0;
   const context = vm.createContext({
-    phase() {}, log() {}, isDone() { return false; }, stop_at_poc: false,
+    phase() {}, log() {}, isDone(p) { return p === 'development'; }, stop_at_poc: false,
     MODE: 'auto', RUN_GATE_SCHEMA: {}, PHASE_RESULT: {},
-    phasesDone: new Set(), runGateResult: null,
+    phasesDone: new Set(), runGateResult: null, phaseResults: {},
+    accepted(r) { return r?.status === 'DONE'; },
     ctx(_phase, prompt) { return prompt; },
     async agent(prompt, options) {
       calls.push({ prompt, label: options.label });
@@ -69,6 +70,6 @@ test('a repaired gate persists success only after the successful rerun', async (
   ]);
   assert.equal(result.status, 'PASS');
   assert.equal(result.attempts, 2);
-  assert.deepEqual(calls.map(c => c.label), ['run-gate', 'run-gate-fix', 'run-gate', 'persist-run-gate']);
+  assert.deepEqual(calls.map(c => c.label), ['run-gate', 'run-gate-fix', 'inspector-run-gate-fix', 'run-gate', 'persist-run-gate']);
   assert.match(calls.at(-1).prompt, /"status":"PASS"/);
 });

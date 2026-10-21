@@ -1,12 +1,13 @@
 # engineer-next 交接协议 / Handoff Protocol
 
-`detectResumePoint` 返回的判决里有 `handoff` 字段，决定 engineer-next 怎么把控制权交给下游。本文逐种 handoff 给出确切指令。所有交接前先输出 §9 状态诊断报告；normal 模式等用户确认，auto/silent 直接交接。交接时把同一 `--mode` 透传给下游。
+`detectResumePoint` 返回的判决里有 `handoff` 字段，决定 engineer-next 怎么把控制权交给下游。本文逐种 handoff 给出确切指令。交接前按 mode 输出主技能的状态诊断报告；已有执行/继续授权直接交接，各模式仅输出详略不同。交接时把同一 `--mode` 透传给下游。
 
 ## 通用前置
 
 1. 读取判决（`node skills/engineer-next/references/detect-resume.js [dir]` 或照 SKILL.md 决策表手判）。
-2. 校验 `git rev-parse HEAD` 与 `job.state.json.checkpoint.last_commit`：偏差在诊断报告标 ⚠️，normal 模式询问用户。
-3. 输出诊断报告，按 mode 决定是否等待确认。
+2. 校验 `git rev-parse HEAD` 与 `job.state.json.checkpoint.last_commit`：偏差先核对工作树、产物和验证适用性，不因 HEAD 不同自动询问或重跑。
+3. 继承 CONTEXT.md / REQUIREMENTS.md 的短委托约定引用（成果、完成标准及来源、不可妥协项、授权取舍、决策权限）及 checkpoint 的未解问题、已尝试、下一动作。只读并转交，不建新账本。
+4. 按 mode 输出详略直接交接。只对真实价值取舍/授权缺口升级，给事实、已尝试、推荐及代价、需要决定的事项和仍可继续任务。普通继续不授权 commit/stash/发布，也不重新确认已授权动作。
 
 ## reinvoke-job-workflow（场景 1a / 1c / 6a / 7）
 
@@ -19,7 +20,7 @@
 
 ```javascript
 Workflow({
-  script: "skills/engineer-job/run.wf.js",
+  scriptPath: "skills/engineer-job/run.wf.js",
   args: {
     requirements: "<reconstructed_args.requirements 或用户输入>",
     mode: "<reconstructed_args.mode>",
@@ -27,7 +28,7 @@ Workflow({
     skip_requirements: <bool>,
     skip_frontend: <bool>,
     skip_poc: <bool>,
-    stop_at_poc: false,
+    stop_at_poc: <保留已有约定的布尔值>,
   }
 })
 ```
@@ -43,7 +44,8 @@ Workflow 工具不可用时，退回 engineer-job 的"手动子代理调度"模�
 ```markdown
 继续项目 [名称] 的开发。蓝图：CONTEXT.md（当前目录）。从下一个 TODO 里程碑继续：
 读取 .agents/progress.json（或 job.state.json.development.features）确定断点；
-git log 验证当前 commit；运行测试基线；然后从下一个 TODO 里程碑接续 engineer-workflow。
+核对工作树与已有验收的适用性，补必要测试基线；从未完成任务及必需集成缺陷接续 workflow。
+继承 [委托约定章节引用]、[未解问题/已尝试/下一动作]。缺结果为未验证，修复后复验，不按失败次数重建或删减需求。
 [有 CONTEXT-MAP.md 时] 这是多模块项目，按 CONTEXT-MAP.md 的开发顺序编排。
 ```
 
@@ -64,7 +66,7 @@ git log 验证当前 commit；运行测试基线；然后从下一个 TODO 里�
 这是已有大量代码但无 engineer* 产物的外来项目。执行逆向分析：
 1. 扫描现有文件结构与代码，推断技术栈、数据模型、API、模块边界。
 2. 生成 REQUIREMENTS.md（从代码反推的角色/功能/状态机）与 CONTEXT.md（既有代码作为地基）。
-3. 诚实标注哪些是"明示/observed"、哪些是"推断/inferred"、哪些是"缺口/gap"（缺口列出来问用户）。
+3. 诚实标注哪些是"明示/observed"、哪些是"推断/inferred"、哪些是"缺口/gap"（先检查可取得证据，真实取舍/授权缺口才问用户）。
 完成后交回 engineer-next，按场景 3 路由 orchestrator 接续开发。
 ```
 
@@ -74,11 +76,11 @@ git log 验证当前 commit；运行测试基线；然后从下一个 TODO 里�
 
 ## report-complete（场景 1d）
 
-`job.state.json` 全阶段 DONE。不交接——输出"项目已完成"，建议：运行 `engineer-advisor` 诊断后续方向，或追加新功能走 `engineer-architect` 更新蓝图。
+`job.state.json` 全阶段 DONE 只是候选。核对约定范围、产物、必需验收与当前代码；缺证据交 engineer-qa，真实缺陷交 workflow/orchestrator 修复并复验。全部必需项已满足才报告完成，可未提交；发布与线上确认另按证据记录。
 
 ## report-blocked（场景 1e）
 
-某阶段 BLOCKED。不自动交接——输出阻塞信息（阶段名 + job.state.json 里的错误记录），建议：路由该阶段对应技能带阻塞上下文重试，或 `engineer-advisor` 诊断。normal 模式询问用户选择。
+某阶段 BLOCKED：携带根因、已尝试、证据与下一动作交对应技能诊断修复，必要时 advisor 辅助。所有必需集成缺陷无论数量都修复复验，独立任务继续。只有真实价值取舍或授权缺口才升级；不自动等待用户兜底，不以跳过或 happy path 冒充完成。
 
 ## 参数重建对照表（reconstructed_args）
 
@@ -88,4 +90,6 @@ git log 验证当前 commit；运行测试基线；然后从下一个 TODO 里�
 | projectName | jobState.project → metadata.project.name → cwdName | 同左兜底链 |
 | requirements | metadata.project.description + features 拼接 | 用户本次输入 / 空（交 job 询问） |
 | skip_requirements / skip_frontend / skip_poc | metadata 的 skip_*/has_frontend | 默认 false（交 job 自检测） |
-| stop_at_poc | 固定 false | 固定 false |
+| stop_at_poc | 从现有请求/约定恢复，不擅自扩大 POC 范围 | 用户请求决定；未要求停 POC 时 false |
+
+参数重建是候选：若检测器未恢复 stop_at_poc 等既有决定，由调度方在传入前按约定校正，不能把默认值当作用户新授权。无需新增判决 schema 字段。

@@ -178,9 +178,11 @@ The engineering skills are designed to compose: `requirements → architect → 
 
 These skills emit many artifacts (`CONTEXT.md`, `REQUIREMENTS.md`, `FRONTEND-DESIGN.md`, `.agents/` state). When a conversation grows long, start a fresh session and point it at the persisted blueprint/state instead of continuing in a bloated context. `engineer-advisor` can diagnose when a reset is warranted.
 
-### Accept before you advance
+### Delegate outcomes and verification
 
-After any generated code, review and accept (`engineer-inspector`) **before** saying "continue" or committing. Saying "continue" without review is how architecture drift compounds.
+Record the intended outcome, acceptance criteria and their sources, non-negotiable requirements, and authorized tradeoffs in the existing requirements or blueprint. Within that scope, the executing agent owns review, testing, repairs and re-verification; you do not need to prompt each transition. A request to continue inherits the established decisions and authorization.
+
+Missing evidence remains unverified, and failed required work remains incomplete. The agent may continue independent work without reducing the original target. When a decision needs your authority, it should present the facts, attempted remedies, recommended option and its consequences. Finishing the workflow is separate from satisfying the delivery criteria; implementation, verification, publication and live confirmation are reported separately.
 
 ## Install
 

@@ -125,7 +125,6 @@ const PROJECT_NAME = args.projectName || 'unnamed-project'
 const detected = detectComplexity(REQUIREMENTS)
 const skip_requirements = args.skip_requirements != null ? !!args.skip_requirements : detected.skip_requirements
 const skip_frontend = args.skip_frontend != null ? !!args.skip_frontend : detected.skip_frontend
-const isSimpleProject = skip_requirements || skip_frontend
 
 // ── POC gating (Phase 3.5) ───────────────────────────────
 // POC runs by default when the project has a frontend; skip_poc opts out,
@@ -145,6 +144,7 @@ const PHASE_RESULT = {
       enum: ['DONE', 'DONE_WITH_CONCERNS', 'BLOCKED'],
     },
     summary: { type: 'string' },
+    required_complete: { type: 'boolean' },
     changes: {
       type: 'object',
       properties: {
@@ -173,6 +173,7 @@ const PHASE_RESULT = {
         found: { type: 'boolean' },
         last_phase: { type: 'string' },
         phases_done: { type: 'array', items: { type: 'string' } },
+        milestones: { type: 'object', additionalProperties: true },
         session_summary: { type: 'string' },
       },
     },
@@ -230,7 +231,8 @@ function ctx(phase, extra = '') {
     `Mode: ${MODE}`,
     `Requirements: "${REQUIREMENTS}"`,
     `Phase: ${phase}`,
-    "Preserve existing work and requirements. Mode does not expand authorization. Do not hard-reset, silently reduce scope, publish or include unrelated changes in commits. Mark missing required evidence as incomplete.",
+    'Read and inherit the delegation contract in CONTEXT.md / REQUIREMENTS.md and its checkpoint.session_summary reference when present. Preserve the user-approved scope, acceptance, authorization and stop boundaries in all child prompts. Return DONE only with full required evidence; DONE_WITH_CONCERNS needs required_complete:true for nonblocking concerns.',
+    "Preserve existing work and requirements. Inherit the original user intent, constraints and authorization in every nested delegation. Scope changes require a user decision; pause only the affected work. Mode does not expand authorization. Do not hard-reset, silently reduce scope, publish or include unrelated changes in commits. Mark missing required evidence as incomplete.",
   ]
   if (extra) lines.push('', extra)
   return lines.join('\n')
@@ -243,9 +245,36 @@ const phasesDone = new Set()
 let developmentSummary = ''
 let developmentMilestoneState = {}
 let runGateResult = null
+let recoveredMilestones = {}
+const phaseResults = {}
 
 function isDone(phase) {
   return phasesDone.has(phase)
+}
+
+// Missing, degraded or contradictory evidence never establishes completion.
+function accepted(result) {
+  return !!(result && typeof result.summary === 'string' && result.summary.trim()
+    && (result.status === 'DONE' || (result.status === 'DONE_WITH_CONCERNS' && result.required_complete === true))
+    && result.required_complete !== false && !result.changes?.degraded
+    && !(result.issues || []).some(issue => issue.severity === 'error'))
+}
+
+function recordPhase(name, result) {
+  phaseResults[name] = result || { status: 'BLOCKED', summary: 'No result; required evidence missing.' }
+  if (accepted(result)) phasesDone.add(name)
+  else phasesDone.delete(name)
+  log(`${name}: ${accepted(result) ? result.status : 'INCOMPLETE'} — ${phaseResults[name].summary || 'No usable evidence'}`)
+}
+
+async function repairPhase(name, result, label, group) {
+  if (!accepted(result) && result?.summary?.trim()) {
+    result = await agent(ctx(name, `One targeted recovery attempt. Diagnose the failure and preserve the FULL original scope and acceptance criteria. Do not substitute a skeleton or reduced deliverable. If a user decision or external prerequisite is needed, return BLOCKED with the exact next action instead of retrying blindly.
+Previous evidence: ${JSON.stringify(result)}
+Complete the originally requested phase, verify its required outputs, and return DONE only with all required evidence. Persist the actual status in .agents/job.state.json.`),
+      { schema: PHASE_RESULT, label, phase: group })
+  }
+  recordPhase(name, result)
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -266,7 +295,7 @@ You have TWO possible entry points. Determine which one applies.
 --- ENTRY A: RECOVERY (if job.state.json exists) ---
 
 Check if the file ".agents/job.state.json" exists in the current directory.
-  • If YES: Read and parse it. Return IMMEDIATELY with:
+  • If YES: Read and parse it. Return the candidate history for a separate validation step with:
     { status: "DONE", summary: "Recovered from job.state.json",
       recovery: { found: true, last_phase: "<last_phase value>", phases_done: [<all phases with DONE status>], session_summary: "<checkpoint.session_summary>" } }
     DO NOT re-scaffold anything.
@@ -328,30 +357,20 @@ Write them to disk as actual files.`),
     { schema: PHASE_RESULT, label: 'init-project', phase: 'Scaffold' }
   )
 
-  // Handle recovery: skip completed phases
-  if (result?.recovery?.found && Array.isArray(result.recovery.phases_done)) {
-    result.recovery.phases_done.forEach(p => {
-      if (p) phasesDone.add(p)
-    })
-    log(`Recovered from state — phases done: ${[...phasesDone].filter(Boolean).join(', ') || 'none'}`)
-    log(`Current phase: ${result.recovery.last_phase || 'unknown'}`)
-  } else if (result?.status === 'BLOCKED') {
-    // Retry once
-    log('Phase 0 failed, retrying once...')
-    result = await agent(
-      `Retry: init-project scaffolding. Requirements: "${REQUIREMENTS}". Write project-metadata.json first. Previous attempt failed.`,
-      { schema: PHASE_RESULT, label: 'init-project-retry', phase: 'Scaffold' }
-    )
-  }
-
-  if (!result || result.status === 'BLOCKED') {
-    throw new Error('Phase 0 (init-project) failed after 2 attempts. Cannot continue.')
-  }
-
-  // Mark init as done (if not already recovered)
-  if (!result.recovery?.found) {
-    phasesDone.add('init')
-    log('Phase 0 complete: project scaffolded')
+  if (result?.recovery?.found) {
+    const validated = await agent(ctx('recovery', `Validate recovery against current requirements, CONTEXT.md, current code and actual verification evidence. Read .agents/job.state.json and .agents/progress.json. Historical DONE flags alone are not evidence.
+Return recovery.phases_done containing only currently validated design/scaffold phases (init, requirements, architect, frontend, poc). Invalidate downstream design phases when their inputs changed. Return recovery.milestones keyed by id, with status DONE, verified:true, nonempty summary and exact current id/name/deps/description/acceptance/frontend for milestones whose full acceptance and review evidence still match current code. Revalidate uncertain evidence without reimplementing verified milestones. Never mark a skipped/degraded milestone as complete. Do not re-scaffold or overwrite existing work. Do not carry forward development, run_gate, finalize, deploy or report completion; this run will derive them again.
+Candidate state: ${JSON.stringify(result.recovery)}`),
+      { schema: PHASE_RESULT, label: 'recovery-validate', phase: 'Scaffold' })
+    if (accepted(validated)) {
+      for (const p of validated.recovery?.phases_done || []) {
+        if (['init', 'requirements', 'architect', 'frontend', 'poc'].includes(p)) phasesDone.add(p)
+      }
+      recoveredMilestones = validated.recovery?.milestones || {}
+    }
+    log(`Recovery validated phases: ${[...phasesDone].join(', ') || 'none'}`)
+  } else {
+    await repairPhase('init', result, 'init-project-retry', 'Scaffold')
   }
 }
 
@@ -362,7 +381,7 @@ Write them to disk as actual files.`),
 // ═══════════════════════════════════════════════════════════
 
 phase('Requirements')
-if (!isDone('requirements') && !skip_requirements) {
+if (isDone('init') && !isDone('requirements') && !skip_requirements) {
   log('Phase 1: engineer-requirements — deep requirement decomposition')
 
   let result = await agent(
@@ -387,26 +406,7 @@ Return structured result with summary.`),
     { schema: PHASE_RESULT, label: 'engineer-requirements', phase: 'Requirements' }
   )
 
-  if (result?.status === 'BLOCKED') {
-    log('Phase 1 failed, retrying once...')
-    result = await agent(
-      `Retry: requirements decomposition. Requirements: "${REQUIREMENTS}". Generate a minimal REQUIREMENTS.md with at least role definitions and feature list.`,
-      { schema: PHASE_RESULT, label: 'requirements-retry', phase: 'Requirements' }
-    )
-  }
-
-  if (!result || result.status === 'BLOCKED') {
-    // Degrade: generate minimal requirements
-    await agent(
-      `Generate a minimal REQUIREMENTS.md with role definitions and basic feature list extracted from: "${REQUIREMENTS}". Update job.state.json requirements as DONE_WITH_CONCERNS.`,
-      { schema: PHASE_RESULT, label: 'requirements-degrade', phase: 'Requirements' }
-    )
-    log('Phase 1 degraded: minimal requirements generated')
-  } else {
-    log('Phase 1 complete: REQUIREMENTS.md generated')
-  }
-
-  phasesDone.add('requirements')
+  await repairPhase('requirements', result, 'requirements-retry', 'Requirements')
 } else if (skip_requirements) {
   log('Phase 1 skipped (simple project)')
 }
@@ -418,7 +418,7 @@ Return structured result with summary.`),
 // ═══════════════════════════════════════════════════════════
 
 phase('Architect')
-if (!isDone('architect')) {
+if (isDone('init') && (skip_requirements || isDone('requirements')) && !isDone('architect')) {
   log('Phase 2: engineer-architect — generating blueprint')
 
   let result = await agent(
@@ -449,26 +449,7 @@ APPEND to .agents/job.progress.md.`),
     { schema: PHASE_RESULT, label: 'engineer-architect', phase: 'Architect' }
   )
 
-  if (result?.status === 'BLOCKED') {
-    log('Phase 2 failed, retrying once...')
-    result = await agent(
-      `Retry: architect blueprint. Requirements: "${REQUIREMENTS}". If still blocked, generate a skeleton CONTEXT.md with minimal structure and mark degraded.`,
-      { schema: PHASE_RESULT, label: 'architect-retry', phase: 'Architect' }
-    )
-  }
-
-  if (!result || result.status === 'BLOCKED') {
-    // Degrade: generate skeleton blueprint
-    await agent(
-      `Generate a minimal skeleton CONTEXT.md and update job.state.json with architect as DONE_WITH_CONCERNS. This is a degraded fallback.`,
-      { schema: PHASE_RESULT, label: 'architect-degrade', phase: 'Architect' }
-    )
-    log('Phase 2 degraded: skeleton blueprint generated')
-  } else {
-    log('Phase 2 complete: blueprint generated')
-  }
-
-  phasesDone.add('architect')
+  await repairPhase('architect', result, 'architect-retry', 'Architect')
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -483,7 +464,7 @@ phase('Frontend')
 // If no frontend, it generates a minimal FRONTEND-DESIGN.md noting no frontend needed.
 // Skip via isSimpleProject (passed through args) or explicit args.skip_frontend.
 
-if (!isDone('frontend') && !skip_frontend) {
+if (isDone('architect') && !isDone('frontend') && !skip_frontend) {
   log('Phase 3: engineer-frontend-architect — frontend design')
 
   let result = await agent(
@@ -510,25 +491,7 @@ Return structured result.`),
     { schema: PHASE_RESULT, label: 'engineer-frontend-architect', phase: 'Frontend' }
   )
 
-  if (result?.status === 'BLOCKED') {
-    log('Phase 3 failed, retrying once...')
-    result = await agent(
-      `Retry: frontend design. Generate at minimum a FRONTEND-DESIGN.md with portal scope, page tree, and design token system.`,
-      { schema: PHASE_RESULT, label: 'frontend-retry', phase: 'Frontend' }
-    )
-  }
-
-  if (!result || result.status === 'BLOCKED') {
-    await agent(
-      `Generate minimal FRONTEND-DESIGN.md with portal definitions and page tree. Mark as degraded.`,
-      { schema: PHASE_RESULT, label: 'frontend-degrade', phase: 'Frontend' }
-    )
-    log('Phase 3 degraded: minimal frontend design generated')
-  } else {
-    log('Phase 3 complete: FRONTEND-DESIGN.md generated')
-  }
-
-  phasesDone.add('frontend')
+  await repairPhase('frontend', result, 'frontend-retry', 'Frontend')
 } else {
   log('Phase 3 skipped (no frontend or simple project)')
 }
@@ -542,7 +505,7 @@ Return structured result.`),
 
 phase('POC')
 const runPoc = !skip_frontend && !skip_poc
-if (runPoc && !isDone('poc')) {
+if (runPoc && isDone('frontend') && !isDone('poc')) {
   log('Phase 3.5: engineer-poc — high-fidelity clickable prototype')
 
   let result = await agent(
@@ -564,25 +527,7 @@ Return structured result.`),
     { schema: PHASE_RESULT, label: 'engineer-poc', phase: 'POC' }
   )
 
-  if (result?.status === 'BLOCKED') {
-    log('Phase 3.5 failed, retrying once...')
-    result = await agent(
-      `Retry: engineer-poc. Generate at minimum a runnable frontend POC covering the main pages with mock data, plus POC-MANIFEST.md and POC-FIDELITY.md.`,
-      { schema: PHASE_RESULT, label: 'poc-retry', phase: 'POC' }
-    )
-  }
-
-  if (!result || result.status === 'BLOCKED') {
-    await agent(
-      `Generate a minimal clickable POC of the core pages with mock data + POC-MANIFEST.md + POC-FIDELITY.md. Mark as degraded.`,
-      { schema: PHASE_RESULT, label: 'poc-degrade', phase: 'POC' }
-    )
-    log('Phase 3.5 degraded: minimal POC generated')
-  } else {
-    log('Phase 3.5 complete: POC generated')
-  }
-
-  phasesDone.add('poc')
+  await repairPhase('poc', result, 'poc-retry', 'POC')
 
   if (stop_at_poc) {
     log('stop_at_poc=true — halting after POC; skipping develop/run-gate/integrate/deploy, proceeding to report.')
@@ -597,7 +542,7 @@ Return structured result.`),
 //  Output: .agents/progress.json + completed code
 
 phase('Develop')
-if (!isDone('development') && !stop_at_poc) {
+if (isDone('architect') && (skip_frontend || isDone('frontend')) && (!runPoc || isDone('poc')) && !isDone('development') && !stop_at_poc) {
   log('Phase 4: extracting milestone DAG from CONTEXT.md')
 
   const extracted = await agent(
@@ -616,25 +561,19 @@ Return ONLY the structured milestones.`),
     { schema: MILESTONE_SCHEMA, label: 'milestone-extract', phase: 'Develop' }
   )
 
-  let milestones = extracted && extracted.milestones && extracted.milestones.length
-    ? extracted.milestones
-    : [{ id: 'M1', name: 'implement-all', deps: [], description: 'implement the whole project per CONTEXT.md', acceptance: 'build and tests pass', frontend: false }]
-  if (!extracted || !extracted.milestones || !extracted.milestones.length) {
-    log('Phase 4: milestone extraction empty — degraded to single implement-all milestone')
-  }
-
-  let order
+  const milestones = extracted?.milestones || []
+  let order = []
   try {
+    if (!milestones.length || new Set(milestones.map(m => m.id)).size !== milestones.length) throw new Error('missing or duplicate milestones')
     order = topoSort(milestones)
   } catch (e) {
-    log(`Phase 4: topo sort failed (${e.message}) — fallback to listed order`)
-    order = milestones.map((m) => m.id)
+    log(`Phase 4: invalid milestone DAG (${e.message}); development remains incomplete`)
   }
   const byId = {}
   milestones.forEach((m) => { byId[m.id] = m })
 
   const milestoneState = {}
-  order.forEach((id) => { milestoneState[id] = { status: 'TODO', rebuild_count: 0, degraded: false, skipped: false } })
+  milestones.forEach(({ id }) => { milestoneState[id] = { status: 'TODO', rebuild_count: 0, degraded: false, skipped: false } })
   const MAX_RETRY = 1
 
   function cascadeSkip(blockedId) {
@@ -653,6 +592,14 @@ Return ONLY the structured milestones.`),
     const ms = milestoneState[id]
     if (ms.status === 'SKIPPED') continue
     const m = byId[id]
+    const saved = recoveredMilestones[id]
+    if (saved?.status === 'DONE' && saved.verified === true && saved.summary?.trim()
+      && ['id', 'name', 'deps', 'description', 'acceptance', 'frontend'].every(key => JSON.stringify(saved[key]) === JSON.stringify(m[key]))) {
+      ms.status = 'DONE'
+      ms.summary = saved.summary
+      log(`Phase 4: milestone ${id} already verified; preserving completed work`)
+      continue
+    }
     ms.status = 'IN_PROGRESS'
     log(`Phase 4: milestone ${id} (${m.name}) — start`)
 
@@ -663,60 +610,60 @@ If this is a frontend milestone and "POC-MANIFEST.md" exists, build on the exist
 Implement milestone ${id} "${m.name}":
 Description: ${m.description}
 Acceptance: ${m.acceptance || '(per CONTEXT.md)'}
-${ms.degraded ? 'DEGRADED SCOPE: only the happy path; skip edge/exception branches and optional enhancements; keep core acceptance points.' : ''}
-Follow engineer-workflow: generate code + tests, run tests, commit.
+Follow engineer-workflow: generate code + tests, run tests. Commit only if explicitly authorized, selecting reviewed task files.
 Update .agents/job.state.json development.features.${id} and append to .agents/job.progress.md.
 Return structured result.`),
       { schema: PHASE_RESULT, label: `workflow-${id}`, phase: 'Develop' }
     )
 
-    if ((!res || res.status === 'BLOCKED') && ms.rebuild_count < MAX_RETRY) {
+    if (!accepted(res) && res?.summary?.trim() && ms.rebuild_count < MAX_RETRY) {
       ms.rebuild_count++
-      ms.degraded = true
-      log(`Phase 4: milestone ${id} BLOCKED — retry once with degraded (happy-path only) scope`)
+      log(`Phase 4: milestone ${id} incomplete — one targeted recovery within the original scope`)
       res = await agent(
-        ctx('engineer-workflow', `=== RETRY MILESTONE ${id}: ${m.name} (DEGRADED) ===
-Previous attempt blocked. Implement ONLY the happy path of milestone ${id} "${m.name}".
-Skip edge cases, exception branches, optional enhancements. Keep core acceptance points.
+        ctx('engineer-workflow', `=== RETRY MILESTONE ${id}: ${m.name} ===
+Diagnose the failure; fix supported causes within the FULL original scope. If blocked by a decision/prerequisite, return BLOCKED with next action. Do not shrink acceptance or blindly repeat.
+Previous result: ${JSON.stringify(res)}
 Description: ${m.description}
+Acceptance: ${m.acceptance || '(per CONTEXT.md)'}
 Update .agents/job.state.json and job.progress.md. Return structured result.`),
         { schema: PHASE_RESULT, label: `workflow-${id}-retry`, phase: 'Develop' }
       )
     }
 
-    if (!res || res.status === 'BLOCKED') {
-      ms.status = 'SKIPPED'
-      ms.skipped = true
-      ms.skip_reason = 'workflow blocked after retry'
-      log(`Phase 4: milestone ${id} SKIPPED (blocked) — cascading`)
+    if (!accepted(res)) {
+      ms.status = 'BLOCKED'
+      ms.summary = res?.summary || 'Implementation evidence missing'
       cascadeSkip(id)
     } else {
-      const insp = await agent(
-        ctx('engineer-inspector', `=== VERIFY MILESTONE ${id}: ${m.name} ===
-Read "CONTEXT.md" and inspect code changes for milestone ${id} "${m.name}".
-Check the three architecture-drift signals: foundation tampering, over-engineering, size bloat.
-Acceptance target: ${m.acceptance || '(per CONTEXT.md)'}
-Return DONE if acceptable, DONE_WITH_CONCERNS if minor issues, BLOCKED if serious drift.`),
-        { schema: PHASE_RESULT, label: `inspector-${id}`, phase: 'Develop' }
-      )
-      if (insp && insp.status === 'BLOCKED' && ms.rebuild_count < MAX_RETRY) {
+      const inspectPrompt = ctx('engineer-inspector', `=== VERIFY MILESTONE ${id}: ${m.name} ===
+Read CONTEXT.md and inspect the CURRENT code and test evidence for the FULL milestone scope.
+Description: ${m.description}
+Acceptance: ${m.acceptance || '(per CONTEXT.md)'}
+Check architecture drift, correctness and required acceptance evidence. Return DONE only if all required checks pass. DONE_WITH_CONCERNS requires required_complete:true and only nonblocking concerns; otherwise BLOCKED. Missing evidence is incomplete.`)
+      let insp = await agent(inspectPrompt, { schema: PHASE_RESULT, label: `inspector-${id}`, phase: 'Develop' })
+      if (!accepted(insp) && insp?.summary?.trim() && ms.rebuild_count < MAX_RETRY) {
         ms.rebuild_count++
-        log(`Phase 4: milestone ${id} inspector BLOCKED — one fix attempt`)
-        await agent(
-          ctx('engineer-workflow', `=== FIX MILESTONE ${id} per inspector ===
-Inspector flagged serious drift. Re-read CONTEXT.md and fix milestone ${id} "${m.name}". Return structured result.`),
-          { schema: PHASE_RESULT, label: `workflow-${id}-fix`, phase: 'Develop' }
-        )
+        const fix = await agent(ctx('engineer-workflow', `=== FIX MILESTONE ${id} per inspector ===
+Re-read CONTEXT.md and fix the diagnosed issues in milestone ${id} "${m.name}" within the original scope.
+Description: ${m.description}
+Acceptance: ${m.acceptance || '(per CONTEXT.md)'}
+Inspector evidence: ${JSON.stringify(insp)}
+Return the actual repair outcome. Do not declare acceptance; a fresh inspector must verify it.`),
+          { schema: PHASE_RESULT, label: `workflow-${id}-fix`, phase: 'Develop' })
+        // Even a partial repair needs review; a missing/blocked repair cannot establish completion.
+        const recheck = await agent(inspectPrompt + `\nRepair result: ${JSON.stringify(fix)}`, { schema: PHASE_RESULT, label: `inspector-${id}-recheck`, phase: 'Develop' })
+        insp = accepted(fix) ? recheck : fix
       }
-      ms.status = insp && insp.status === 'BLOCKED' ? 'DEGRADED' : 'DONE'
+      ms.status = accepted(insp) ? 'DONE' : 'BLOCKED'
+      ms.summary = insp?.summary || 'Review evidence missing'
+      if (ms.status !== 'DONE') cascadeSkip(id)
       log(`Phase 4: milestone ${id} ${ms.status}`)
     }
   }
 
   developmentSummary = milestones.map((m) => `${m.id}:${milestoneState[m.id].status}`).join(', ')
   developmentMilestoneState = milestoneState
-  log(`Phase 4 complete: ${developmentSummary}`)
-  phasesDone.add('development')
+  recordPhase('development', { status: order.length > 0 && order.every(id => milestoneState[id].status === 'DONE') ? 'DONE' : 'BLOCKED', summary: developmentSummary || 'Milestone plan unavailable' })
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -725,7 +672,7 @@ Inspector flagged serious drift. Re-read CONTEXT.md and fix milestone ${id} "${m
 //  修不动标 DOES_NOT_RUN，report 头条如实反映。
 
 phase('Run Gate')
-if (!isDone('run_gate') && !stop_at_poc) {
+if (isDone('development') && !isDone('run_gate') && !stop_at_poc) {
   log('Phase 4.5: run gate — build + test must pass')
 
   const MAX_FIX = MODE === 'normal' ? 2 : 1
@@ -756,14 +703,14 @@ Return coverage_ok=true only when the applicable policy is satisfied, or when no
 applies and the selected risk-relevant checks have passed. Explain that in coverage_reason.
 If required evidence is missing or a policy fails, return coverage_ok=false with the reason.
 Do not invent numerical coverage for an unavailable metric.
-${attempts > 1 ? 'Previous attempt failed. You MAY fix the code to make build+test pass before re-running.' : ''}`),
+Verification only; do not modify code during this check.`),
       { schema: RUN_GATE_SCHEMA, label: 'run-gate', phase: 'Run Gate' }
     )
 
-    if (gate && gate.build_ok && gate.test_ok && (gate.coverage_ok === true)) break
-    if (attempts > MAX_FIX) break
+    if (gate && gate.build_ok === true && gate.test_ok === true && (gate.coverage_ok === true)) break
+    if (attempts > MAX_FIX || !gate) break
     log(`Phase 4.5: run gate failed (attempt ${attempts}) — fix attempt ${attempts}`)
-    await agent(
+    const fix = await agent(
       ctx('run-gate-fix', `=== FIX BUILD/TEST FAILURES ===
 The run gate did not pass. Diagnose whether this is a product defect, missing evidence, test defect or environment failure. Fix only supported causes within the authorized scope; preserve existing work and requirements.
 Last failure output:
@@ -772,9 +719,16 @@ Coverage policy: ${(gate && gate.coverage_reason) || '(not reported)'}
 Do NOT skip required checks, delete valid tests, hard-reset or shrink requirements to pass. Commit only if already authorized, selecting reviewed task files. Append actual progress and unresolved evidence to .agents/job.progress.md.`),
       { schema: PHASE_RESULT, label: 'run-gate-fix', phase: 'Run Gate' }
     )
+    const review = await agent(ctx('engineer-inspector', `Review CURRENT run-gate repair changes against the original scope, CONTEXT.md and full milestone acceptance. Verify affected behavior and architecture; missing evidence is BLOCKED. Repair result: ${JSON.stringify(fix)}`),
+      { schema: PHASE_RESULT, label: 'inspector-run-gate-fix', phase: 'Run Gate' })
+    if (!accepted(fix) || !accepted(review)) {
+      phasesDone.delete('development')
+      phaseResults.development = { status: 'BLOCKED', summary: 'Run-gate repair lacks passing implementation/review evidence.' }
+      break
+    }
   }
 
-  const passed = !!(gate && gate.build_ok && gate.test_ok && (gate.coverage_ok === true))
+  const passed = !!(gate && gate.build_ok === true && gate.test_ok === true && (gate.coverage_ok === true))
   runGateResult = {
     status: passed ? 'PASS' : 'DOES_NOT_RUN',
     attempts,
@@ -789,18 +743,17 @@ Do NOT skip required checks, delete valid tests, hard-reset or shrink requiremen
     ctx('persist', `Update ".agents/job.state.json": set phases.run_gate = ${JSON.stringify({ status: runGateResult.status, attempts: runGateResult.attempts })}. Do not change any other fields.`),
     { schema: PHASE_RESULT, label: 'persist-run-gate', phase: 'Run Gate' }
   )
-  phasesDone.add('run_gate')
+  if (passed) phasesDone.add('run_gate')
 }
 
 // ═══════════════════════════════════════════════════════════
-//  Phase 5 — Integration: 集成测试 (non-blocking)
+//  Phase 5 — Integration: required acceptance with bounded repair
 
 phase('Integrate')
-if (!isDone('finalize') && !stop_at_poc) {
+if (isDone('development') && isDone('run_gate') && !isDone('finalize') && !stop_at_poc) {
   log('Phase 5: integration testing')
 
-  const result = await agent(
-    ctx('integration', `=== RUN INTEGRATION TESTS ===
+  const integrationPrompt = ctx('integration', `=== RUN INTEGRATION TESTS ===
 
 Read project-metadata.json for project type and testing config.
 
@@ -808,7 +761,7 @@ Read project-metadata.json for project type and testing config.
 2. Run ALL tests — run the project test command
 3. If server/web app: run production readiness checklist
 4. Document ALL failures
-5. DO NOT block on failures — record and continue
+5. Required failures or missing evidence must return BLOCKED; list exact failing checks and diagnostics. DONE means every required check passed. DONE_WITH_CONCERNS is only for nonblocking concerns with required_complete:true.
 
 UPDATE job.state.json finalize phase status.
 APPEND to job.progress.md.
@@ -820,19 +773,43 @@ Drive key user journeys end-to-end. If the project has a UI, use the agent-brows
 (start server, script navigate/fill/click/assert, screenshot to .agents/qa-e2e/).
 If NO UI (pure API/CLI/library), degrade per engineer-qa references/e2e-playbook.md:
 API -> HTTP black-box CRUD + error paths; CLI -> subcommand e2e; library -> skip and note.
-Record E2E pass/fail and whether it was degraded. DO NOT block — record and continue.`),
+Record E2E pass/fail and applicability with evidence. Missing required E2E evidence is incomplete. Verification only; do not edit implementation.`)
+  let result = await agent(integrationPrompt,
     { schema: PHASE_RESULT, label: 'integration', phase: 'Integrate' }
   )
 
-  log(`Integration: ${result?.summary || 'completed with concerns'}`)
-  phasesDone.add('finalize')
+  if (!accepted(result) && result?.summary?.trim()) {
+    const fix = await agent(ctx('integration-fix', `Repair the diagnosed integration failures within the original scope. Do not weaken required checks. Stop with precise blockers if external prerequisites or a scope decision are needed.
+Failure evidence: ${JSON.stringify(result)}
+Run relevant regression checks and return the actual repair result.`),
+      { schema: PHASE_RESULT, label: 'integration-fix', phase: 'Integrate' })
+    const recheck = await agent(integrationPrompt + `\nRepair result: ${JSON.stringify(fix)}\nRe-run all affected required checks against the current code, including build/tests and run-gate coverage policy; previous results may be stale.`,
+      { schema: PHASE_RESULT, label: 'integration-recheck', phase: 'Integrate' })
+    const review = await agent(ctx('engineer-inspector', `Review CURRENT integration repair changes against the original scope, CONTEXT.md and full milestone acceptance. Verify affected behavior and architecture; missing evidence is BLOCKED. Repair result: ${JSON.stringify(fix)}`),
+      { schema: PHASE_RESULT, label: 'inspector-integration-fix', phase: 'Integrate' })
+    result = !accepted(fix) ? fix : (!accepted(review) ? review : recheck)
+    if (!accepted(fix) || !accepted(review)) {
+      phasesDone.delete('development')
+      phaseResults.development = { status: 'BLOCKED', summary: 'Integration repair lacks passing implementation/review evidence.' }
+    }
+    // Integration repairs change code after the run gate. Its old PASS is no longer authoritative.
+    phasesDone.delete('run_gate')
+    runGateResult = { status: 'DOES_NOT_RUN', last_error: 'Integration repair requires fresh run-gate evidence.' }
+    const gate = await agent(ctx('run-gate', 'Re-run required build, tests and project coverage policy on the CURRENT code after integration repair. Verification only. Missing evidence is false. Return build_ok, test_ok, coverage_ok, coverage_reason and output.'),
+      { schema: RUN_GATE_SCHEMA, label: 'run-gate-after-integration', phase: 'Integrate' })
+    if (gate?.build_ok === true && gate?.test_ok === true && gate?.coverage_ok === true) {
+      phasesDone.add('run_gate')
+      runGateResult = { status: 'PASS', coverage_reason: gate.coverage_reason }
+    }
+  }
+  recordPhase('finalize', result)
 }
 
 // ═══════════════════════════════════════════════════════════
 //  Phase 6 — Deploy: 部署配置 (non-blocking)
 
 phase('Deploy')
-if (!isDone('deploy') && !stop_at_poc) {
+if (isDone('architect') && !isDone('deploy') && !stop_at_poc) {
   log('Phase 6: deployment configuration')
 
   const result = await agent(
@@ -853,12 +830,19 @@ APPEND to job.progress.md.`),
     { schema: PHASE_RESULT, label: 'deploy-config', phase: 'Deploy' }
   )
 
-  log(`Deploy: ${result?.summary || 'skipped or completed'}`)
-  phasesDone.add('deploy')
+  recordPhase('deploy', result)
 }
 
 // ═══════════════════════════════════════════════════════════
 //  Phase 7 — Report: 最终报告
+
+const requiredPhases = ['init', ...(skip_requirements ? [] : ['requirements']), 'architect', ...(skip_frontend ? [] : ['frontend']), ...(runPoc ? ['poc'] : []), ...(!stop_at_poc ? ['development', 'run_gate', 'finalize', 'deploy'] : [])]
+const missingPhases = requiredPhases.filter(p => !isDone(p))
+if (stop_at_poc && !runPoc) missingPhases.push('poc (stop_at_poc requires an enabled frontend POC)')
+const goalStatus = missingPhases.length ? 'INCOMPLETE' : (stop_at_poc ? 'POC_ONLY' : 'DONE')
+const stateSnapshot = Object.fromEntries(requiredPhases.map(p => [p, { status: isDone(p) ? (p === 'run_gate' ? 'PASS' : 'DONE') : (p === 'run_gate' ? 'DOES_NOT_RUN' : 'BLOCKED'), ...(p === 'development' && Object.keys(developmentMilestoneState).length ? { features: developmentMilestoneState } : {}), summary: phaseResults[p]?.summary || (isDone(p) ? 'Verified in this run or recovery validation' : 'Required evidence missing') }]))
+await agent(ctx('persist', `Persist this authoritative phase snapshot into .agents/job.state.json, merging fields without deleting existing feature history, verification evidence or the delegation-contract reference in checkpoint.session_summary: ${JSON.stringify(stateSnapshot)}. Append the current outcome to checkpoint.session_summary: ${JSON.stringify(`Goal status: ${goalStatus}; incomplete phases: ${missingPhases.join(', ')}`)}. Preserve checkpoint authorization, attempted remedies and delegation references. Set checkpoint.next_action to the first unresolved prerequisite/check and its concrete next step (or requested POC handoff/full completion only when supported). Append actual results to job.progress.md. Do not convert missing/skipped work to DONE.`),
+  { schema: PHASE_RESULT, label: 'persist-job-outcome', phase: 'Report' })
 
 phase('Report')
 if (!isDone('report')) {
@@ -866,6 +850,9 @@ if (!isDone('report')) {
 
   const result = await agent(
     ctx('report', `=== GENERATE FINAL REPORT ===
+AUTHORITATIVE GOAL STATUS: ${goalStatus}. Incomplete phases: ${missingPhases.join(', ') || 'none'}.
+Current phase results: ${JSON.stringify(stateSnapshot)}
+Workflow execution ending does not mean the user goal is complete. Never claim completion unless GOAL STATUS is DONE. POC_ONLY means only the prototype stage was requested to stop; the full project remains unfinished.
 RUN GATE STATUS: ${runGateResult ? runGateResult.status : 'unknown'}.
 If status is DOES_NOT_RUN, the FIRST line of your report MUST be exactly:
   ⚠️ DOES_NOT_RUN — required run-gate verification did not pass.
@@ -893,8 +880,7 @@ Return the report text in the "report" field of the result.`),
     { schema: PHASE_RESULT, label: 'final-report', phase: 'Report' }
   )
 
-  log(`Final report: ${result?.summary || 'generated'}`)
-  phasesDone.add('report')
+  recordPhase('report', result)
 
   // If report text was returned, show it
   if (result?.report) {
@@ -906,5 +892,6 @@ Return the report text in the "report" field of the result.`),
 // ═══════════════════════════════════════════════════════════
 //  Completion
 
-log(`All phases completed${stop_at_poc ? ' (stopped at POC)' : ''}. Mode: ${MODE}.`)
-log(`Phases completed: ${[...phasesDone].filter(Boolean).join(', ')}`)
+if (!isDone('report')) missingPhases.push('report')
+log(`Verified phases: ${[...phasesDone].join(', ')}`)
+log(`Workflow ended. Goal status: ${missingPhases.length ? 'INCOMPLETE' : goalStatus}. Mode: ${MODE}. Incomplete phases: ${missingPhases.join(', ') || 'none'}.`)

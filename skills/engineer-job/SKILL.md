@@ -6,7 +6,7 @@ description: >
   AI项目全自动构建引擎 — 从零开始自动完成整个项目构建。
   输入简单的需求描述和项目背景，自动执行：
   项目脚手架 → 架构设计 → 多功能编排开发 → 集成验收 → 部署配置生成。
-  支持 --auto（自动确认）和 --silent（静默）模式实现无人值守。
+  支持 --auto（摘要）和 --silent（精简输出），模式不改变授权范围。
   TRIGGERS: 用户说"帮我从零做一个""全自动构建""帮我搭建一个完整的"
   "automate project building""full project from scratch""build project auto"
   "做一个完整的""全链路开发""自动从头到尾做一个"
@@ -65,13 +65,11 @@ metadata:
 
 即使整个对话上下文丢失，从这些文件也能完全恢复项目进度。
 
-#### 原则三：降级优于阻塞 / Degrade Over Block
+#### 原则三：诊断修复并保留目标
 
-遇到失败时先诊断并继续独立工作；不静默缩减需求或将缺失产物记为完成：
+所有 mode 下都在既有授权内推进：失败先定位实现、环境或验收器原因，修复后复验。必需产物或证据缺失保持未完成，依赖任务不能越过门禁；独立任务可继续。固定失败次数不触发重建、范围降级或强制用户兜底。
 
-- `--normal` 模式：报告用户，等待决策
-- `--auto` 模式：在授权范围内修复，缺少必需证据时如实标记未完成
-- `--silent` 模式：减少输出但保留失败与未完成记录
+在现有 CONTEXT.md / REQUIREMENTS.md 维护简短委托约定：成果、完成标准及来源、不可妥协项、已授权取舍、决策权限。每阶段读取该引用并传递任务差量；checkpoint 复用摘要记录引用、未解问题、已尝试及结果和下一动作，不建新账本。只对真实价值取舍或授权缺口升级，附事实、已尝试、推荐及代价和仍可继续的任务。
 
 ---
 
@@ -81,7 +79,7 @@ metadata:
 
 用户已授权版本发布时，使用可用的 `engineer-release` 处理产物、插件、镜像及下游依赖；无该技能时按项目发布流程完成。普通开发不自动扩大到远程发布。验收依据、命令、配置和结果传给发布步骤，只有版本或风险变化时补验。
 
-mode 仅控制沟通与已有授权内的自动推进，不自动授权提交、删除、重置、缩减范围或发布。用户已明确授权的动作不重复确认。
+mode 仅控制输出详略，不自动授权提交、stash、删除、重置、缩减范围或发布。用户已明确授权的动作不重复确认。
 
 ## 🚦 触发条件 / When to Trigger
 
@@ -112,11 +110,11 @@ mode 仅控制沟通与已有授权内的自动推进，不自动授权提交、
 
 ## 🏃 快速执行 / Quick Start
 
-触发 engineer-job 后，**首要行动**是调用 Workflow 脚本自动执行全部 8 个阶段：
+触发 engineer-job 后，**首要行动**是调用 Workflow 脚本执行适用阶段：
 
 ```javascript
 Workflow({
-  script: "skills/engineer-job/run.wf.js",
+  scriptPath: "skills/engineer-job/run.wf.js",
   args: {
     requirements: "<用户的需求描述>",
     mode: "auto",              // normal | auto | silent
@@ -140,38 +138,38 @@ Workflow({
 用户: "帮我做一个博客系统"
         │
         ▼
-engineer-job: Workflow({ script: "run.wf.js", args: { requirements: "...", mode: "auto" }})
+engineer-job: Workflow({ scriptPath: "skills/engineer-job/run.wf.js", args: { requirements: "...", mode: "auto" }})
         │
-        ▼ 自动推进 8 个 Phase (约 5-15 分钟)
+        ▼ 按依赖推进适用阶段
         │
-    🎉 输出: 完整可运行的项目 + 最终报告
+    🎉 输出: 交付成果 + 实际验收及未完成报告
 ```
 
 ### 恢复已中断的项目
 
-如果项目中途中断（如对话超时），重新调用完全相同的 Workflow：
+如果项目中途中断，先读取 checkpoint 和委托约定并核对产物。development 未完成时交 orchestrator 恢复里程碑；设计或收尾阶段才重调 Workflow：
 
 ```javascript
 // 自动检测 .agents/job.state.json 并恢复进度
 Workflow({
-  script: "skills/engineer-job/run.wf.js",
+  scriptPath: "skills/engineer-job/run.wf.js",
   args: { requirements: "...", mode: "auto", projectName: "...", skip_requirements: false, skip_frontend: false }
 })
 ```
 
-Workflow 会跳过已完成的阶段，从中断处继续。
+仅跳过证据仍适用的已完成阶段。保留已有 skip_* / stop_at_poc 决定，恢复不扩大原任务。
 
 ---
 
 ## ⚙️ 模式选择 / Mode Selection
 
-通过 `--mode`（Workflow 为 `args.mode`）参数控制自动确认程度（默认 normal）：
+通过 `--mode`（Workflow 为 `args.mode`）控制输出详略，默认 normal。已授权执行或继续不再逐阶段确认。
 
-| 模式 | Phase 间推进 | 异常时行为 |
-|:----:|-------------|-----------|
-| normal | Phase 间自动推进（Workflow 自带节流），报告阶段完成 | 报告错误，降级后继续，最终报告中标明 |
-| auto | 自动推进，最终报告输出降级记录 | 自动降级/跳过，记录到最终报告 |
-| silent | 全部自动，无中间输出 | 静默处理，只记日志 |
+| 模式 | 输出 | 异常时行为 |
+|:----:|------|------------|
+| normal | 展示计划、阶段进展及结果 | 在授权内诊断、修复、复验；真实取舍/授权缺口才升级 |
+| auto | 关键进展及结果摘要 | 同 normal |
+| silent | 简短结果与必要阻塞信息，保留证据 | 同 normal |
 
 ---
 
@@ -179,72 +177,38 @@ Workflow 会跳过已完成的阶段，从中断处继续。
 
 ```mermaid
 graph TD
-    USER["用户：'做一个博客系统'"] --> PHASE0
-    
-    subgraph "Phase 0: 项目初始化 / init"
-        PHASE0["① init-project<br/>项目脚手架"] --> OK0{"成功？"}
-        OK0 -->|"✅"| PHASE1
-        OK0 -->|"❌"| FAIL0["终止，报告失败"]
-    end
-    
-    subgraph "Phase 1: 需求分析 / requirements"
-        PHASE1["② engineer-requirements<br/>需求分析"] --> OK1{"成功？"}
-        OK1 -->|"✅"| PHASE2
-        OK1 -->|"❌"| DEGRADE1["降级：最小需求"]
-        DEGRADE1 --> PHASE2
-    end
-    
-    subgraph "Phase 2: 架构设计 / architect"
-        PHASE2["③ engineer-architect<br/>架构蓝图"] --> OK2{"成功？"}
-        OK2 -->|"✅"| PHASE3
-        OK2 -->|"❌"| DEGRADE2["降级：生成骨架蓝图"]
-        DEGRADE2 --> PHASE3
-    end
-    
-    subgraph "Phase 3: 前端设计 / frontend"
-        PHASE3["④ engineer-frontend-architect<br/>前端设计"] --> OK3{"成功？"}
-        OK3 -->|"✅"| PHASE4
-        OK3 -->|"❌"| DEGRADE3["降级：最小设计"]
-        DEGRADE3 --> PHASE4
-    end
-    
-    subgraph "Phase 4-7: 开发-收尾 / development-finalize"
-        PHASE4["⑤ engineer-orchestrator<br/>编排开发"] --> LOOP{"还有里程碑？"}
-        LOOP -->|"✅"| MS["engineer-workflow"]
-        MS --> INSPECT{"验收"}
-        INSPECT -->|"PASS"| COMMIT["提交 + 更新蓝图"]
-        INSPECT -->|"FAIL"| HEAL{"自愈"}
-        HEAL -->|"修复"| MS
-        HEAL -->|"降级"| MS2["简化范围执行"]
-        HEAL -->|"跳过"| SKIP["标记 SKIPPED"]
-        SKIP --> LOOP
-        COMMIT --> LOOP
-        MS2 --> LOOP
-        LOOP -->|"❌"| PHASE5
-    end
-    
-    subgraph "收尾 / finalize"
-        PHASE5["⑥ 集成测试"] --> PHASE6["⑦ 部署配置"]
-        PHASE6 --> PHASE7["⑧ 最终报告"]
-    end
-    
-    PHASE7 --> DONE["🎉 项目完成"]
+    A[用户请求与委托约定] --> B[初始化与需求设计]
+    B --> C{必需产物已验证?}
+    C -->|是| D[按依赖编排里程碑]
+    C -->|否| F[诊断与定向修复]
+    D --> E[单功能与跨功能验收]
+    E -->|失败或缺证据| F
+    F --> G{已有授权内可推进?}
+    G -->|是| B2[修复或补证据并复验原失败项]
+    B2 --> C2{对应验收通过?}
+    C2 -->|否| F
+    C2 -->|是| D
+    G -->|真实取舍或授权缺口| H[保存未完成及升级说明; 继续独立任务]
+    E -->|全部必需项通过| I[适用部署配置与验证]
+    I --> J[报告实际交付状态]
 ```
 
 ### 阶段总览 / Phase Overview
 
-| 阶段 | 名称 | 调用技能 | 输入 → 输出 | 失败处理 |
-|:----:|:----:|:---------:|:-----------:|:--------:|
-| 0 | init | `init-project` | 用户需求 → 文件树 + project-metadata.json | 重试 1 次，失败则终止 |
-| 1 | requirements | `engineer-requirements` | project-metadata.json → REQUIREMENTS.md | 重试 1 次，失败则降级最小需求 |
-| 2 | architect | `engineer-architect` | project-metadata.json + REQUIREMENTS.md → CONTEXT.md | 重试 1 次，失败则降级骨架蓝图 |
-| 3 | frontend | `engineer-frontend-architect` | CONTEXT.md + REQUIREMENTS.md → FRONTEND-DESIGN.md | 重试 1 次，失败则降级最小设计 |
-| 3.5 | poc | `engineer-poc` | REQUIREMENTS.md + FRONTEND-DESIGN.md → 可运行 POC + POC-MANIFEST.md + POC-FIDELITY.md | 重试 1 次，失败则降级最小 POC；无前端或 skip_poc 时跳过 |
-| 4 | orchestrate | `engineer-orchestrator` + `engineer-workflow` × N | 蓝图 + 前端设计 → 完整代码 | 里程碑级自动自愈 |
-| 4.5 | run gate | 内置运行门禁 | 代码 → build+test 通过 | 失败强制修复循环；修不动标 DOES_NOT_RUN |
-| 5 | integrate | 内置集成测试 | 代码 → 测试报告 | 记录失败，不阻塞 |
-| 6 | deploy | 内置部署生成 | 蓝图部署方案 → 部署配置 | 记录警告，不阻塞 |
-| 7 | report | 内置报告生成 | 所有以上 → 最终报告 | — |
+| 阶段 | 调用技能/职责 | 输入 → 输出 | 失败处理 |
+|------|---------------|-------------|----------|
+| init | init-project | 请求 → 脚手架 + metadata | 修复；保护已有文件，未完成则阻塞依赖 |
+| requirements | engineer-requirements | 请求/metadata → REQUIREMENTS.md | 补齐原要求，不降级最小需求 |
+| architect | engineer-architect | 需求 → CONTEXT.md | 修复蓝图，不用骨架冒充完成 |
+| frontend | engineer-frontend-architect | 需求/蓝图 → FRONTEND-DESIGN.md | 适用时修复设计，无前端才不适用 |
+| poc | engineer-poc | 设计 → POC 与清单 | 保留 skip_poc/stop_at_poc 决定，不因失败缩范围 |
+| development | orchestrator + workflow | 蓝图/设计 → 代码 | 定向修复，里程碑级恢复 |
+| run gate | 运行验证 | 代码 → build/test 证据 | 失败修复复验；缺结果为未验证 |
+| integration | 集成验收 | 代码 → 集成证据 | 所有必需缺陷无论数量进入修复复验 |
+| deploy | 部署配置 | 约定方案 → 配置及验证 | 必需配置未通过保持未完成；实际发布另按已有授权 |
+| report | 报告 | 所有证据 → 实际状态 | 有未完成项不能宣称整个项目完成 |
+
+具体阶段键及参数以当前执行器为准，详见 references/engine.md。
 
 ### 三文档体系 / Three-Document System
 
@@ -267,12 +231,12 @@ FRONTEND-DESIGN.md ← Phase 3 (前端设计)
 - **CONTEXT.md**: 回答"怎么做"——技术栈、数据模型、API 契约、架构模式、里程碑
 - **FRONTEND-DESIGN.md**: 回答"前端长什么样"——页面树、组件树、状态管理、UI 状态机
 
-**简单项目跳过**：当项目没有前端界面或模块较少时，自动跳过 Phase 1 和 Phase 3。
+**阶段适用性**：简单项目可省独立需求分析阶段，但要求仍须完整写入蓝图；无前端才省前端设计。阶段跳过不能删除成果或验收要求。
 
 **可选增强 — Phase 5 生产就绪检查**：
-在 `--auto` 或 `--silent` 模式下，如果项目是服务端/Web 应用，Phase 5 会额外执行生产就绪检查。
+若交付约定要求生产就绪且项目是服务端/Web 应用，各 mode 均执行适用检查。
 读取 `init-project/references/production-readiness.md` 按项目类型运行检查清单，
-未通过项记录到最终报告的"建议改进"部分，不阻塞流程。
+必需未通过项修复复验，仍未通过则保持未完成；可选改进才列建议。
 纯 CLI/库项目自动跳过此步骤。
 
 ---
@@ -283,13 +247,13 @@ engineer-job 提供两种执行模式。**Workflow 脚本是默认推荐的主�
 
 ### 模式 A（推荐）：Workflow 脚本自动执行
 
-通过 Workflow 工具自动执行全部 8 个阶段。各阶段子代理在 Workflow 引擎管理下自动推进，
+通过 Workflow 工具执行适用阶段。各阶段子代理在 Workflow 引擎管理下自动推进，
 无需手动调度。
 
 **使用方式**：
 ```javascript
 Workflow({
-  script: "skills/engineer-job/run.wf.js",
+  scriptPath: "skills/engineer-job/run.wf.js",
   args: {
     requirements: "做一个博客系统，CRUD 功能，Python FastAPI + SQLite",
     mode: "auto",              // normal | auto | silent
@@ -303,7 +267,7 @@ Workflow({
 **关键特性**：
 - **标准协议**：Phase 0 写入 `project-metadata.json`，Phase 1 写入 `REQUIREMENTS.md`，Phase 2 写入 `CONTEXT.md`，Phase 3 写入 `FRONTEND-DESIGN.md`。所有阶段通过文件传递结构化数据，不靠自然语言摘要
 - **自动恢复**：重启时自动检测 `.agents/job.state.json`，跳过已完成阶段
-- **降级继续**：继续独立任务，必需失败项保持未完成，不静默删减范围
+- **独立任务继续**：继续独立任务，必需失败项保持未完成，不静默删减范围
 - **最终报告**：所有阶段完成后自动生成完整报告
 
 详情参见 `references/engine.md`。
@@ -353,8 +317,8 @@ engineer-job（主会话）
 2. **上下文干净** — 子代理只包含当前任务所需的最少信息，不继承主会话的对话历史
 3. **标准协议传递** — 子代理之间的状态通过文件传递（`project-metadata.json` → `REQUIREMENTS.md` → `CONTEXT.md` → `FRONTEND-DESIGN.md` → `job.state.json`），不通过对话参数传递
 4. **简短状态码** — 子代理返回以下三种状态之一，不携带大量文本：
-   - `DONE` — 成功完成
-   - `DONE_WITH_CONCERNS` — 完成但有备注
+   - `DONE` — 全部必需成果与验收完成（可未提交）
+   - `DONE_WITH_CONCERNS` — 必需项均通过，仅有非阻塞备注
    - `BLOCKED` — 无法继续
 
 ---
@@ -365,7 +329,7 @@ engineer-job（主会话）
 
 保护工作树、未提交改动与数据，不因失败次数自动重建或重置。旧执行器的 DOES_NOT_RUN 表示运行门禁未通过，需在报告区分真实运行失败与证据不足；不得将其直接当成所有功能不可用。
 
-执行引擎仍有历史降级路径；收到其降级或跳过结果时必须对照原请求逐项确认，缺失项保持未完成。发布按前述授权和验收交接规则执行，不从自动模式推导许可。
+对执行器返回的降级、跳过、空返回或缺失结果必须核对原请求和证据，缺失项保持未完成。发布按前述授权和验收交接规则执行，不从自动模式推导许可。
 
 ---
 
@@ -376,10 +340,10 @@ engineer-job（主会话）
 ```
 新对话 → 检测 .agents/job.state.json
   ├── 存在 → 读取 → 报告当前进度 → 恢复执行
-  │   ├── init: 未完成 → 重新 init-project
-  │   ├── requirements: 未完成 → 重新 requirements
-  │   ├── architect: 未完成 → 重新 architect
-  │   ├── frontend: 未完成 → 重新 frontend
+  │   ├── init: 未完成 → 诊断现有脚手架后补齐
+  │   ├── requirements: 未完成 → 接续 requirements
+  │   ├── architect: 未完成 → 接续 architect
+  │   ├── frontend: 未完成 → 接续 frontend
   │   ├── development: 未完成 → 恢复 orchestrator
   │   │   ├── 读取 checkpoint.next_action
   │   │   ├── git log 验证当前 commit
@@ -406,7 +370,9 @@ engineer-job（主会话）
 1. ✅ 阶段 0: init — [时间]
 2. ✅ 阶段 1: architect — [时间]
 3. ✅ M1: [名称] — [时间]
-4. ⚠️ M2: [名称]（降级通过）
+
+### 未完成/未验证
+4. M2: [名称] — [缺失项、尝试及下一动作]
 
 ### 待完成
 5. [ ] M3: [名称]
@@ -502,7 +468,7 @@ engineer-job 使用三文件方案来追踪跨技能、跨会话的项目进度�
     "last_commit": "def456",
     "last_phase": "development",
     "next_action": "continue milestone M2 (article-crud) — fixing failing test",
-    "session_summary": "Completed M1. M2 in progress with 1 rebuild. 0 integration issues."
+    "session_summary": "CONTEXT.md 委托约定；M1 已验收，M2 测试失败。已修正参数仍失败，下一步定位依赖；工作树改动保留。"
   }
 }
 ```
@@ -513,9 +479,9 @@ engineer-job 使用三文件方案来追踪跨技能、跨会话的项目进度�
 |:----:|------|
 | `TODO` | 未开始 |
 | `IN_PROGRESS` | 正在执行 |
-| `DONE` | 已完成 |
+| `DONE` | 必需成果与验收均完成，可未提交 |
 | `BLOCKED` | 阻塞，无法继续 |
-| `SKIPPED` | 跳过（如降级失败后） |
+| `SKIPPED` | 明确不适用或已有授权排除；不计作原需求完成 |
 
 #### 文件 2：`.agents/job.progress.md` — 人类可读追加账本
 
@@ -546,14 +512,16 @@ engineer-job 使用三文件方案来追踪跨技能、跨会话的项目进度�
 
 ## 📊 最终报告 / Final Report
 
-所有阶段完成后，engineer-job 输出以下最终报告：
+执行结束或确实无法继续时输出报告；只有全部必需项验证通过才使用“完成”。
 
 ```markdown
-# 🎉 项目开发完成 / Project Development Complete
+# 项目交付报告 / Delivery Report
+
+**结论**: [已完成 / 未完成 / 未验证及原因]
 
 **项目**: [项目名]
 **模式**: [normal / auto / silent]
-**总阶段**: 8/8 ✅
+**阶段状态**: [实际已验收/未完成/不适用数量]
 **总里程碑**: [N/N] 
 **总变更**: +N / -M 行
 **总文件**: N 个
@@ -572,11 +540,11 @@ engineer-job 使用三文件方案来追踪跨技能、跨会话的项目进度�
 | 5 | 集成测试 | ✅ | N/N 测试通过 |
 | 6 | 部署配置 | ✅ | [Dockerfile/CI/...] |
 
-## 降级记录
+## 未完成与已授权取舍
 
-| 里程碑 | 降级原因 | 最终处理 |
+| 里程碑 | 事实与授权来源 | 修复/验收与下一动作 |
 |--------|---------|---------|
-| [名称] | 重建 2 次后降级范围 | 降级通过 |
+| [名称] | [未通过项或明确授权的变更] | [已尝试、复验结果、下一动作] |
 
 ## 部署配置
 
@@ -597,12 +565,12 @@ engineer-job 使用三文件方案来追踪跨技能、跨会话的项目进度�
 | 场景 | 处理方式 |
 |------|---------|
 | **job.state.json 不存在但 project-metadata.json 存在** | 回退到 metadata → 重建 job.state.json → 从 metadata 推断当前阶段 |
-| **job.state.json 与 git 状态不一致** | 运行 `git log --oneline -3` 验证，报告差异，询问用户 |
+| **job.state.json 与 git 状态不一致** | 运行 `git log --oneline -3` 验证，核对产物/工作树/验证范围；真实取舍或授权缺口才询问 |
 | **子代理超时** | 默认 10 分钟超时，超时后标记 BLOCKED |
-| **同一项目重复启动** | 检测 job.state.json 存在，提示用户恢复而非重新开始 |
-| **用户中途说"暂停"** | 记录当前进度到 job.state.json + project-metadata.json，commit 当前工作，输出恢复指令 |
-| **引擎在 --auto 模式下技术栈默认选择不符合预期** | 在最终报告中提供"建议修改"清单，但开发阶段不暂停 |
+| **同一项目重复启动** | 检测 job.state.json 存在，读取约定及 checkpoint 后直接恢复 |
+| **用户中途说"暂停"** | 记录当前进度到 job.state.json + project-metadata.json，保留工作树（不自动 commit/stash），输出恢复指令 |
+| **引擎在 --auto 模式下技术栈默认选择不符合预期** | 核对已定约束，普通实现选择自主修正；真实技术取舍才升级 |
 | **用户提供了部分代码但没有 CONTEXT.md** | 先扫描现有代码（调用 engineer-architect 的逆向分析模式）生成蓝图，再继续 |
-| **用户说"不要部署配置"** | 在 init 或 deploy 阶段提供选项。auto 模式下根据项目类型默认决定是否生成 |
-| **所有功能完成后还有集成问题堆积** | 在最终报告中列出，并作为第一条建议 |
-| **project-metadata.json 与 CONTEXT.md 不一致** | 以 CONTEXT.md 为准，重建 metadata。记录差异日志 |
+| **用户说"不要部署配置"** | 遵守明确排除并记录，各 mode 不重新扩大范围 |
+| **所有功能完成后还有集成问题堆积** | 全部必需问题进入修复复验；未解决不能报告项目完成 |
+| **project-metadata.json 与 CONTEXT.md 不一致** | 以用户当前决定和代码证据校准，保留有效信息，更新冲突字段并记录原因 |

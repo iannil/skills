@@ -41,7 +41,7 @@ engineer-next 是一个**精准的调度员**：用最小代价搞清楚"项目�
 
 1. **状态即文件，诊断即读文件 / State Is Files** —— 只读既有 `job.state.json` / `progress.json` / `project-metadata.json` / `CONTEXT.md` / `REQUIREMENTS.md` / `FRONTEND-DESIGN.md` / `POC-MANIFEST.md`，不写自己的进度。默认读取顺序：`job.state.json → progress.json → CONTEXT.md`；这不是可信度排序，用户当前明确决定优先，冲突时先校准。
 2. **复用既有恢复，绝不重跑 / Reuse Recovery, Never Redo** —— 接续的命门是"从断点继续"。典型陷阱：重调 `engineer-job` 在 development 阶段会重跑所有里程碑——所以"开发进行中"必须走 `engineer-orchestrator` 的里程碑级恢复。
-3. **降级优于阻塞 / Degrade Over Block** —— 状态文件损坏/检测歧义，按既定优先级降级判定，只在 normal 模式提示用户。
+3. **降级优于阻塞 / Degrade Over Block** —— 状态文件损坏/检测歧义，按既定优先级降级判定，各 mode 都保留不确定性说明；真实取舍或授权缺口才询问。
 
 ---
 
@@ -66,11 +66,11 @@ engineer-next 是一个**精准的调度员**：用最小代价搞清楚"项目�
 
 | 模式 | 行为 |
 |:----:|------|
-| normal | 出状态诊断报告，等待用户确认后再交接；检测不确定（如 git 偏差）时询问。 |
-| auto | 出诊断摘要后直接交接，不确定性按默认降级。 |
-| silent | 静默诊断 + 交接，仅记日志，末尾输出交接摘要。 |
+| normal | 输出诊断报告，按已授权的继续请求直接交接；真实取舍或授权缺口才询问。 |
+| auto | 输出摘要并直接交接；不确定性核对证据，权限与 normal 相同。 |
+| silent | 精简诊断 + 交接，保留必要阻塞说明及摘要；权限不变。 |
 
-**mode 透传**：交接时把同一 `--mode` 透传给 target_skill。
+**mode 透传**：交接时透传同一 `--mode`，它只控制输出详略，不授权提交、stash、重置、删需求或发布。继承 CONTEXT.md / REQUIREMENTS.md 委托约定引用（成果、完成标准来源、不可妥协项、授权取舍、决策权限），以及 checkpoint 的未解问题、已尝试和下一动作；不新建账本。
 
 ---
 
@@ -91,10 +91,10 @@ graph TD
     C --> D["得到判决 verdict"]
     D --> E["校验 git HEAD vs checkpoint.last_commit"]
     E --> F["输出状态诊断报告"]
-    F --> G{"mode?"}
-    G -->|normal| H["等待用户确认"]
-    G -->|auto/silent| I["直接交接"]
-    H --> I
+    F --> G{"真实取舍或授权缺口?"}
+    G -->|有| H["列事实/尝试/推荐及代价; 继续独立任务"]
+    G -->|无| I["按既有授权直接交接"]
+    H -->|获得相关决定后| I
     I --> J["按 handoff-protocol.md 交接给 target_skill"]
 ```
 
@@ -129,7 +129,7 @@ node skills/engineer-next/references/detect-resume.js [projectDir]
 | 1b | `job.state.json` 在，`development` 为首个未完成阶段（TODO 起步或 IN_PROGRESS） | 下一个 TODO 里程碑 | **路由 engineer-orchestrator**（里程碑级恢复）。⚠️ 不重调 job，否则重跑已完成里程碑 |
 | 1c | `job.state.json` 在，`development` DONE，但 run_gate/finalize/deploy/report 未完成 | 收尾阶段 | **重调 engineer-job run.wf.js**（不重跑里程碑） |
 | 1c+ | `job.state.json` 在，`development` DONE 但无 QA 记录 / `.agents/qa-latest.md` 结论非 PASS | 补测试验收 | **路由 engineer-qa** 跑测试门禁（②③④层），通过后再进收尾 |
-| 1d | `job.state.json` 全阶段 DONE | （已完成） | 报告"已完成"，建议 engineer-advisor 或追加功能走 architect |
+| 1d | `job.state.json` 全阶段 DONE | （已完成） | 核对必需成果与当前证据；全部满足才报告完成，否则交验收/修复 |
 | 1e | 某阶段 BLOCKED | 该阶段 | 报告阻塞 + 路由该技能/advisor |
 | 2 | 无 job.state，但有 `.agents/progress.json` | 下一个 TODO 里程碑 | **路由 engineer-orchestrator** 恢复 |
 | 3 | 无 job.state/progress，但有 `CONTEXT.md`（蓝图就绪） | 首个里程碑/模块 | **路由 engineer-orchestrator**（有 CONTEXT-MAP.md 走多模块） |
@@ -164,8 +164,8 @@ node skills/engineer-next/references/detect-resume.js [projectDir]
 - （若适用）测试基线: [N/N 通过]
 
 ### 下一步
-[normal] 确认后我将交接给 [target_skill]...
-[auto] 直接交接。
+按已有继续授权交接给 [target_skill]；继承 [约定引用、未解问题、已尝试、下一动作]。
+真实取舍/授权缺口：[事实、推荐及代价、待决定事项、仍可继续任务；无则不询问]
 ```
 
 ---
@@ -175,12 +175,12 @@ node skills/engineer-next/references/detect-resume.js [projectDir]
 | 场景 | 处理 |
 |------|------|
 | `job.state.json` 损坏/无法解析 | 降级到 progress.json → CONTEXT.md → 外来项目判定 |
-| git HEAD 与 `checkpoint.last_commit` 偏差 | 诊断报告标 ⚠️；normal 模式询问 |
+| git HEAD 与 `checkpoint.last_commit` 偏差 | 核对工作树与证据适用性，不因 HEAD 偏差自动询问或重跑 |
 | 恢复时用户给了**新需求** | 新功能→路由 orchestrator 追加；改范围→路由 architect |
 | `CONTEXT-MAP.md` 在（多模块） | 交 orchestrator 多模块编排 |
 | 检测歧义 | 严格按决策表优先级（2 > 4 等） |
 | 外来项目体量在阈值附近 | 保守走逆向(6b)——宁可有蓝图 |
-| development DONE 但测试门禁未过 | 路由 engineer-qa 补验收，PASS 后再交 job 收尾 |
+| development DONE 但测试门禁未过 | 路由 engineer-qa 补验收；实际缺陷交 workflow/orchestrator 修复后复验，PASS 后再收尾 |
 
 ---
 

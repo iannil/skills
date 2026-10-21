@@ -1,254 +1,80 @@
 # engineer-job 执行引擎参考 / Execution Engine Reference
 
-> `run.wf.js` 的设计原理、使用方式和扩展指南。
->
-> **Updated for skill-protocol v1.0** — See `references/skill-protocol.md` for the
-> standardized inter-skill communication protocol.
->
-> Metadata schema: `references/project-metadata.schema.json`
+`run.wf.js` 通过 Workflow 的 `agent()` / `phase()` / `log()` 编排阶段。参数和状态以当前脚本及 `project-metadata.schema.json` 为准，技能间语义见 [skill-protocol.md](skill-protocol.md)。本页不新增状态枚举或必填 JSON 字段。
 
----
+## 执行与授权
 
-## 设计原理 / Design Principles
+用户已要求执行或继续时，在已有授权内自动推进；`normal` / `auto` / `silent` 只控制输出详略。技术修复、补证据、集成复验无需逐阶段确认；提交、stash、破坏性重置、缩减需求和发布不能从 mode 或普通开发请求推导授权。
 
-`run.wf.js` 是一个 Workflow 脚本，利用 Workflow 工具的 `agent()` / `phase()` / `log()` API 实现多阶段编排。
+每次委托读取 `CONTEXT.md` / `REQUIREMENTS.md` 中的简短委托约定：成果、完成标准及来源、不可妥协项、已授权取舍、可自主决定与需升级的事项。尚无文档时先从用户请求整理，文档创建后落入现有文档，不另建账本。
 
-### 四个核心原则
-
-1. **文件即状态** — 所有进度写入 `.agents/` 目录和 `project-metadata.json`，不依赖对话上下文
-2. **阶段即子代理** — 每个 Phase 是一个独立 agent() 调用，上下文干净
-3. **协议即管道** — Phase 间通过 `project-metadata.json` 传递结构化数据，不依赖自然语言摘要
-4. **降级优于阻塞** — 遇错优先降级/跳过，而非停下等人
-
-### 协议数据流 / Protocol Data Flow
-
-```
-User (args.requirements)
-    │
-    ▼
-Phase 0: init-project ──► project-metadata.json ──► Phase 1: engineer-architect
-                                                           │
-                                                           ▼
-                                                    CONTEXT.md (blueprint)
-                                                           │
-                                                           ▼
-Phase 2: engineer-orchestrator ──► .agents/progress.json ◄── engineer-workflow × N
-                                                           │
-                                                           ▼
-Phase 3: Integration  ──► test report (recorded, non-blocking)
-Phase 4: Deploy       ──► Dockerfile / CI config (non-blocking)
-Phase 5: Report       ──► Final completion report
-```
-
-### 自动复杂度检测（Component 2）
-
-Phase 0 读取 `args.requirements` 后，`run.wf.js` 用 `detectComplexity()` 启发式判定 `has_frontend` / `skip_requirements` / `skip_frontend`（显式 `args.skip_*` 永远优先）。检测结果写入 `project-metadata.json`，并据 `skip_requirements` / `skip_frontend` 分别门禁 Phase 1 与 Phase 3。纯函数单一真源在 `references/detection-logic.js`，由 `tests/test-detection.mjs` 守护，并内联进 `run.wf.js`（沙箱禁止 require）。
-
----
-
-## 使用方式 / Usage
-
-通过 Workflow 工具调用（**推荐**）：
+## 调用
 
 ```javascript
 Workflow({
-  script: "skills/engineer-job/run.wf.js",
+  scriptPath: "skills/engineer-job/run.wf.js",
   args: {
-    requirements: "做一个博客系统，支持文章的CRUD，使用Python FastAPI，SQLite存数据",
-    mode: "auto",           // normal (默认) | auto | silent
+    requirements: "做一个博客系统，支持文章 CRUD，Python FastAPI + SQLite",
+    mode: "auto", // normal（默认）| auto | silent：仅沟通详略
     projectName: "blog-system"
   }
 })
 ```
 
-这是 **engineer-job 的主执行路径**。不要手动逐个调用子 Agent — 在 `--auto` 和 `--silent` 模式下，
-Workflow 会自动推进所有 6 个 Phase 并在完成后输出最终报告。
+Workflow 是推荐入口；工具不可用时按同样的约定手动调度子代理。不能因执行器返回空结果、降级产物或已结束就认定交付完成。
 
-如果项目已开始但中途中断，重新调用 Workflow（同样的 `run.wf.js`）会自动检测 `job.state.json`
-并从上一次中断处继续：
+| 模式 | 输出 | 失败处理（权限一致） |
+|:----:|------|--------------------|
+| normal | 计划、阶段进展和结果 | 诊断、修复、复验；真实取舍或授权缺口才升级 |
+| auto | 关键进展和结果摘要 | 同上 |
+| silent | 简短结果与必要阻塞信息；证据仍需保留 | 同上 |
 
-```javascript
-// 恢复示例 — 自动检测 .agents/job.state.json
-Workflow({
-  script: "skills/engineer-job/run.wf.js",
-  args: {
-    requirements: "同上",
-    mode: "auto",
-    projectName: "blog-system"
-  }
-})
-```
+## 阶段与产物
 
----
+阶段名称映射以当前执行器为准，勿以文档中的顺序编号重写状态。
 
-## 模式说明 / Mode Behavior
+| 阶段 | 输入 → 输出 | 验收与恢复 |
+|------|-------------|------------|
+| init | 用户请求 → 脚手架、project-metadata.json | 修复初始化错误，保护已有文件；缺失必需产物时阻塞依赖阶段 |
+| requirements | 请求、metadata → REQUIREMENTS.md | 简单项目可省独立分析阶段，但所有要求仍落入 CONTEXT；失败不能缩成最小需求 |
+| architect | 需求、metadata → CONTEXT.md、适用 ADR、metadata 更新 | 核对全部约束；骨架蓝图不能代替完整设计 |
+| frontend | 需求、蓝图 → FRONTEND-DESIGN.md | 无前端可不适用；设计失败需修复，不自动替换为最小设计 |
+| poc | 前端设计 → POC、POC-MANIFEST.md、POC-FIDELITY.md | 尊重 skip_poc / stop_at_poc 的已有决定；POC 不证明正式后端与真实集成完成 |
+| development | 蓝图、设计、POC → 各里程碑代码与进度 | 由 orchestrator 按依赖推进，workflow 交付单功能；失败定向修复 |
+| run gate | 当前代码 → 实际 build/test 证据 | 缺结果为未验证；失败修复后重跑受影响检查 |
+| integration / finalize | 功能产物 → 跨功能、端到端及约定质量验收 | 每一个必需缺陷都进入修复与复验，不按数量或严重程度豁免 |
+| deploy | 已约定部署方案 → 配置及适用验证 | 配置生成与实际发布分别记录；实际发布需要已有授权 |
+| report | 当前证据 → 实际交付报告 | 区分已实现、已验收、未完成、已发布与线上已确认 |
 
-| 模式 | Phase 间推进 | 异常处理 |
-|:----:|-------------|---------|
-| normal | Phase 间自动推进（Workflow 工具自带节流） | 报告错误，降级后继续，最终报告中标明 |
-| auto | 自动推进，最终报告输出降级记录 | 自动降级/跳过，记录到最终报告 |
-| silent | 自动推进，无中间输出 | 静默处理，只记日志 |
+复杂度检测的单一真源是 `references/detection-logic.js`，显式 `args.skip_*` 优先。自动检测只是阶段适用性候选；不能据此删去用户明示要求。有前端的 POC 默认策略与参数见主技能。跨阶段结构化信息通过 `project-metadata.json`，需求和授权通过现有文档引用传递。
 
----
+## 运行与集成门禁
 
-## 6 个 Phase 详解
+1. 从项目原生配置（Makefile、package.json、pyproject.toml、Cargo.toml、go.mod 等）确定命令；必要时参考 `references/build-commands.json`。
+2. 实际执行 build/test，并按需求和风险委托 engineer-qa 验证集成及关键用户链路；无 UI 时使用适用的黑盒验证。覆盖率使用项目约定，不新增统一百分比。
+3. 记录命令、环境、代码版本或工作树差异、结果和证据位置。空返回、无法解析、缺报告或过期证据都不能默认成功。
+4. 定位实现、环境或验收器问题，修复后重新验收原失败项及受影响范围。每次尝试应有新证据或具体改变。
+5. 固定重试预算只限制一轮执行，耗尽后重新诊断、拆任务或交接，不触发重建、缩成 happy path、跳过必需项或自动要求用户兜底。无有效下一步时保存未完成状态并推进独立任务。
 
-### Phase 0: Scaffold (init-project)
+旧状态 `DOES_NOT_RUN` 表示门禁未通过，报告须区分实际运行失败和未取得证据；不据此声称所有功能都不可用。协议不支持 UNVERIFIED 等细分值时，用已有非完成状态，原因写入现有 summary / issues / errors。
 
-**输入**: `args.requirements` + `args.projectName`
+生产就绪检查由交付约定决定，所有 mode 相同。必需项失败阻止对应完成结论；可选优化可列建议。部署配置可包括 Dockerfile、compose、CI 和 `.env.example`，按项目实际需要生成并验证；不凭配置存在宣称可部署或已上线。
 
-**输出**: 
-- 完整的项目文件树（通用结构 + 语言特定模板）
-- `project-metadata.json` — 结构化技术栈信息（后续 Phases 的输入）
+## 恢复与 checkpoint
 
-**失败处理**: 重试 1 次 → 仍然失败 → 终止（Phase 0 不可降级）
+先读取 job.state.json → progress.json → CONTEXT.md 的候选状态，再核对工作树、实际产物和验收证据；读取顺序不是可信度排序。用户当前决定优先，HEAD 变化本身不需要确认。
 
-### Phase 1: Architect (engineer-architect)
+- DONE：有适用证据才跳过；结果缺失或与当前代码不符则补验，发现缺陷则修复复验。
+- BLOCKED：继承根因、已尝试方案和下一动作，在现有授权内诊断接续；只将真正的价值取舍或授权缺口交用户。
+- development 未完成：交 orchestrator 恢复里程碑，不重新初始化已完成队列。
+- 设计或收尾未完成：确认不会覆盖已有产物后重调 job；保留已有 skip_* 和 stop_at_poc 决定。
 
-**输入**: `project-metadata.json`（Phase 0 的输出）
+checkpoint 复用现有 session_summary / next_action（progress 的 context 摘要亦可）：写入委托约定的文档章节引用、未解问题、尝试及结果、下一动作与仍可继续任务。记录未提交文件和验证范围；commit hash 是定位信息，不是完成条件。没有提交授权时保留工作树，不为恢复而 commit 或 stash。
 
-**输出**:
-- `CONTEXT.md` — 完整的项目蓝图（系统全景、词汇表、数据模型、API 契约、里程碑、部署方案）
-- `docs/adr/` — 架构决策记录
-- `project-metadata.json` — 追加 `architect` 节（里程碑列表、词汇表、前端设计方向）
+升级说明应包含：事实与证据、已尝试及失败原因、推荐方案及代价、具体需要用户决定的事项、等待期间仍可继续的任务。无需用户价值判断的工程问题由执行链继续处理。
 
-**失败处理**: 重试 1 次 → 生成骨架蓝图（降级通过）
+## 扩展与兼容
 
-### Phase 2: Develop (engineer-orchestrator + engineer-workflow)
+新增阶段时同步当前执行器的阶段声明，复用现有结果协议。消费结果先检查结构和必需证据，缺失时保持非完成；禁止 `result?.status || 'DONE'` 这样的成功兜底。不能只依赖子代理自报 DONE，修复后由负责验收的步骤重新检查。
 
-**输入**: `CONTEXT.md` + `project-metadata.json`
-
-**输出**:
-- `.agents/progress.json` — 里程碑级进度跟踪
-- 完成的项目代码（按里程碑依赖顺序生成）
-- 更新后的 `CONTEXT.md`（里程碑状态标记为完成）
-
-**失败处理**: 里程碑级诊断与定向修复；必需失败项保持未完成，不自动重置或删减范围
-
-### Phase 2.5: Run Gate (hard gate)
-
-**新增（Component 4）** — build + test 必须通过。
-
-- agent 读 `project-metadata.json` 的 language/framework，优先用项目原生配置（Makefile / package.json / pyproject.toml / Cargo.toml / go.mod），回退查 `references/build-commands.json`。
-- 真跑 build + test（通过 agent 的 Bash 工具）。
-- 失败 → 强制修复循环（normal=2 / auto=1 / silent=1 次）。
-- 修不动 → 标 `DOES_NOT_RUN`，最终报告头条如实标注，**不宣称完成**。
-- 覆盖率门禁：使用项目约定的分支覆盖率和基线策略，未约定时按变更风险判断，不强加统一百分比（委托 engineer-qa ②③层，见其 references/coverage-tools.md）。
-
-### Phase 3: Integrate
-
-**非阻塞阶段** — 记录结果但不阻塞后续 Phase
-
-**检查项**:
-1. 编译/构建检查
-2. 全部测试运行
-3. 生产就绪检查（仅服务端/Web 应用）
-4. agent-browser E2E 关键用户链路负载一次（无 UI 降级为黑盒，委托 engineer-qa ④层）。
-
-### Phase 4: Deploy
-
-**非阻塞阶段** — 生成但不验证部署配置
-
-**生成项**:
-- Dockerfile（如适用）
-- docker-compose.yml（如多服务）
-- .github/workflows/（如 CI/CD 配置）
-- .env.example（环境变量模板）
-
-### Phase 5: Report
-
-输出包含以下内容的最终报告：
-1. 每阶段完成状态
-2. 里程碑完成表
-3. 文件变更摘要
-4. 测试结果
-5. 部署配置
-6. 词汇表审计
-7. 降级日志
-8. 后续建议
-
----
-
-## 恢复流程 / Recovery
-
-重启时自动检测：
-
-```
-Check .agents/job.state.json
-  ├── exists → read current phase
-  │   └── for each phase:
-  │       ├── DONE → skip
-  │       ├── BLOCKED → report, ask what to do
-  │       └── TODO/IN_PROGRESS → execute
-  └── not exists → check project-metadata.json / CONTEXT.md
-       └── nothing → fresh start
-```
-
-### 恢复操作
-
-1. 读取 `job.state.json` — 确定当前阶段和下一个动作
-2. 验证 git 状态 — `git log --oneline -3`，与 `checkpoint.last_commit` 比对
-3. 运行测试 — 确认现有代码状态正常
-4. 读取 `project-metadata.json` — 获取最新的项目元信息
-5. 生成恢复报告 — 展示当前进度和下一个动作
-
----
-
-## 扩展指南 / Extending
-
-### 新增 Phase
-
-在 `run.wf.js` 的 main loop 末尾追加：
-
-```javascript
-// New Phase: Security Audit
-phase('Security')
-if (!isDone(state, 'security')) {
-  const result = await agent(
-    `Security audit prompt...`,
-    { schema: PHASE_RESULT, label: 'security-audit', phase: 'Security' }
-  )
-  markPhase(state, 'security', result?.status || 'DONE', result)
-  state.checkpoint.next_action = 'next phase'
-  writeState(state)
-}
-```
-
-不要忘记在 `meta.phases` 数组中添加对应的 phase title。
-
-### 新增 phase 到 meta
-
-```javascript
-phases: [
-  ...
-  { title: 'Security', detail: 'security audit scanning' },
-]
-```
-
-### 修改 Phase 逻辑
-
-编辑对应 phase 的 `agent()` prompt。注意保持 `PHASE_RESULT` schema 的兼容性。
-
-### 自定义降级策略
-
-在每个 phase 的 `if (result?.status === 'BLOCKED')` 分支中修改处理逻辑：
-- 可修复错误 → 重试一次
-- 不可修复但可降级 → 降级通过
-- 不可修复且不可降级 → 抛出异常
-
----
-
-## 兼容性 / Compatibility
-
-| 组件 | 版本 | 备注 |
-|------|:----:|------|
-| `run.wf.js` | 2.0 | skill-protocol v1.0 实现 |
-| `job.state.json` | 2.0 | 与 `engineer-orchestrator` 兼容 |
-| `project-metadata.json` | 1.0 | 新增标准协议文件 |
-| Workflow 工具 | 任意 | 需要 `agent()` / `phase()` / `log()` API |
-| Node.js | ≥18 | 仅用于文件 I/O，非运行时依赖 |
-
-### 与 engineer-orchestrator 的兼容
-
-`job.state.json` 的 `development.features` 结构与 `engineer-orchestrator` 的 `progress.json` 完全兼容。
-检测优先级：`job.state.json` → `progress.json` → `CONTEXT.md` → 从用户问起。
+新增字段前核对 schema 与消费者；无法兼容的详细信息放现有摘要/问题字段或文档，不凭本页发明字段。`job.state.json` 和 `progress.json` 的不同字段路径、大小写与版本由各自消费者负责，不直接互相覆盖。
