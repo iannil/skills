@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 // Execute the actual workflow phase with an isolated Agent adapter: no model calls,
 // shell commands, project writes or replacement implementation of the gate.
-const source = fs.readFileSync(path.join(__dirname, '../skills/engineer-job/run.wf.js'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '../skills/fde-job/run.wf.js'), 'utf8');
 const start = source.indexOf("phase('Run Gate')");
 const end = source.indexOf("phase('Integrate')", start);
 assert.ok(start >= 0 && end > start, 'workflow phase boundaries exist');

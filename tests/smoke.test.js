@@ -10,10 +10,10 @@ const root = path.resolve(__dirname, '..');
 const cli = path.join(root, 'bin', 'skills.js');
 
 const EXPECTED_SKILLS = [
-  'init-project',
+  'fde-init-project',
   'commercial-positioning-research',
   'seo-geo-methodology',
-  'product-analysis-framework',
+  'fde-product-analysis-framework',
   'rc-application-tool',
   'rc-philosophy-advisor',
   'rc-text-assistant',
@@ -57,12 +57,12 @@ test('install all dry-run selects all skills', () => {
 });
 
 test('install one skill dry-run selects only that skill', () => {
-  const result = runCli(['install', 'init-project', '--dry-run']);
+  const result = runCli(['install', 'fde-init-project', '--dry-run']);
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /Selected skills: init-project/);
-  assert.doesNotMatch(result.stdout, /Selected skills: init-project, product-analysis-framework/);
-  assert.match(result.stdout, /--skill init-project/);
+  assert.match(result.stdout, /Selected skills: fde-init-project/);
+  assert.doesNotMatch(result.stdout, /Selected skills: fde-init-project, fde-product-analysis-framework/);
+  assert.match(result.stdout, /--skill fde-init-project/);
 });
 
 test('unknown skill exits non-zero with valid choices', () => {
@@ -70,12 +70,12 @@ test('unknown skill exits non-zero with valid choices', () => {
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Unknown skill "missing-skill"/);
-  assert.match(result.stderr, /init-project/);
-  assert.match(result.stderr, /product-analysis-framework/);
+  assert.match(result.stderr, /fde-init-project/);
+  assert.match(result.stderr, /fde-product-analysis-framework/);
 });
 
-test('init-project reference file is packaged', () => {
-  const reference = path.join(root, 'skills', 'init-project', 'references', 'conventions-guide.md');
+test('fde-init-project reference file is packaged', () => {
+  const reference = path.join(root, 'skills', 'fde-init-project', 'references', 'conventions-guide.md');
 
   assert.equal(fs.existsSync(reference), true);
   assert.match(fs.readFileSync(reference, 'utf8'), /项目指南/);

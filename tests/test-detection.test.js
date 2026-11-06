@@ -2,9 +2,9 @@ const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const { readFileSync } = require('node:fs')
 const path = require('node:path')
-const { detectComplexity, topoSort } = require('../skills/engineer-job/references/detection-logic.js')
+const { detectComplexity, topoSort } = require('../skills/fde-job/references/detection-logic.js')
 
-const cases = JSON.parse(readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'evals', 'complexity-cases.json'), 'utf8'))
+const cases = JSON.parse(readFileSync(path.join(__dirname, '..', 'skills', 'fde-job', 'evals', 'complexity-cases.json'), 'utf8'))
 
 for (const c of cases) {
   test(`detect: ${c.label}`, () => {
@@ -44,7 +44,7 @@ test('topoSort: unknown dep throws', () => {
 })
 
 test('run.wf.js inlines pure functions (sync guard)', () => {
-  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'run.wf.js'), 'utf8')
+  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'fde-job', 'run.wf.js'), 'utf8')
   assert.ok(wf.includes('function detectComplexity'), 'run.wf.js 必须内联 detectComplexity')
   assert.ok(wf.includes('function topoSort'), 'run.wf.js 必须内联 topoSort')
   assert.ok(wf.includes('mirrored from references/detection-logic.js'), 'run.wf.js 必须标注镜像来源')
@@ -57,8 +57,8 @@ function extractSignalArray(src, name) {
 }
 
 test('run.wf.js keyword tables match detection-logic.js (sync guard)', () => {
-  const dl = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'references', 'detection-logic.js'), 'utf8')
-  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'run.wf.js'), 'utf8')
+  const dl = readFileSync(path.join(__dirname, '..', 'skills', 'fde-job', 'references', 'detection-logic.js'), 'utf8')
+  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'fde-job', 'run.wf.js'), 'utf8')
   for (const k of ['FRONTEND_SIGNALS', 'NO_FRONTEND_SIGNALS', 'COMPLEX_SIGNALS', 'SIMPLE_SIGNALS']) {
     const a = extractSignalArray(dl, k)
     const b = extractSignalArray(wf, k)
@@ -71,7 +71,7 @@ test('run.wf.js defines its args-derived Constants (sync guard)', () => {
   // Catches accidental deletion of the Constants block (MODE/REQUIREMENTS/PROJECT_NAME),
   // which node --check (syntax-only) and the detection-logic tests cannot detect —
   // a missing const only surfaces as a runtime ReferenceError when the workflow executes.
-  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'engineer-job', 'run.wf.js'), 'utf8')
+  const wf = readFileSync(path.join(__dirname, '..', 'skills', 'fde-job', 'run.wf.js'), 'utf8')
   assert.ok(/^const MODE = /m.test(wf), 'run.wf.js must define const MODE')
   assert.ok(/^const REQUIREMENTS = /m.test(wf), 'run.wf.js must define const REQUIREMENTS')
   assert.ok(/^const PROJECT_NAME = /m.test(wf), 'run.wf.js must define const PROJECT_NAME')

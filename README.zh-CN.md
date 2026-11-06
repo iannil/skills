@@ -10,7 +10,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-40 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个工程技能、1 个 Agent 评测技能、5 个项目与产品技能、12 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
+40 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个 FDE 技能、1 个 Agent 评测技能、5 个项目与产品技能、12 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
 
 每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
 
@@ -29,10 +29,10 @@ cd skills
 
 安装后，在 Agent 中指定技能名并描述任务，例如：
 
-- **开发软件**：“用 engineer-job，从零做一个任务管理工具。”
+- **开发软件**：“用 fde-job，从零做一个任务管理工具。”
 - **写作续篇**：“用 write-webnovel，读完现有正文和设定后续写下一章。”
 - **精修文字**：“用 novel-prose-readability，精修这段文字，保留人物声口与叙事视角。”
-- **梳理产品**：“用 product-pusher，帮我找出这个产品点子最需要验证的假设。”
+- **梳理产品**：“用 fde-product-pusher，帮我找出这个产品点子最需要验证的假设。”
 - **学习哲学**：“用 rc-tutor，从零解释观测收敛。”
 
 更多选项见[安装](#安装)。如果这些技能对你有帮助，欢迎点一个 star。
@@ -41,36 +41,36 @@ cd skills
 
 | 你想做什么 | 技能分类 | 数量 | 常用入口 |
 |---|---|---:|---|
-| 从需求到实现、验收，或接续已有工程 | [工程类](#工程类技能) | 17 | `engineer-job` / `engineer-next` |
-| 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 5 | `init-project` / `product-pusher` |
+| 从需求到实现、验收，或接续已有工程 | [FDE 类](#fde-类技能) | 17 | `fde-job` / `fde-next` |
+| 初始化项目、分析产品、验证创业点子 | [项目与产品类](#项目与产品类技能) | 5 | `fde-init-project` / `fde-product-pusher` |
 | 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 12 | `write-book` / `write-webnovel` |
 | 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
 | 验证 Agent 学习、复用与迁移收益 | [Agent 评测](#agent-评测技能) | 1 | `agent-learning-eval` |
 
 ## 可用技能
 
-### 工程类技能
+### FDE 类技能
 
-基于"实现规划驱动的 AI 辅助编程实战"方法论，构成完整的工程开发技能链：
+基于"实现规划驱动的 AI 辅助编程实战"方法论，构成完整的 FDE 开发技能链：
 
-- `engineer-job` — **AI 项目全自动构建引擎**（P0）。元编排引擎，自动执行完整项目生命周期：脚手架 → 架构设计 → 多功能开发 → 集成验收 → 部署配置生成。支持 `--auto`（自动确认）与 `--silent`（静默）模式，实现无人值守的项目构建。
-- `engineer-next` — **AI 进度接续路由引擎**。"随时随地接着上次继续"的万能入口。读取 engineer* 状态指纹（`.agents/job.state.json`、`.agents/progress.json`、`CONTEXT.md`、`REQUIREMENTS.md`、`project-metadata.json`、代码体量），诊断项目停在哪，路由到正确技能接续——`engineer-job`（重建参数重调其 Workflow，跳过已完成阶段）、`engineer-orchestrator`（开发进行中走里程碑级恢复，绝不重调 job 以免重跑里程碑）、`engineer-architect`（缺蓝图，或对外来项目逆向建模）、`engineer-requirements`。零 engineer* 产物的外来项目按代码量自适应接入：近乎为空→engineer-job 全新；大量代码→先逆向出蓝图。纯路由——不重写阶段、不写进度文件。
-- `engineer-cloner` — **AI 逆向站点克隆前置引擎**。给定授权的目标站点地址与完整权限账号，经 `agent-browser` 逆向观测线上站点（登录 → loop-until-dry 遍历 → 功能账本 → API/设计提取），产出 `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` 与诚实的 `CLONE-FIDELITY.md`（可观测精确 / 推断 / 不可观测），再交棒 `engineer-job` 完成全功能、全生命周期、高精度克隆。做设计语言重建 + 现代栈重建，不拷贝原始资产、不声称复制后端源码。
-- `engineer-legacy-recon` — **AI 遗留系统静态侦察前置引擎**（`engineer-cloner` 的离线兄弟）。当你进不去线上系统、但用户**把遗留系统的页面内容 + 导航菜单贴给你**（或截图 / 导出 HTML）时，本技能把这些既有材料当作唯一真相源——**不联网、不用 `agent-browser`**——静态推断出模块地图、实体字段、操作、状态机、角色权限划分。逐项标 `明示 / 推断 / 缺口`，产出 `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` 与 `RECON-FIDELITY.md`（含待用户补全的缺口清单），再交棒 `engineer-job`。仅当用户明确要用授权账号对照线上核实时，才升级到 `engineer-cloner`。
-- `engineer-requirements` — **AI 需求分析师**。基于 Event Storming + DDD 战略设计方法论，将模糊的用户需求深度拆解为结构化需求文档——识别有界上下文、业务事件、功能依赖与关键状态机。输出 `REQUIREMENTS.md` 供 `engineer-architect` 使用。当系统复杂、多模块或多端（2 个以上前端端或 5 个以上功能模块）时触发。
-- `engineer-architect` — **AI 架构师**（P0）。将模糊的用户需求转化为结构化的 CONTEXT.md 蓝图。自动调研、分析并提议技术方案，生成可执行的架构蓝图，包含系统全景、数据模型、API 契约与里程碑依赖树。
-- `engineer-frontend-architect` — **AI 前端架构师**。在系统架构完成*之后*进行的前端详细设计。输出 `FRONTEND-DESIGN.md`，包含页面树、组件树、状态管理架构、UI 状态机与设计系统 Token——适用于多端系统（Web / 小程序 / 移动端）。必须在 `engineer-architect` 之后执行；当项目有 2 个以上前端端时自动触发。
-- `engineer-poc` — **AI 高保真 POC 生成引擎**。把需求变成可运行的**纯前端演进式**原型：读取 `REQUIREMENTS.md` + `FRONTEND-DESIGN.md`（+ `CONTEXT.md`），识别行业并套用内置模式库，在可替换的 mock 数据接缝上把每个页面的全 UI 状态（loading/empty/error/normal/edge）做出来——全功能覆盖由 `.agents/poc.ledger.json` + loop-until-dry + coverage critic 保证。产出 `POC-MANIFEST.md`（mock→真实演进映射）与诚实的 `POC-FIDELITY.md`（`真实交互` / `mock 数据` / `占位未实现`）。作为 `engineer-job` 的可选 Phase 3.5 接入——工程可**停在 POC**、可**跳过**、也可**接着** Phase 4 把 mock 层演进为真实后端。无需后端。
-- `engineer-orchestrator` — **AI 项目编排引擎**（P0）。接收项目蓝图，自动分解为功能级任务队列，按依赖顺序逐一调用 engineer-workflow，并管理跨功能集成验收、上下文重置与跨会话进度持久化。
-- `engineer-workflow` — **AI 编码全自动工作流引擎**。以单个功能需求为输入，自动执行：里程碑拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 提交固化 → 更新蓝图。
-- `engineer-coach` — **AI 编码流程教练**。以六步 SOP 引导用户完成 AI 辅助编程：拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 固化。
-- `engineer-inspector` — **AI 代码架构监理**。检测架构偏移的三大信号（篡改地基 / 过度设计 / 体积失控），输出结构化验收报告。
-- `engineer-qa` — **工程测试验收**。按任务风险和项目约定选择测试与覆盖率口径，区分模拟、真实集成和目标环境证据，输出 PASS / NEEDS_FIX / UNVERIFIED；失败不会自动重置工作树。
-- `engineer-advisor` — **AI 编码知识顾问**。诊断对话健康度，评估是否需要重置上下文、升维指令或彻底重建。
+- `fde-job` — **AI 项目全自动构建引擎**（P0）。元编排引擎，自动执行完整项目生命周期：脚手架 → 架构设计 → 多功能开发 → 集成验收 → 部署配置生成。支持 `--auto`（自动确认）与 `--silent`（静默）模式，实现无人值守的项目构建。
+- `fde-next` — **AI 进度接续路由引擎**。"随时随地接着上次继续"的万能入口。读取 fde* 状态指纹（`.agents/job.state.json`、`.agents/progress.json`、`CONTEXT.md`、`REQUIREMENTS.md`、`project-metadata.json`、代码体量），诊断项目停在哪，路由到正确技能接续——`fde-job`（重建参数重调其 Workflow，跳过已完成阶段）、`fde-orchestrator`（开发进行中走里程碑级恢复，绝不重调 job 以免重跑里程碑）、`fde-architect`（缺蓝图，或对外来项目逆向建模）、`fde-requirements`。零 fde* 产物的外来项目按代码量自适应接入：近乎为空→fde-job 全新；大量代码→先逆向出蓝图。纯路由——不重写阶段、不写进度文件。
+- `fde-cloner` — **AI 逆向站点克隆前置引擎**。给定授权的目标站点地址与完整权限账号，经 `agent-browser` 逆向观测线上站点（登录 → loop-until-dry 遍历 → 功能账本 → API/设计提取），产出 `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` 与诚实的 `CLONE-FIDELITY.md`（可观测精确 / 推断 / 不可观测），再交棒 `fde-job` 完成全功能、全生命周期、高精度克隆。做设计语言重建 + 现代栈重建，不拷贝原始资产、不声称复制后端源码。
+- `fde-legacy-recon` — **AI 遗留系统静态侦察前置引擎**（`fde-cloner` 的离线兄弟）。当你进不去线上系统、但用户**把遗留系统的页面内容 + 导航菜单贴给你**（或截图 / 导出 HTML）时，本技能把这些既有材料当作唯一真相源——**不联网、不用 `agent-browser`**——静态推断出模块地图、实体字段、操作、状态机、角色权限划分。逐项标 `明示 / 推断 / 缺口`，产出 `REQUIREMENTS.md` / `CONTEXT.md` / `FRONTEND-DESIGN.md` 与 `RECON-FIDELITY.md`（含待用户补全的缺口清单），再交棒 `fde-job`。仅当用户明确要用授权账号对照线上核实时，才升级到 `fde-cloner`。
+- `fde-requirements` — **AI 需求分析师**。基于 Event Storming + DDD 战略设计方法论，将模糊的用户需求深度拆解为结构化需求文档——识别有界上下文、业务事件、功能依赖与关键状态机。输出 `REQUIREMENTS.md` 供 `fde-architect` 使用。当系统复杂、多模块或多端（2 个以上前端端或 5 个以上功能模块）时触发。
+- `fde-architect` — **AI 架构师**（P0）。将模糊的用户需求转化为结构化的 CONTEXT.md 蓝图。自动调研、分析并提议技术方案，生成可执行的架构蓝图，包含系统全景、数据模型、API 契约与里程碑依赖树。
+- `fde-frontend-architect` — **AI 前端架构师**。在系统架构完成*之后*进行的前端详细设计。输出 `FRONTEND-DESIGN.md`，包含页面树、组件树、状态管理架构、UI 状态机与设计系统 Token——适用于多端系统（Web / 小程序 / 移动端）。必须在 `fde-architect` 之后执行；当项目有 2 个以上前端端时自动触发。
+- `fde-poc` — **AI 高保真 POC 生成引擎**。把需求变成可运行的**纯前端演进式**原型：读取 `REQUIREMENTS.md` + `FRONTEND-DESIGN.md`（+ `CONTEXT.md`），识别行业并套用内置模式库，在可替换的 mock 数据接缝上把每个页面的全 UI 状态（loading/empty/error/normal/edge）做出来——全功能覆盖由 `.agents/poc.ledger.json` + loop-until-dry + coverage critic 保证。产出 `POC-MANIFEST.md`（mock→真实演进映射）与诚实的 `POC-FIDELITY.md`（`真实交互` / `mock 数据` / `占位未实现`）。作为 `fde-job` 的可选 Phase 3.5 接入——工程可**停在 POC**、可**跳过**、也可**接着** Phase 4 把 mock 层演进为真实后端。无需后端。
+- `fde-orchestrator` — **AI 项目编排引擎**（P0）。接收项目蓝图，自动分解为功能级任务队列，按依赖顺序逐一调用 fde-workflow，并管理跨功能集成验收、上下文重置与跨会话进度持久化。
+- `fde-workflow` — **AI 编码全自动工作流引擎**。以单个功能需求为输入，自动执行：里程碑拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 提交固化 → 更新蓝图。
+- `fde-coach` — **AI 编码流程教练**。以六步 SOP 引导用户完成 AI 辅助编程：拆解 → 下发指令 → 编码 → 验收 → 分支判断 → 固化。
+- `fde-inspector` — **AI 代码架构监理**。检测架构偏移的三大信号（篡改地基 / 过度设计 / 体积失控），输出结构化验收报告。
+- `fde-qa` — **工程测试验收**。按任务风险和项目约定选择测试与覆盖率口径，区分模拟、真实集成和目标环境证据，输出 PASS / NEEDS_FIX / UNVERIFIED；失败不会自动重置工作树。
+- `fde-advisor` — **AI 编码知识顾问**。诊断对话健康度，评估是否需要重置上下文、升维指令或彻底重建。
 
-- `engineer-reconcile` — 项目事实与文档校准：从实际实现和验证证据重建进度，整理文档与记忆。
-- `engineer-build-performance` — 构建性能优化：测量 build/dev 等待时间，验证缓存失效、增量输出与资源代价。
-- `engineer-release` — 版本发布与依赖协同：协调主程序、插件、镜像及下游版本，分别确认发布和线上状态。
+- `fde-reconcile` — 项目事实与文档校准：从实际实现和验证证据重建进度，整理文档与记忆。
+- `fde-build-performance` — 构建性能优化：测量 build/dev 等待时间，验证缓存失效、增量输出与资源代价。
+- `fde-release` — 版本发布与依赖协同：协调主程序、插件、镜像及下游版本，分别确认发布和线上状态。
 
 ### Agent 评测技能
 
@@ -78,11 +78,11 @@ cd skills
 
 ### 项目与产品类技能
 
-- `init-project` - 完整的项目初始化工作流，包含文档、记忆、发布结构、可观测性约定，以及按语言类型的脚手架。
+- `fde-init-project` - 完整的项目初始化工作流，包含文档、记忆、发布结构、可观测性约定，以及按语言类型的脚手架。
 - `commercial-positioning-research` - 寻找差异化商业定位，分别评估商业成立的证据与下一阶段投入价值，输出附来源、可复算测算及验证方案的报告；建议与决策阶段匹配。
 - `seo-geo-methodology` - 循证 SEO / GEO 优化：诊断搜索发现与 AI 引用问题，改进内容，分别衡量搜索可见度、AI 引用和业务结果，不承诺排名或增长。
-- `product-analysis-framework` - 结构化的产品与创业分析框架，覆盖市场证据、用户痛点、护城河、商业模式、风险，以及可复用的创业模式。
-- `product-pusher` - **产品拷问**。把一个还没做出来的产品/创业点子，通过又软又硬的拷问对话锻造成能动手的产品定义：先一起发散，再一个个硬问题拷问（真实用户、真实痛点、生死开关握在谁手里、最便宜的验证），直到收敛出具体的产品定义——收尾给出按致命度排序的死因报告与 go/no-go/pivot 判断。协作但对抗：只戳漏洞，不当啦啦队。底层是因果链 / RC 纪律，用大白话呈现。
+- `fde-product-analysis-framework` - 结构化的产品与创业分析框架，覆盖市场证据、用户痛点、护城河、商业模式、风险，以及可复用的创业模式。
+- `fde-product-pusher` - **产品拷问**。把一个还没做出来的产品/创业点子，通过又软又硬的拷问对话锻造成能动手的产品定义：先一起发散，再一个个硬问题拷问（真实用户、真实痛点、生死开关握在谁手里、最便宜的验证），直到收敛出具体的产品定义——收尾给出按致命度排序的死因报告与 go/no-go/pivot 判断。协作但对抗：只戳漏洞，不当啦啦队。底层是因果链 / RC 纪律，用大白话呈现。
 
 ### 书籍与网文创作类技能
 
@@ -132,51 +132,51 @@ cd skills
 
 ## 专项技能的分工
 
-- 继续开发用 `engineer-next`；进度与代码互相矛盾时先用 `engineer-reconcile`。
-- 架构设计与精简用 `engineer-architect`；结构审查用 `engineer-inspector`；行为验证用 `engineer-qa`；版本发布用 `engineer-release`。
+- 继续开发用 `fde-next`；进度与代码互相矛盾时先用 `fde-reconcile`。
+- 架构设计与精简用 `fde-architect`；结构审查用 `fde-inspector`；行为验证用 `fde-qa`；版本发布用 `fde-release`。
 - 写书与系列定位用 `write-book`；按读者与类型润色用 `book-polish`；系统内容审计用 `book-content-audit`；生成文件验收用 `book-export-qa`。
 - `agent-learning-eval` 验证学习收益，不把资产数量或测试通过当作进化证据。
 
 演示数据、AI 编辑器、技术书稿核验、开源交付、RC 一致性和素材改编按需加载相关技能的参考模块，不增加平行入口。新专项可独立使用；缺少可选协作技能时按当前工具和证据完成任务。
 
-## 工程工作流最佳实践
+## FDE 工作流最佳实践
 
 ### 选对入口技能
 
-工程类技能构成一条链。从最贴近你当前处境的入口进入——每个技能都知道如何向下一个交接：
+FDE 类技能构成一条链。从最贴近你当前处境的入口进入——每个技能都知道如何向下一个交接：
 
 | 你的处境 | 从这里开始 | 产出 |
 |---|---|---|
-| "从零一气呵成做完整个项目，无人值守" | `engineer-job` | 完整项目 |
-| "接着上次继续"/不知道用哪个技能/恢复进度 | `engineer-next` | 路由到正确的接续点 |
-| 克隆一个你有权重建的线上站点 | `engineer-cloner` | 三文档 → `engineer-job` |
-| 从粘贴的页面内容 + 菜单重建遗留系统（无线上访问） | `engineer-legacy-recon` | 三文档 + 缺口清单 → `engineer-job` |
-| 复杂 / 多模块 / 多端系统，需求仍模糊 | `engineer-requirements` | `REQUIREMENTS.md` |
-| 业务目标清晰，但还没有架构蓝图 | `engineer-architect` | `CONTEXT.md` |
-| 架构已完成，项目有前端（尤其 2 个以上端） | `engineer-frontend-architect` | `FRONTEND-DESIGN.md` |
-| 正式实现前想先要一个高保真可点击原型 | `engineer-poc` | 可运行纯前端 POC + `POC-MANIFEST.md` → `engineer-job` |
-| 蓝图已就绪，按功能逐个交付整个项目 | `engineer-orchestrator` | 集成后的项目 |
-| 单个功能，端到端完成 | `engineer-workflow` | 已实现并验收的功能 |
-| 验证已完成功能是否通过测试门禁（单元 + 覆盖率 + E2E） | `engineer-qa` | PASS / NEEDS_FIX / UNVERIFIED 结论 |
-| 你想自己驱动编码，仅需引导 | `engineer-coach` | — |
+| "从零一气呵成做完整个项目，无人值守" | `fde-job` | 完整项目 |
+| "接着上次继续"/不知道用哪个技能/恢复进度 | `fde-next` | 路由到正确的接续点 |
+| 克隆一个你有权重建的线上站点 | `fde-cloner` | 三文档 → `fde-job` |
+| 从粘贴的页面内容 + 菜单重建遗留系统（无线上访问） | `fde-legacy-recon` | 三文档 + 缺口清单 → `fde-job` |
+| 复杂 / 多模块 / 多端系统，需求仍模糊 | `fde-requirements` | `REQUIREMENTS.md` |
+| 业务目标清晰，但还没有架构蓝图 | `fde-architect` | `CONTEXT.md` |
+| 架构已完成，项目有前端（尤其 2 个以上端） | `fde-frontend-architect` | `FRONTEND-DESIGN.md` |
+| 正式实现前想先要一个高保真可点击原型 | `fde-poc` | 可运行纯前端 POC + `POC-MANIFEST.md` → `fde-job` |
+| 蓝图已就绪，按功能逐个交付整个项目 | `fde-orchestrator` | 集成后的项目 |
+| 单个功能，端到端完成 | `fde-workflow` | 已实现并验收的功能 |
+| 验证已完成功能是否通过测试门禁（单元 + 覆盖率 + E2E） | `fde-qa` | PASS / NEEDS_FIX / UNVERIFIED 结论 |
+| 你想自己驱动编码，仅需引导 | `fde-coach` | — |
 
-`init-project` 仅用于**脚手架约定**；若要从零做完整项目，请使用 `engineer-job`。
+`fde-init-project` 仅用于**脚手架约定**；若要从零做完整项目，请使用 `fde-job`。
 
 ### 遵守三条纪律（红线）
 
 这些是方法论中不可妥协的底线——技能会强制执行，你也应当如此：
 
 - *无图纸不开工* — 在 `requirements` / `architect` / `frontend-architect` 产出设计文档之前，不要开始编码。
-- *无验证不固化* — 永远不要在验收之前提交或"固化"生成的代码。先跑 `engineer-inspector`。
+- *无验证不固化* — 永远不要在验收之前提交或"固化"生成的代码。先跑 `fde-inspector`。
 - *先诊断再调整* — 保留当前改动与证据，定位原因后从已核实状态接续；重置对话上下文不等于丢弃代码。
 
 ### 整链安装，而非只装一个
 
-工程类技能是为组合而设计的：`requirements → architect → frontend-architect → orchestrator → workflow → inspector`。只装一部分可能会破坏它们之间的交接契约，因此建议全部安装（直接运行 `./install.sh`，不带参数）。
+FDE 类技能是为组合而设计的：`requirements → architect → frontend-architect → orchestrator → workflow → inspector`。只装一部分可能会破坏它们之间的交接契约，因此建议全部安装（直接运行 `./install.sh`，不带参数）。
 
 ### 保持上下文精简
 
-这些技能会产出大量产物（`CONTEXT.md`、`REQUIREMENTS.md`、`FRONTEND-DESIGN.md`、`.agents/` 状态）。当对话变得很长时，开启一个新会话并指向持久化的蓝图/状态，而不是在臃肿的上下文里继续。`engineer-advisor` 可以诊断何时该重置。
+这些技能会产出大量产物（`CONTEXT.md`、`REQUIREMENTS.md`、`FRONTEND-DESIGN.md`、`.agents/` 状态）。当对话变得很长时，开启一个新会话并指向持久化的蓝图/状态，而不是在臃肿的上下文里继续。`fde-advisor` 可以诊断何时该重置。
 
 ### 委托成果，也委托验证责任
 
@@ -195,8 +195,8 @@ npx iannil/skills install all
 安装单个技能：
 
 ```bash
-npx iannil/skills install init-project
-npx iannil/skills install product-analysis-framework
+npx iannil/skills install fde-init-project
+npx iannil/skills install fde-product-analysis-framework
 npx iannil/skills install rc-tutor
 npx iannil/skills install write-book
 npx iannil/skills install write-webnovel
@@ -217,7 +217,7 @@ npx iannil/skills install --dry-run
 ./install.sh
 
 # 只安装/更新指定技能
-./install.sh init-project engineer-architect
+./install.sh fde-init-project fde-architect
 
 # 只安装网文创作入口和文字精修技能到 Codex
 ./install.sh --agent codex write-webnovel novel-prose-readability
@@ -246,8 +246,8 @@ git pull && ./install.sh
 
 ```bash
 npx skills add iannil/skills --skill '*'
-npx skills add iannil/skills --skill init-project
-npx skills add iannil/skills --skill product-analysis-framework
+npx skills add iannil/skills --skill fde-init-project
+npx skills add iannil/skills --skill fde-product-analysis-framework
 npx skills add iannil/skills --skill rc-tutor
 npx skills add iannil/skills --skill write-webnovel
 ```
@@ -276,7 +276,7 @@ npm test
 
 ## 仓库结构
 
-下面列出全部 39 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
+下面列出全部 40 个技能入口。技能目录按需包含 `references/`（参考资料）、`agents/`（Agent 配置）、`scripts/`（脚本）和 `evals/`（评估样例）。
 
 ```text
 skills/
@@ -284,24 +284,24 @@ skills/
 ├── book-content-audit/SKILL.md
 ├── book-export-qa/SKILL.md
 ├── book-polish/SKILL.md
-├── engineer-advisor/SKILL.md
-├── engineer-architect/SKILL.md
-├── engineer-build-performance/SKILL.md
-├── engineer-cloner/SKILL.md
-├── engineer-coach/SKILL.md
-├── engineer-frontend-architect/SKILL.md
-├── engineer-inspector/SKILL.md
-├── engineer-job/SKILL.md
-├── engineer-legacy-recon/SKILL.md
-├── engineer-next/SKILL.md
-├── engineer-orchestrator/SKILL.md
-├── engineer-poc/SKILL.md
-├── engineer-qa/SKILL.md
-├── engineer-reconcile/SKILL.md
-├── engineer-release/SKILL.md
-├── engineer-requirements/SKILL.md
-├── engineer-workflow/SKILL.md
-├── init-project/SKILL.md
+├── fde-advisor/SKILL.md
+├── fde-architect/SKILL.md
+├── fde-build-performance/SKILL.md
+├── fde-cloner/SKILL.md
+├── fde-coach/SKILL.md
+├── fde-frontend-architect/SKILL.md
+├── fde-inspector/SKILL.md
+├── fde-job/SKILL.md
+├── fde-legacy-recon/SKILL.md
+├── fde-next/SKILL.md
+├── fde-orchestrator/SKILL.md
+├── fde-poc/SKILL.md
+├── fde-qa/SKILL.md
+├── fde-reconcile/SKILL.md
+├── fde-release/SKILL.md
+├── fde-requirements/SKILL.md
+├── fde-workflow/SKILL.md
+├── fde-init-project/SKILL.md
 ├── novel-character-agency/SKILL.md
 ├── novel-comedy-engine/SKILL.md
 ├── novel-prose-readability/SKILL.md
@@ -310,8 +310,8 @@ skills/
 ├── novel-tactical-payoff/SKILL.md
 ├── commercial-positioning-research/SKILL.md
 ├── seo-geo-methodology/SKILL.md
-├── product-analysis-framework/SKILL.md
-├── product-pusher/SKILL.md
+├── fde-product-analysis-framework/SKILL.md
+├── fde-product-pusher/SKILL.md
 ├── rc-application-tool/SKILL.md
 ├── rc-causal-chain/SKILL.md
 ├── rc-philosophy-advisor/SKILL.md

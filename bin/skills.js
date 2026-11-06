@@ -17,8 +17,8 @@ function usage() {
     'Examples:',
     '  skills install',
     '  skills install all',
-    '  skills install init-project',
-    '  skills install product-analysis-framework --dry-run'
+    '  skills install fde-init-project',
+    '  skills install fde-product-analysis-framework --dry-run'
   ].join('\n');
 }
 

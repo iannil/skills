@@ -12,7 +12,7 @@
 #
 # Usage:
 #   ./install.sh                          # install/update ALL skills → Claude Code
-#   ./install.sh init-project rc-tutor    # install/update specific skill(s)
+#   ./install.sh fde-init-project rc-tutor    # install/update specific skill(s)
 #   ./install.sh --agent codex            # target Codex CLI instead
 #   ./install.sh --agent all              # target Claude Code AND Codex
 #   ./install.sh --target ~/my/skills     # target a custom directory
