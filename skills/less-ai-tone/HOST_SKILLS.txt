@@ -1,0 +1,36 @@
+# Host skills that embed a full less-ai-tone/ subtree.
+# Keep one name per line. Comments allowed after #.
+
+write-book
+write-webnovel
+writing-absurd-xianxia
+novel-character-agency
+novel-comedy-engine
+novel-prose-readability
+novel-retention-edit
+novel-reveal-design
+novel-tactical-payoff
+book-polish
+book-content-audit
+
+rc-tutor
+rc-application-tool
+rc-causal-chain
+rc-philosophy-advisor
+rc-text-assistant
+
+commercial-positioning-research
+seo-geo-methodology
+fde-product-analysis-framework
+fde-product-pusher
+
+fde-requirements
+fde-architect
+fde-frontend-architect
+fde-cloner
+fde-legacy-recon
+fde-reconcile
+fde-inspector
+fde-qa
+fde-advisor
+fde-workflow

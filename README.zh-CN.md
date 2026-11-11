@@ -5,12 +5,12 @@
 [English](README.md) | **简体中文**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-40-blue.svg)](#可用技能)
+[![Skills](https://img.shields.io/badge/skills-41-blue.svg)](#可用技能)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#安装)
 ![离线安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E7%A6%BB%E7%BA%BF%20%7C%20%E9%9B%B6%E4%BE%9D%E8%B5%96-orange.svg)
 
-40 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个 FDE 技能、1 个 Agent 评测技能、5 个项目与产品技能、12 个书籍与网文创作技能，以及 5 个 RC（观测收敛）哲学技能。
+41 个可安装技能，面向 Codex、Claude Code 等支持技能的 AI Agent：17 个 FDE 技能、1 个 Agent 评测技能、5 个项目与产品技能、12 个书籍与网文创作技能、5 个 RC（观测收敛）哲学技能，以及 1 个成稿去 AI 味技能。
 
 每个技能以 `skills/<name>/SKILL.md` 定义工作方法，并按需附带参考资料、脚本或 Agent 配置。可以按任务单独选用，也可以组合成工作流。
 
@@ -46,6 +46,7 @@ cd skills
 | 规划、撰写、续写或修订中文书籍与网文 | [书籍与网文创作类](#书籍与网文创作类技能) | 12 | `write-book` / `write-webnovel` |
 | 学习 RC、诊断问题、分析因果与写作 | [RC 哲学类](#rc-哲学类技能) | 5 | `rc-tutor` / `rc-application-tool` |
 | 验证 Agent 学习、复用与迁移收益 | [Agent 评测](#agent-评测技能) | 1 | `agent-learning-eval` |
+| 成稿后检测并清理 AI 写作痕迹 | [去 AI 味](#去-ai-味技能) | 1 | `less-ai-tone` |
 
 ## 可用技能
 
@@ -104,6 +105,10 @@ cd skills
 - `book-content-audit` — 书稿内容审计与修订：核验论证、事实、案例和技术示例，保护有效内容。
 - `book-export-qa` — 书籍导出产物验收：核对源稿、双语和 PDF/EPUB/DOCX 的版本、内容及排版。
 
+### 去 AI 味技能
+
+- `less-ai-tone` — 成稿去 AI 味：先脚本检测与语义判读，交付改前报告并等待回复，再最小改写与复测对比。30 个长文撰写类 skill 在交付连续成稿后默认挂接本流程；权威包可用 `./bin/sync-less-ai-tone.sh` 同步到各 skill 内 `less-ai-tone/` 子树。
+
 ### RC 哲学类技能
 
 - `rc-tutor` - 向零基础学习者讲授 RC（观测收敛）哲学框架——不预设任何哲学背景。
@@ -135,6 +140,7 @@ cd skills
 - 继续开发用 `fde-next`；进度与代码互相矛盾时先用 `fde-reconcile`。
 - 架构设计与精简用 `fde-architect`；结构审查用 `fde-inspector`；行为验证用 `fde-qa`；版本发布用 `fde-release`。
 - 写书与系列定位用 `write-book`；按读者与类型润色用 `book-polish`；系统内容审计用 `book-content-audit`；生成文件验收用 `book-export-qa`。
+- 连续中文成稿交付前用 `less-ai-tone`（或宿主 skill 内 `./less-ai-tone/`）做检测与确认后再改；不得静默改写。
 - `agent-learning-eval` 验证学习收益，不把资产数量或测试通过当作进化证据。
 
 演示数据、AI 编辑器、技术书稿核验、开源交付、RC 一致性和素材改编按需加载相关技能的参考模块，不增加平行入口。新专项可独立使用；缺少可选协作技能时按当前工具和证据完成任务。

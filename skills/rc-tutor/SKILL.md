@@ -161,3 +161,13 @@ When the user pushes back on RC (especially common with A4/A5 — the stone-cons
 - **Plain language**: Avoid "ontology", "epistemology" unless you've already explained them. Use "what is real" and "how we know" instead.
 - **First mention rule**: The first time you use any RC term in a session, explain it in plain language. After that, you can use the term freely.
 - **CRITICAL — Never make up RC terms**: RC's terms are precisely defined in §1.1. Do NOT invent expansions or alternative names. For example, RC does NOT stand for "Reflective Convergence" — it's just "RC" or "Observational Convergence" (观察收敛). If you're unsure of a term, say so. Fabricating RC terminology undermines trust in the framework.
+
+
+## 成稿后去 AI 味
+
+交付连续中文成稿（章节、报告正文、修订稿等）且达到约 ≥800 汉字连续散文时，在本 skill 自身验收之后，**必须**按 [./less-ai-tone/](./less-ai-tone/) 执行去 AI 味工作流：脚本检测 → 语义层判读 → 改前报告并等待用户回复 → 再改写 → 复测对比。用户回复前不得因去 AI 味改正文。
+
+- 大纲、纯表格、纯代码、术语对照表可跳过，并在交付说明中注明。
+- 诊断-only 或用户明确要求跳过时，只报告或不跑，不改写。
+- 与本 skill 冲突时，本 skill 的体裁约束优先（声口、模板结构、引文、代码块、X 级不改项）。
+- 维护：权威包在仓库 `skills/less-ai-tone/`；更新后运行 `./bin/sync-less-ai-tone.sh` 再同步子树。

@@ -1,0 +1,20 @@
+{
+  "N": {
+    "before": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "after": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "notes": "两版都已是可读网文正文。改后主要减破折号堆叠，并去掉「不是好奇那么简单」式支架；情节与门后信息完整保留。自然度体感提升很轻；AI味略降。"
+  },
+  "P": {
+    "before": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "after": {"natural": 5, "ai_tell": 1, "info": 5, "genre": 5, "total": 20},
+    "notes": "改前已具体，但有多处翻案腔与破折号收束。改后正面陈述更直；产品本质/付费理由/替代路径/证据链/风险切口均在。三篇里改善最明显，仍属增量。"
+  },
+  "E": {
+    "before": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "after": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "notes": "状态机与事件依赖基本保留。改动集中在去翻案腔与部分并列标点。整篇并读时提升很弱；信息无损伤。"
+  },
+  "summary": "3/3 after 综合分≥before且AI味改善≥1；提升偏增量。P 最明显，N/E 几乎要并读才感到。",
+  "rater": "independent-subagent-blind",
+  "artifact_note": "晚到改写代理曾把本文件覆盖为空模板；分数自 SCORECARD.md 恢复。当前 after 指标以磁盘复测为准。"
+}

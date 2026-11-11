@@ -1,0 +1,204 @@
+{
+ "meta": {
+  "篇数": 1,
+  "万汉字": 0.09,
+  "段数": 9,
+  "小标题数": 1
+ },
+ "density": {
+  "翻案腔": 5.453,
+  "提示语冒号": 7.634,
+  "起手式": 1.091,
+  "当…时从句": 2.181,
+  "前置话题壳": 2.181,
+  "句首连接词": 0.0,
+  "顿号并列≥3": 5.453,
+  "过长前置定语": 1.091,
+  "拟人化喻体": 0.0,
+  "概括替代(已否决)": 1.091,
+  "序数词小标题(已否决)": 0.0,
+  "「这意味着」复述(已否决)": 2.181,
+  "空转句引列表(已否决)": 0.0
+ },
+ "char_density": {
+  "破折号": 3.272,
+  "分号": 4.362,
+  "引号": 2.181
+ },
+ "hits": {
+  "翻案腔": [
+   {
+    "file": "engineering.md",
+    "line": 3,
+    "excerpt": "不是接口数量，而是"
+   },
+   {
+    "file": "engineering.md",
+    "line": 9,
+    "excerpt": "不是缺少测试，而是"
+   },
+   {
+    "file": "engineering.md",
+    "line": 9,
+    "excerpt": "不是性能不够，而是"
+   },
+   {
+    "file": "engineering.md",
+    "line": 9,
+    "excerpt": "不是框架问题，而是"
+   },
+   {
+    "file": "engineering.md",
+    "line": 15,
+    "excerpt": "不是技术，而是"
+   }
+  ],
+  "提示语冒号": [
+   {
+    "file": "engineering.md",
+    "line": 3,
+    "excerpt": "一句话总结："
+   },
+   {
+    "file": "engineering.md",
+    "line": 7,
+    "excerpt": "核心是："
+   },
+   {
+    "file": "engineering.md",
+    "line": 7,
+    "excerpt": "重点是："
+   },
+   {
+    "file": "engineering.md",
+    "line": 7,
+    "excerpt": "原因如下："
+   },
+   {
+    "file": "engineering.md",
+    "line": 11,
+    "excerpt": "具体来说："
+   },
+   {
+    "file": "engineering.md",
+    "line": 17,
+    "excerpt": "建议是："
+   },
+   {
+    "file": "engineering.md",
+    "line": 17,
+    "excerpt": "简单说："
+   }
+  ],
+  "起手式": [
+   {
+    "file": "engineering.md",
+    "line": 3,
+    "excerpt": "说白了，"
+   }
+  ],
+  "当…时从句": [
+   {
+    "file": "engineering.md",
+    "line": 5,
+    "excerpt": "当服务启动时，"
+   },
+   {
+    "file": "engineering.md",
+    "line": 15,
+    "excerpt": "当第三轮评审开始时，"
+   }
+  ],
+  "前置话题壳": [
+   {
+    "file": "engineering.md",
+    "line": 5,
+    "excerpt": "对于调用方来说"
+   },
+   {
+    "file": "engineering.md",
+    "line": 15,
+    "excerpt": "对于早期团队来说"
+   }
+  ],
+  "句首连接词": [],
+  "顿号并列≥3": [
+   {
+    "file": "engineering.md",
+    "line": 7,
+    "excerpt": "字段漂移——`status`、`state`、`phase` 在文档里轮换"
+   },
+   {
+    "file": "engineering.md",
+    "line": 11,
+    "excerpt": "当…时从句、前置话题壳、句首“因此/此外”会把说明段"
+   },
+   {
+    "file": "engineering.md",
+    "line": 15,
+    "excerpt": "首先、其次、再次都要核对清单"
+   },
+   {
+    "file": "engineering.md",
+    "line": 15,
+    "excerpt": "鉴权、幂等、回滚"
+   },
+   {
+    "file": "engineering.md",
+    "line": 17,
+    "excerpt": "把说明段里的翻案腔、提示语冒号、起手式清掉"
+   }
+  ],
+  "过长前置定语": [
+   {
+    "file": "engineering.md",
+    "line": 13,
+    "excerpt": "一个能够帮助团队在不增加人力的情况下显著提升审核速度的工具已经上"
+   }
+  ],
+  "拟人化喻体": [],
+  "概括替代(已否决)": [
+   {
+    "file": "engineering.md",
+    "line": 13,
+    "excerpt": "显著提升"
+   }
+  ],
+  "序数词小标题(已否决)": [],
+  "「这意味着」复述(已否决)": [
+   {
+    "file": "engineering.md",
+    "line": 11,
+    "excerpt": "这意味着"
+   },
+   {
+    "file": "engineering.md",
+    "line": 11,
+    "excerpt": "这意味着"
+   }
+  ],
+  "空转句引列表(已否决)": []
+ },
+ "syn_hits": [
+  {
+   "file": "engineering.md",
+   "line": 5,
+   "excerpt": "采用／利用",
+   "context": "当服务启动时，对于调用方来说，超时比报错更危险。然而，重试策略仍写在注释里。我们采用兼容体系提升站点利用率；随后增强调度能力，再优化吞吐，最"
+  },
+  {
+   "file": "engineering.md",
+   "line": 5,
+   "excerpt": "提升／提高／增强／优化",
+   "context": "当服务启动时，对于调用方来说，超时比报错更危险。然而，重试策略仍写在注释里。我们采用兼容体系提升站点利用率；随后增强调度能力，再优化吞吐，最"
+  }
+ ],
+ "structure": {
+  "句长CV": 0.377,
+  "节长CV": null,
+  "小标题/千字": 1.091,
+  "两句同构/百段": 177.78,
+  "三句同构/百段": 155.56,
+  "mtld粗估": 79
+ }
+}

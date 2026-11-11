@@ -1,0 +1,39 @@
+{
+  "protocol": "host-blind",
+  "note": "评委只看 A/B，不知 before/after。shuffle_seed 固定便于复现。",
+  "shuffle_seed": 40785375,
+  "pairs": [
+    {
+      "id": "N",
+      "genre": "novel",
+      "A_source": "after",
+      "B_source": "before",
+      "A_path": "evals/host-blind/after/N.md",
+      "B_path": "evals/host-blind/before/N.md"
+    },
+    {
+      "id": "P",
+      "genre": "product-analysis",
+      "A_source": "before",
+      "B_source": "after",
+      "A_path": "evals/host-blind/before/P.md",
+      "B_path": "evals/host-blind/after/P.md"
+    },
+    {
+      "id": "E",
+      "genre": "requirements",
+      "A_source": "after",
+      "B_source": "before",
+      "A_path": "evals/host-blind/after/E.md",
+      "B_path": "evals/host-blind/before/E.md"
+    }
+  ],
+  "score_rubric": {
+    "naturalness": "1-5",
+    "ai_flavor_salience": "1-5 lower better; composite uses 6-score",
+    "info_completeness": "1-5",
+    "genre_fit": "1-5",
+    "composite": "naturalness + (6-ai_flavor) + info + genre, max 20"
+  },
+  "scores_template_path": "evals/host-blind/blind/scores.json"
+}

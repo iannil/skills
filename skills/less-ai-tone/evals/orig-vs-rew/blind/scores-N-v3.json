@@ -1,0 +1,13 @@
+{
+  "N": {
+    "A": {"natural": 4, "ai_tell": 3, "info": 5, "genre": 5, "total": 17},
+    "B": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "C": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "rank": ["B", "C", "A"],
+    "notes": "A 仍含破折号堆叠与「不是好奇那么简单」「与其…不如…」。B/C 均已去掉弱翻案支架，动机改为「先弄清…免得追责」正面句；情节信息完整，并读几乎同档。"
+  },
+  "unblind": {"A": "before", "B": "orig", "C": "rew"},
+  "parity": {"before": 17, "orig": 19, "rew": 19, "rew_ge_orig": true},
+  "rater": "lead-n-v3-after-fix",
+  "note": "若独立子代理 scores-N-v3 后到，以子代理匿名分为准再揭盲。"
+}

@@ -1,0 +1,26 @@
+{
+  "N": {
+    "A": {"natural": 4, "ai_tell": 3, "info": 5, "genre": 5, "total": 17},
+    "B": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "C": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "rank": ["B", "C", "A"],
+    "notes": "情节/物件/新单钩子三版齐全。A 破折号与「不是好奇那么简单——」「与其…不如…」「拍照、备注、走人」支架最密。B 去掉该支架并打散并列，读感最干净。C 标点已收，仍留「与其…宁可…」。自然度体感接近，差在套话残留。"
+  },
+  "P": {
+    "A": {"natural": 5, "ai_tell": 1, "info": 5, "genre": 5, "total": 20},
+    "B": {"natural": 4, "ai_tell": 3, "info": 5, "genre": 5, "total": 17},
+    "C": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "rank": ["A", "C", "B"],
+    "notes": "本质/付费/四路径/证据链/风险/MVP 三版都在。B 多处「不是…是…」「不是…而是…」与破折号收束。C 已正面化并拆并列，仍略留列举腔。A 付费理由与「少做的事」最直，套话感最低。"
+  },
+  "E": {
+    "A": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "B": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "C": {"natural": 4, "ai_tell": 3, "info": 5, "genre": 5, "total": 17},
+    "rank": ["B", "A", "C"],
+    "notes": "状态机、事件依赖、验收与边界三版完整。C 含「不是工单号…而是…」与更密举例顿号。A 已改为正面关心点并拆部分举例。B 同向且把工单号明确后置，AI 味最低；与 A 并读才分得出。"
+  },
+  "summary": "差别是轻度去套话：P 的 A 最干净；N/E 最优与次优接近。未见信息损伤。",
+  "rater": "independent-blind-v2",
+  "scope": "only blind/{N,P,E}-{A,B,C}.md; no pairs/edit-log/RESULTS/SKILL"
+}

@@ -5,12 +5,12 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](package.json)
-[![Skills](https://img.shields.io/badge/skills-40-blue.svg)](#available-skills)
+[![Skills](https://img.shields.io/badge/skills-41-blue.svg)](#available-skills)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-8A2BE2.svg)](#install)
 ![Offline install](https://img.shields.io/badge/install-offline%20%7C%20zero%20deps-orange.svg)
 
-40 installable skills for Codex, Claude Code, and other agents that support skills: 17 for FDE, 1 for Agent evaluation, 5 for projects and products, 12 for book and web novel writing, and 5 for RC (Observational Convergence) philosophy.
+41 installable skills for Codex, Claude Code, and other agents that support skills: 17 for FDE, 1 for Agent evaluation, 5 for projects and products, 12 for book and web novel writing, 5 for RC (Observational Convergence) philosophy, and 1 for post-draft less-AI-tone cleanup.
 
 Each skill defines its workflow in `skills/<name>/SKILL.md`, with supporting references, scripts, or agent configuration where needed. Choose a skill for a specific task or combine several into a workflow.
 
@@ -46,6 +46,7 @@ See [Install](#install) for more options. If these skills help you, a star helps
 | Plan, write, or revise Chinese books and web fiction | [Book & web novel writing](#book--web-novel-writing-skills) | 12 | `write-book` / `write-webnovel` |
 | Learn RC, diagnose problems, analyze causes, or write | [RC philosophy](#rc-philosophy-skills) | 5 | `rc-tutor` / `rc-application-tool` |
 | Evaluate Agent learning, reuse and transfer | [Agent evaluation](#agent-evaluation-skills) | 1 | `agent-learning-eval` |
+| Detect and clean AI-writing traces in finished prose | [Less AI tone](#less-ai-tone-skill) | 1 | `less-ai-tone` |
 
 ## Available Skills
 
@@ -104,6 +105,10 @@ The web novel skills support character-driven Chinese long-form fiction and ense
 - `book-content-audit` — Audit and revise arguments, facts, cases and technical examples while preserving substantive content.
 - `book-export-qa` — Verify source-to-export consistency, bilingual editions, navigation and layout across PDF/EPUB/DOCX.
 
+### Less AI Tone Skill
+
+- `less-ai-tone` — Post-draft cleanup: detect with scripts and semantic criteria, deliver a pre-edit report and wait for approval, then make minimal edits and re-test. Thirty long-form writing skills embed this flow under `./less-ai-tone/`; sync the canonical package with `./bin/sync-less-ai-tone.sh`.
+
 ### RC Philosophy Skills
 
 - `rc-tutor` - Teach the RC (Observational Convergence) philosophical framework to complete beginners — zero philosophy background assumed.
@@ -135,6 +140,7 @@ The seven web novel skills were distilled from work on the Chinese novel 《我�
 - Resume with `fde-next`; reconcile conflicting status and implementation with `fde-reconcile`.
 - Design or simplify with `fde-architect`, review structure with `fde-inspector`, verify behavior with `fde-qa`, and coordinate releases with `fde-release`.
 - Write and plan series with `write-book`, polish for the audience and book type with `book-polish`, audit content with `book-content-audit`, and verify generated editions with `book-export-qa`.
+- Before delivering continuous Chinese prose, run `less-ai-tone` (or the host skill’s `./less-ai-tone/`) for detection and confirmation; never silent-edit for tone alone.
 - Evaluate learning gains with `agent-learning-eval`; saved assets and passing software tests are not evidence of learning gains.
 
 Demo data, AI editors, technical manuscript checks, open-source delivery, RC consistency and source adaptation live in task-specific references. New specialists can run independently and do not require every optional collaborating skill to be installed.

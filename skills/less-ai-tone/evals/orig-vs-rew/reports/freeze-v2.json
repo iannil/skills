@@ -1,0 +1,42 @@
+{
+  "before": {
+    "N": {
+      "sha256": "2a1adc8cfef4e912cfd79c0440d183d32246986d1a5b0be1e2bacb020b87ced5",
+      "hanzi": 1120,
+      "dash": 7,
+      "semi": 2
+    },
+    "P": {
+      "sha256": "c845dd04815e8974db3a86d61ff52417ee57ef9b63674645f82c9000d3dd5e20",
+      "hanzi": 904,
+      "dash": 2,
+      "semi": 3
+    },
+    "E": {
+      "sha256": "26bf98557574e8c9527973c37cf42a14a01fc25df84afbb021471a8c7a0c2eb5",
+      "hanzi": 1009,
+      "dash": 0,
+      "semi": 4
+    }
+  },
+  "after-orig": {
+    "N": {
+      "sha256": "6115a9d3cdd5b561bddb2cb146da1406f725746066a90222379c66ffaaf8e93a",
+      "hanzi": 1110,
+      "dash": 0,
+      "semi": 0
+    },
+    "P": {
+      "sha256": "0a58c4d414be1f86b2d8d3de55832f808d9e8c2e58834c9d4b13f10201525d55",
+      "hanzi": 904,
+      "dash": 0,
+      "semi": 0
+    },
+    "E": {
+      "sha256": "52124c3a237120acc9eed438d60d99ad9f9b3c00a091110f4cac214f472f9fbd",
+      "hanzi": 998,
+      "dash": 0,
+      "semi": 0
+    }
+  }
+}

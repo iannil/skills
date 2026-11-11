@@ -1,0 +1,17 @@
+{
+  "N": {
+    "A": "before",
+    "B": "orig",
+    "C": "rew"
+  },
+  "P": {
+    "A": "rew",
+    "B": "before",
+    "C": "orig"
+  },
+  "E": {
+    "A": "orig",
+    "B": "rew",
+    "C": "before"
+  }
+}

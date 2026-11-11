@@ -1,0 +1,24 @@
+{
+  "N": {
+    "A": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "B": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "C": {"natural": 4, "ai_tell": 3, "info": 5, "genre": 5, "total": 17},
+    "rank": ["B", "A", "C"],
+    "notes": "三版情节与物件信息同级完整。C 破折号/分号堆叠与「不是好奇那么简单——」支架最显；A 多改为句号但仍留「不是好奇那么简单。」；B 去掉该支架，读感最干净。自然度体感差距很小，几乎要并读。"
+  },
+  "P": {
+    "A": {"natural": 5, "ai_tell": 1, "info": 5, "genre": 5, "total": 20},
+    "B": {"natural": 4, "ai_tell": 3, "info": 5, "genre": 5, "total": 17},
+    "C": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "rank": ["A", "C", "B"],
+    "notes": "信息点（本质/付费/四路径/证据链/风险/MVP）三版都在。B 翻案腔与破折号收束最明显；C 打散部分顿号并列且去了部分破折号，但仍留「不是在买识别准确率，是在买…」；A 改为正面陈述，套话感最低。"
+  },
+  "E": {
+    "A": {"natural": 4, "ai_tell": 3, "info": 5, "genre": 5, "total": 17},
+    "B": {"natural": 4, "ai_tell": 1, "info": 5, "genre": 5, "total": 19},
+    "C": {"natural": 4, "ai_tell": 2, "info": 5, "genre": 5, "total": 18},
+    "rank": ["B", "C", "A"],
+    "notes": "状态机与事件依赖三版均完整，体裁合适。A 含「不是工单号…而是…」与更密举例串；B/C 都改成正面关心点，B 在团长字段列举与值班举例上拆得更开一点。提升仍属轻度，单读不易判档。"
+  },
+  "summary": "匿名三选一里差别多为轻度去套话：P 的 A 最干净，N/E 的最优与次优几乎要并读；未发现明显信息损伤。"
+}

@@ -109,3 +109,13 @@ metadata:
 - [references/anti-trope-and-reversals.md](references/anti-trope-and-reversals.md)：反反套路的识别、反制与多层反转组合，做故事设计或反转诊断时读。
 - [references/comedy-and-payoff.md](references/comedy-and-payoff.md)：包袱组织、笑爽反转同点兑现与爽感结算，写正文或喜剧诊断时读。
 - [references/examples-and-failures.md](references/examples-and-failures.md)：原创正反对照样例，校准口味或写例证时读。
+
+
+## 成稿后去 AI 味
+
+交付连续中文成稿（章节、报告正文、修订稿等）且达到约 ≥800 汉字连续散文时，在本 skill 自身验收之后，**必须**按 [./less-ai-tone/](./less-ai-tone/) 执行去 AI 味工作流：脚本检测 → 语义层判读 → 改前报告并等待用户回复 → 再改写 → 复测对比。用户回复前不得因去 AI 味改正文。
+
+- 大纲、纯表格、纯代码、术语对照表可跳过，并在交付说明中注明。
+- 诊断-only 或用户明确要求跳过时，只报告或不跑，不改写。
+- 与本 skill 冲突时，本 skill 的体裁约束优先（声口、模板结构、引文、代码块、X 级不改项）。
+- 维护：权威包在仓库 `skills/less-ai-tone/`；更新后运行 `./bin/sync-less-ai-tone.sh` 再同步子树。
